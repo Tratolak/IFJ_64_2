@@ -1,0 +1,17 @@
+
+# Objektove soubory
+*.o
+*.obj
+
+# Knihovny
+*.lib
+*.a
+
+# Sdilene objekty
+*.dll
+*.so
+
+# Spustitelne
+*.exe
+*.out
+
