@@ -1,6 +1,7 @@
 
-# Code::Blocks layout
+# Code::Blocks
 *.layout
+*.depend
 
 # Objektove soubory
 *.o
