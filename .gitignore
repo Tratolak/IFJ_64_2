@@ -1,4 +1,7 @@
 
+# Code::Blocks layout
+*.layout
+
 # Objektove soubory
 *.o
 *.obj
