@@ -1,0 +1,6 @@
+#ifndef SYMTABLE_H_INCLUDED
+#define SYMTABLE_H_INCLUDED
+
+
+
+#endif // SYMTABLE_H_INCLUDED
