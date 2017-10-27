@@ -6,12 +6,10 @@ enum TokenType {INT, DOUBLE, STRING};
 typedef enum TokenType TokType;
 
 typedef struct token{
-    TokType Type;
-    int ival;
-    double fval;
-    char* sval;
+    TokType type;
+    char* val;
 }Token;
 
-int SynAnalyzer(Token tok);
+int SynAnalyzer();
 
 #endif // SYNTAX_ANALYZER_H_INCLUDED
