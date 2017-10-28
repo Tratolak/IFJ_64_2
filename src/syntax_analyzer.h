@@ -1,14 +1,9 @@
 #ifndef SYNTAX_ANALYZER_H_INCLUDED
 #define SYNTAX_ANALYZER_H_INCLUDED
 
-//TBD
-enum TokenType {INT, DOUBLE, STRING};
-typedef enum TokenType TokType;
+#include "scanner.h"
 
-typedef struct token{
-    TokType type;
-    char* val;
-}Token;
+//TBD
 
 int SynAnalyzer();
 
