@@ -1,7 +1,11 @@
 #include "scanner.h"
 
 // reserved words from the language  (35)
-const char * const Reserved[] = {"as", "asc", "declare", "dim", "do", "double", "else", "end", "chr", "function", "if", "input", "integer", "length", "loop", "print", "return", "scope", "string", "substr", "then", "while", "and", "boolean", "continue", "elseif", "exit", "false", "for", "next", "not", "or", "shared", "static", "true"};
+const char * const Reserved[] = {"as", "asc", "declare", "dim", "do", "double",
+"else", "end", "chr", "function", "if", "input", "integer", "length", "loop",
+"print", "return", "scope", "string", "substr", "then", "while", "and",
+"boolean", "continue", "elseif", "exit", "false", "for", "next", "not", "or",
+"shared", "static", "true"};
 
 Token* FormToken(TokType type, char* value) {
   Token *token = malloc(sizeof(Token));
@@ -13,8 +17,10 @@ Token* FormToken(TokType type, char* value) {
 
   if (type == STRING || type == ID || type == KEYWORD) {
     token->val = malloc(strlen(value)+1);
-    if (token->val == NULL)
+    if (token->val == NULL) {
+      free(token);
       return NULL;
+    }
     strcpy(token->val, value);
   }
   return token;
@@ -23,13 +29,14 @@ Token* FormToken(TokType type, char* value) {
 int IsReserved(char* str) {
   for (int i = 0; i < 35; i++) {
     if (strcmp(str, Reserved[i]) == 0)
-      return 1;
+      return true;
   }
-  return 0;
+  return false;
 }
 
 int GetToken(Token **token) {
   int c, i = 0;
+  bool t = false;
   char str[129];
   state = START;
 
@@ -44,39 +51,74 @@ int GetToken(Token **token) {
 
       case START:
 
-        // skip white
-        if (isblank(c))
+        // skip white & 0
+        if (isblank(c) || c == '0')
           break;
 
-        if (c == '\n') {
+        // new line
+        else if (c == '\n') {
           *token = FormToken(EOL, NULL);
-          return 1;
-        }
-
-        // line comment
-        if (c == '\'') {
-          state = COMLINE;
-          break;
-        }
-
-        // block comment or dividing
-        if (c == '/') {
-          if ((c = fgetc(fp)) == '\'')
-            state = COMBLOCK;
-          else {
-            ungetc(c, fp);
-            *token = FormToken(DIV, NULL);
-            return 1;
-          }
-          break;
+          t = true;
         }
 
         // identifier/keyword
-        if (islower(c) || c == '_')
+        else if (islower(c) || c == '_') {
           state = IDENTIFIER;
+          str[i++] = c;
+        }
 
+        // line comment
+        else if (c == '\'')
+          state = COMLINE;
 
-        str[i++] = c;
+        // block comment or dividing
+        else if (c == '/')
+          state = SLASH;
+
+        // multiplication
+        else if (c == '*') {
+          *token = FormToken(MUL, NULL);
+          t = true;
+        }
+
+        // adding
+        else if (c == '+') {
+          *token = FormToken(ADD, NULL);
+          t = true;
+        }
+
+        // substract
+        else if (c == '-') {
+          *token = FormToken(SUB, NULL);
+          t = true;
+        }
+
+        // modulo
+        else if (c == '\\') {
+          *token = FormToken(MOD, NULL);
+          t = true;
+        }
+
+        // equal
+        else if (c == '=') {
+          *token = FormToken(EQL, NULL);
+          t = true;
+        }
+
+        // less-than (and something)
+        else if (c == '<')
+          state = LESS;
+
+        // greater-than (and something)
+        else if (c == '>')
+          state = GREATER;
+
+        // unexpected character
+        else {
+
+          return S_LEXEM_FAIL;
+        }
+
         break;
 
 
@@ -90,14 +132,14 @@ int GetToken(Token **token) {
             *token = FormToken(KEYWORD, str);
           else
             *token = FormToken(ID, str);
-          return 1;
+          t = true;
         }
         if (i > 128) {
           fprintf(stderr, "Warning: Identificator %s... is too long!\n", str);
           str[i] = '\0';
           ungetc(c, fp);
           *token = FormToken(ID, str);
-          return 1;
+          t = true;
         }
         break;
 
@@ -105,38 +147,78 @@ int GetToken(Token **token) {
       case COMLINE:
         if (c == '\n') {
           *token = FormToken(EOL, NULL);
-          return 1;
+          t = true;
         }
         break;
 
 
+      case SLASH:
+        if (c == '\'') {
+          state = COMBLOCK;
+          break;
+        }
+        else {
+          ungetc(c, fp);
+          *token = FormToken(DIV, NULL);
+          t = true;
+        }
+
       case COMBLOCK:
-        if (c == '\'' && (c = fgetc(fp)) == '/')
-          state = START;
+        if (c == '\'')
+          state = COMBLOCK_F;
         break;
 
+      case COMBLOCK_F:
+        if (c == '/')
+          state = START;
+        else if (c == '\'')
+          break;
+        else
+          state = COMBLOCK;
+        break;
+
+
+      case LESS:
+        if (c == '>') {
+          *token = FormToken(NEQL, NULL);
+          t = true;
+        }
+        else if (c == '=') {
+          *token = FormToken(LEQL, NULL);
+          t = true;
+        }
+        else {
+          ungetc(c, fp);
+          *token = FormToken(LT, NULL);
+          t = true;
+        }
+
+
+      case GREATER:
+        if (c == '=') {
+          *token = FormToken(GEQL, NULL);
+          t = true;
+        }
+        else {
+          ungetc(c, fp);
+          *token = FormToken(GT, NULL);
+          t = true;
+        }
+
       default:
-        // nothing yet
-        return 1;
+        // nothing
+        break;
     }
+
+    // token should be set - controll and exit function
+    if (t)
+      if (*token == NULL)
+        return S_MEMORY_ERROR;
+      else
+        return S_TOKEN_OK;
 
   }
-  return 0;
-}
 
-int SOpenFile(char* path)
-{
-    SOURCE = fopen(path, "r");
-
-    if(SOURCE == NULL)
-    {
-        return S_FAILEDOPEN;
-    }
-
-    return 0;
-}
-
-void SCloseFile()
-{
-    fclose(SOURCE);
+  // end of input file
+  return S_END_OF_FILE;
 }

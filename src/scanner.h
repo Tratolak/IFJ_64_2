@@ -5,12 +5,18 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include <string.h>
+#include <stdbool.h>
 
-#define S_FAILEDOPEN 1
+#define S_END_OF_FILE 0     // returns after succesfully readed file
+#define S_TOKEN_OK 1        // returns after token succesfully readed
+#define S_LEXEM_FAIL 2      // returns after wrong lexem is readed
+#define S_MEMORY_ERROR 3    // returns after memory allocation error
 
-FILE* SOURCE;
 
-typedef enum TokenType {INT, DOUBLE, STRING, ID, KEYWORD, DIV, EOL //TBD
+FILE* fp = stdin;
+
+typedef enum TokenType {INTEGER, DOUBLE, STRING, ID, KEYWORD, DIV, MUL, ADD,
+                        SUB, MOD, EQL, NEQL, LEQL, GEQL, LT, GT, EOL
 } TokType;
 
 typedef struct token {
@@ -18,13 +24,11 @@ typedef struct token {
   char* val;
 } Token;
 
-enum enState {START, IDENTIFIER, COMLINE, COMBLOCK //TBD
+enum enState {START, IDENTIFIER, COMLINE, COMBLOCK, COMBLOCK_F, LESS, GREATER,
+              SLASH, STR, INT, DOUBLE_N, DOUBLE_E
 } state;
 
-int SOpenFile(char* path);
 
 int GetToken(Token **token);
-
-void SCloseFile();
 
 #endif // SCANNER_H_INCLUDED
