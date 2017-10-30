@@ -13,16 +13,8 @@ Token* FormToken(TokType type, char* value) {
     return NULL;
 
   token->type = type;
-  token->val = NULL;
+  token->val = value;
 
-  if (type == STRING || type == ID || type == KEYWORD) {
-    token->val = malloc(strlen(value)+1);
-    if (token->val == NULL) {
-      free(token);
-      return NULL;
-    }
-    strcpy(token->val, value);
-  }
   return token;
 }
 
@@ -34,13 +26,30 @@ int IsReserved(char* str) {
   return false;
 }
 
+bool BufferInit(DynamicBuffer *b, int size) {
+  b->buffer = (char *) malloc(size * sizeof(char));
+  if (b->buffer == NULL)
+    return false;
+  b->used = 0;
+  b->size = size;
+  return true;
+}
+
+void BufferInsert(DynamicBuffer *b, char c) {
+  if (b->used == b->size) {
+    b->size += 32;
+    b->buffer = (char *)realloc(b->buffer, b->size + sizeof(char) * 32);
+  }
+  b->buffer[b->used++] = c;
+}
+
 int GetToken(Token **token) {
-  int c, i = 0;
+  int c;
   bool t = false;
-  char str[129];
+  DynamicBuffer str;
   state = START;
 
-  while ((c = fgetc(fp)) != EOF) {
+  while ((c = getchar()) != EOF) {
 
     if (c == '\r')
       continue;
@@ -64,7 +73,16 @@ int GetToken(Token **token) {
         // identifier/keyword
         else if (islower(c) || c == '_') {
           state = IDENTIFIER;
-          str[i++] = c;
+          if (!BufferInit(&str, 32))
+            return S_MEMORY_ERROR;
+          BufferInsert(&str, c);
+        }
+
+        else if (isdigit(c)) {
+          state = INT;
+          if (!BufferInit(&str, 32))
+            return S_MEMORY_ERROR;
+          BufferInsert(&str, c);
         }
 
         // line comment
@@ -115,7 +133,7 @@ int GetToken(Token **token) {
 
         // unexpected character
         else {
-
+          fprintf(stderr, "ERROR: unexpected symbol \"%c\".\n", c);
           return S_LEXEM_FAIL;
         }
 
@@ -124,21 +142,77 @@ int GetToken(Token **token) {
 
       case IDENTIFIER:
         if (isalnum(c) || c == '_')
-          str[i++] = c;
+          BufferInsert(&str, c);
         else {
-          str[i] = '\0';
-          ungetc(c, fp);
-          if (IsReserved(str))
-            *token = FormToken(KEYWORD, str);
+          BufferInsert(&str, '\0');
+          ungetc(c, stdin);
+          if (IsReserved(str.buffer))
+            *token = FormToken(KEYWORD, str.buffer);
           else
-            *token = FormToken(ID, str);
+            *token = FormToken(ID, str.buffer);
           t = true;
         }
-        if (i > 128) {
-          fprintf(stderr, "Warning: Identificator %s... is too long!\n", str);
-          str[i] = '\0';
-          ungetc(c, fp);
-          *token = FormToken(ID, str);
+        break;
+
+
+      case INT:
+        if (isdigit(c))
+          BufferInsert(&str, c);
+        else if (c == '.') {
+          state = DOUBLE_N;
+          BufferInsert(&str, c);
+        }
+        else if (c == 'e') {
+          state = DOUBLE_ES;
+          BufferInsert(&str, c);
+        }
+        else {
+          BufferInsert(&str, '\0');
+          ungetc(c, stdin);
+          *token = FormToken(INTEGER, str.buffer);
+          t = true;
+        }
+        break;
+
+
+      case DOUBLE_N:
+        if (isdigit(c))
+          BufferInsert(&str, c);
+        else if (c == 'e') {
+          state = DOUBLE_ES;
+          BufferInsert(&str, c);
+        }
+        else {
+          BufferInsert(&str, '\0');
+          ungetc(c, stdin);
+          *token = FormToken(DOUBLE, str.buffer);
+          t = true;
+        }
+        break;
+
+
+      case DOUBLE_ES:
+        if (isdigit(c)) {
+          state = DOUBLE_E;
+          BufferInsert(&str, c);
+        }
+        else if (c == '+' || c == '-')
+          BufferInsert(&str, c);
+        else {
+          fprintf(stderr, "ERROR: %s is not valid double.\n", str.buffer);
+          free(str.buffer);
+          return S_LEXEM_FAIL;
+        }
+        break;
+
+
+      case DOUBLE_E:
+        if (isdigit(c))
+          BufferInsert(&str, c);
+        else {
+          BufferInsert(&str, '\0');
+          ungetc(c, stdin);
+          *token = FormToken(DOUBLE, str.buffer);
           t = true;
         }
         break;
@@ -153,15 +227,14 @@ int GetToken(Token **token) {
 
 
       case SLASH:
-        if (c == '\'') {
+        if (c == '\'')
           state = COMBLOCK;
-          break;
-        }
         else {
-          ungetc(c, fp);
+          ungetc(c, stdin);
           *token = FormToken(DIV, NULL);
           t = true;
         }
+        break;
 
       case COMBLOCK:
         if (c == '\'')
@@ -188,10 +261,11 @@ int GetToken(Token **token) {
           t = true;
         }
         else {
-          ungetc(c, fp);
+          ungetc(c, stdin);
           *token = FormToken(LT, NULL);
           t = true;
         }
+        break;
 
 
       case GREATER:
@@ -200,10 +274,11 @@ int GetToken(Token **token) {
           t = true;
         }
         else {
-          ungetc(c, fp);
+          ungetc(c, stdin);
           *token = FormToken(GT, NULL);
           t = true;
         }
+        break;
 
       default:
         // nothing
@@ -211,12 +286,12 @@ int GetToken(Token **token) {
     }
 
     // token should be set - controll and exit function
-    if (t)
+    if (t) {
       if (*token == NULL)
         return S_MEMORY_ERROR;
       else
         return S_TOKEN_OK;
-
+    }
   }
 
   // end of input file

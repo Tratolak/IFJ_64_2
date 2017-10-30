@@ -13,20 +13,26 @@
 #define S_MEMORY_ERROR 3    // returns after memory allocation error
 
 
-FILE* fp = stdin;
-
 typedef enum TokenType {INTEGER, DOUBLE, STRING, ID, KEYWORD, DIV, MUL, ADD,
                         SUB, MOD, EQL, NEQL, LEQL, GEQL, LT, GT, EOL
 } TokType;
+
+enum enState {START, IDENTIFIER, COMLINE, COMBLOCK, COMBLOCK_F, LESS, GREATER,
+              SLASH, STR, INT, DOUBLE_N, DOUBLE_ES, DOUBLE_E
+} state;
+
 
 typedef struct token {
   TokType type;
   char* val;
 } Token;
 
-enum enState {START, IDENTIFIER, COMLINE, COMBLOCK, COMBLOCK_F, LESS, GREATER,
-              SLASH, STR, INT, DOUBLE_N, DOUBLE_E
-} state;
+
+typedef struct buffer {
+  char *buffer;
+  int used;
+  int size;
+} DynamicBuffer;
 
 
 int GetToken(Token **token);
