@@ -7,6 +7,21 @@ const char * const Reserved[] = {"as", "asc", "declare", "dim", "do", "double",
 "boolean", "continue", "elseif", "exit", "false", "for", "next", "not", "or",
 "shared", "static", "true"};
 
+
+enum enState {START, IDENTIFIER, COMLINE, COMBLOCK, COMBLOCK_F, LESS, GREATER,
+              SLASH, INT, DOUBLE_N, DOUBLE_ES, DOUBLE_E, EXCLAMATION, STR,
+              ESCAPE
+} state;
+
+
+typedef struct buffer {
+  char *buffer;
+  int used;
+  int size;
+} DynamicBuffer;
+
+
+
 Token* FormToken(TokType type, char* value) {
   Token *token = malloc(sizeof(Token));
   if (token == NULL)
@@ -18,13 +33,15 @@ Token* FormToken(TokType type, char* value) {
   return token;
 }
 
-int IsReserved(char* str) {
+
+bool IsReserved(char* str) {
   for (int i = 0; i < 35; i++) {
     if (strcmp(str, Reserved[i]) == 0)
       return true;
   }
   return false;
 }
+
 
 bool BufferInit(DynamicBuffer *b, int size) {
   b->buffer = (char *) malloc(size * sizeof(char));
@@ -35,16 +52,21 @@ bool BufferInit(DynamicBuffer *b, int size) {
   return true;
 }
 
-void BufferInsert(DynamicBuffer *b, char c) {
+
+bool BufferInsert(DynamicBuffer *b, char c) {
   if (b->used == b->size) {
     b->size += 32;
     b->buffer = (char *)realloc(b->buffer, b->size + sizeof(char) * 32);
+    if (b->buffer == NULL)
+      return false;
   }
   b->buffer[b->used++] = c;
+  return true;
 }
 
+
 int GetToken(Token **token) {
-  int c;
+  int c, count, sym;
   bool t = false;
   DynamicBuffer str;
   state = START;
@@ -53,8 +75,6 @@ int GetToken(Token **token) {
 
     if (c == '\r')
       continue;
-
-    c = tolower(c);
 
     switch (state) {
 
@@ -71,18 +91,20 @@ int GetToken(Token **token) {
         }
 
         // identifier/keyword
-        else if (islower(c) || c == '_') {
+        else if (isalpha(c) || c == '_') {
           state = IDENTIFIER;
           if (!BufferInit(&str, 32))
             return S_MEMORY_ERROR;
-          BufferInsert(&str, c);
+          if (!BufferInsert(&str, tolower(c)))
+            return S_MEMORY_ERROR;
         }
 
         else if (isdigit(c)) {
           state = INT;
           if (!BufferInit(&str, 32))
             return S_MEMORY_ERROR;
-          BufferInsert(&str, c);
+          if (!BufferInsert(&str, c))
+            return S_MEMORY_ERROR;
         }
 
         // line comment
@@ -131,6 +153,40 @@ int GetToken(Token **token) {
         else if (c == '>')
           state = GREATER;
 
+        // exclamation mark > maybe string?
+        else if (c == '!')
+          state = EXCLAMATION;
+
+        // comma
+        else if (c == ',') {
+          *token = FormToken(COMMA, NULL);
+          t = true;
+        }
+
+        // semicolon
+        else if (c == ';') {
+          *token = FormToken(SEMICOLON, NULL);
+          t = true;
+        }
+
+        // percent sign
+        else if (c == '%') {
+          *token = FormToken(PERCENT, NULL);
+          t = true;
+        }
+
+        // left bracket
+        else if (c == '(') {
+          *token = FormToken(LBRACKET, NULL);
+          t = true;
+        }
+
+        // right bracket
+        else if (c == ')') {
+          *token = FormToken(RBRACKET, NULL);
+          t = true;
+        }
+
         // unexpected character
         else {
           fprintf(stderr, "ERROR: unexpected symbol \"%c\".\n", c);
@@ -141,10 +197,13 @@ int GetToken(Token **token) {
 
 
       case IDENTIFIER:
-        if (isalnum(c) || c == '_')
-          BufferInsert(&str, c);
+        if (isalnum(c) || c == '_') {
+          if (!BufferInsert(&str, tolower(c)))
+            return S_MEMORY_ERROR;
+        }
         else {
-          BufferInsert(&str, '\0');
+          if (!BufferInsert(&str, '\0'))
+            return S_MEMORY_ERROR;
           ungetc(c, stdin);
           if (IsReserved(str.buffer))
             *token = FormToken(KEYWORD, str.buffer);
@@ -156,18 +215,23 @@ int GetToken(Token **token) {
 
 
       case INT:
-        if (isdigit(c))
-          BufferInsert(&str, c);
+        if (isdigit(c)) {
+          if (!BufferInsert(&str, c))
+            return S_MEMORY_ERROR;
+        }
         else if (c == '.') {
           state = DOUBLE_N;
-          BufferInsert(&str, c);
+          if (!BufferInsert(&str, c))
+            return S_MEMORY_ERROR;
         }
         else if (c == 'e') {
           state = DOUBLE_ES;
-          BufferInsert(&str, c);
+          if (!BufferInsert(&str, c))
+            return S_MEMORY_ERROR;
         }
         else {
-          BufferInsert(&str, '\0');
+          if (!BufferInsert(&str, '\0'))
+            return S_MEMORY_ERROR;
           ungetc(c, stdin);
           *token = FormToken(INTEGER, str.buffer);
           t = true;
@@ -176,14 +240,18 @@ int GetToken(Token **token) {
 
 
       case DOUBLE_N:
-        if (isdigit(c))
-          BufferInsert(&str, c);
-        else if (c == 'e') {
+        if (isdigit(c)) {
+          if (!BufferInsert(&str, c))
+            return S_MEMORY_ERROR;
+        }
+        else if (c == 'e' || c == 'E') {
           state = DOUBLE_ES;
-          BufferInsert(&str, c);
+          if (!BufferInsert(&str, tolower(c)))
+            return S_MEMORY_ERROR;
         }
         else {
-          BufferInsert(&str, '\0');
+          if (!BufferInsert(&str, '\0'))
+            return S_MEMORY_ERROR;
           ungetc(c, stdin);
           *token = FormToken(DOUBLE, str.buffer);
           t = true;
@@ -194,10 +262,13 @@ int GetToken(Token **token) {
       case DOUBLE_ES:
         if (isdigit(c)) {
           state = DOUBLE_E;
-          BufferInsert(&str, c);
+          if (!BufferInsert(&str, c))
+            return S_MEMORY_ERROR;
         }
-        else if (c == '+' || c == '-')
-          BufferInsert(&str, c);
+        else if (c == '+' || c == '-') {
+          if (!BufferInsert(&str, c))
+            return S_MEMORY_ERROR;
+        }
         else {
           fprintf(stderr, "ERROR: %s is not valid double.\n", str.buffer);
           free(str.buffer);
@@ -207,10 +278,13 @@ int GetToken(Token **token) {
 
 
       case DOUBLE_E:
-        if (isdigit(c))
-          BufferInsert(&str, c);
+        if (isdigit(c)) {
+          if (!BufferInsert(&str, c))
+            return S_MEMORY_ERROR;
+        }
         else {
-          BufferInsert(&str, '\0');
+          if (!BufferInsert(&str, '\0'))
+            return S_MEMORY_ERROR;
           ungetc(c, stdin);
           *token = FormToken(DOUBLE, str.buffer);
           t = true;
@@ -277,6 +351,94 @@ int GetToken(Token **token) {
           ungetc(c, stdin);
           *token = FormToken(GT, NULL);
           t = true;
+        }
+        break;
+
+
+      case EXCLAMATION:
+        if (c == '\"') {
+          if (!BufferInit(&str, 32))
+            return S_MEMORY_ERROR;
+          state = STR;
+        }
+        else {
+          state = START;
+          ungetc(c, stdin);
+          fprintf(stderr, "ERROR: unexpected symbol \"!\".\n");
+          return S_LEXEM_FAIL;
+        }
+        break;
+
+      case STR:
+        if (c == '\"') {
+          *token = FormToken(STRING, str.buffer);
+          t = true;
+        }
+        else if (c == '\n') {
+          fprintf(stderr, "ERROR: unexpected EOL in string \"%s\".\n", str.buffer);
+          free(str.buffer);
+          return S_LEXEM_FAIL;
+        }
+        else if (c == '\\') {
+          state = ESCAPE;
+          count = 0;
+          sym = 0;
+        }
+        else
+          if (!BufferInsert(&str, c))
+            return S_MEMORY_ERROR;
+        break;
+
+      case ESCAPE:
+        if (isdigit(c)) {
+          c = c - '0';
+          count++;
+          switch (count) {
+            case 1:
+              sym = c * 100;
+              break;
+            case 2:
+              sym = sym + c * 10;
+              break;
+            case 3:
+              sym = sym + c;
+              break;
+          }
+          if (count == 3) {
+            if (sym < 256) {
+              state = STR;
+              if (!BufferInsert(&str, sym))
+                return S_MEMORY_ERROR;
+            }
+            else {
+              fprintf(stderr, "ERROR: too big number in escape sequence \"%s\\%d\".\n", str.buffer, sym);
+              free(str.buffer);
+              return S_LEXEM_FAIL;
+            }
+          }
+        }
+        else if (count == 0) {
+          state = STR;
+          if (c == '"')
+            sym = '"';
+          else if (c == 'n')
+            sym = '\n';
+          else if (c == 't')
+            sym = '\t';
+          else if (c == '\\')
+            sym = '\\';
+          else {
+            fprintf(stderr, "ERROR: unknown escape sequence \"\\%c\" in \"%s\".\n", c, str.buffer);
+            free(str.buffer);
+            return S_LEXEM_FAIL;
+          }
+          if (!BufferInsert(&str, sym))
+            return S_MEMORY_ERROR;
+        }
+        else {
+          fprintf(stderr, "ERROR: unknown escape sequence \"\\%d\" in \"%s\".\n", sym, str.buffer);
+          free(str.buffer);
+          return S_LEXEM_FAIL;
         }
         break;
 

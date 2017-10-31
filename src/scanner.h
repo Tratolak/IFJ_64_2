@@ -14,25 +14,15 @@
 
 
 typedef enum TokenType {INTEGER, DOUBLE, STRING, ID, KEYWORD, DIV, MUL, ADD,
-                        SUB, MOD, EQL, NEQL, LEQL, GEQL, LT, GT, EOL
+                        SUB, MOD, EQL, NEQL, LEQL, GEQL, LT, GT, COMMA,
+                        SEMICOLON, PERCENT, LBRACKET, RBRACKET, EOL
 } TokType;
-
-enum enState {START, IDENTIFIER, COMLINE, COMBLOCK, COMBLOCK_F, LESS, GREATER,
-              SLASH, STR, INT, DOUBLE_N, DOUBLE_ES, DOUBLE_E
-} state;
 
 
 typedef struct token {
   TokType type;
   char* val;
 } Token;
-
-
-typedef struct buffer {
-  char *buffer;
-  int used;
-  int size;
-} DynamicBuffer;
 
 
 int GetToken(Token **token);
