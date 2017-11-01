@@ -5,6 +5,13 @@
 
 //TBD
 
-int SynAnalyzer();
+typedef struct DeTree
+{
+    Token* token;
+    struct BT* LPtr;
+    struct BT* RPtr;
+} DT;
+
+DT* SynAnalyzer(DT* node);
 
 #endif // SYNTAX_ANALYZER_H_INCLUDED
