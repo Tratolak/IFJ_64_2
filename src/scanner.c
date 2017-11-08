@@ -133,9 +133,9 @@ int GetToken(Token **token) {
           t = true;
         }
 
-        // modulo
+        // integer dividing
         else if (c == '\\') {
-          *token = FormToken(MOD, NULL);
+          *token = FormToken(IDIV, NULL);
           t = true;
         }
 

@@ -14,7 +14,7 @@
 
 
 typedef enum TokenType {INTEGER, DOUBLE, STRING, ID, KEYWORD, DIV, MUL, ADD,
-                        SUB, MOD, EQL, NEQL, LEQL, GEQL, LT, GT, COMMA,
+                        SUB, IDIV, EQL, NEQL, LEQL, GEQL, LT, GT, COMMA,
                         SEMICOLON, PERCENT, LBRACKET, RBRACKET, EOL
 } TokType;
 
