@@ -31,8 +31,14 @@ char ArtPreTB [15][15] = {
 
 };
 
+int GTOKEN_RES;
 
-
+#define GET_TOKEN(A)\
+GTOKEN_RES = GetToken(&(A));\
+if(GTOKEN_RES != S_TOKEN_OK)\
+{\
+    return GTOKEN_RES;\
+}
 
 #define MAX_STACK 20
 typedef struct {
@@ -106,7 +112,7 @@ int ExpRes(){
 int SyntaxAnalyzer(){
     Token *act,*next;
     int err;
-    GetToken(&(act));
+    GET_TOKEN(act);
     //printf("%s",act->val);
     if (act->type==KEYWORD){
         printf("nasel jsem klicove slovo");
