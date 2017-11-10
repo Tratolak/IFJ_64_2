@@ -45,9 +45,11 @@ if(GTOKEN_RES != S_TOKEN_OK)\
 
 #define MAX_STACK 1
 
+#define SYN_OK 0
 #define ID_NOT_DEFINED -1
-#define ID_ALREADY_DEFINED -1
-#define SYN_ERROR -2
+#define ID_ALREADY_DEFINED -2
+#define SYN_ERROR -3
+
 
 typedef struct {
     char arr[MAX_STACK];                             /* pole pro uložení hodnot */
@@ -173,11 +175,11 @@ int SyntaxAnalyzer(){
         else if(strcmp(act->val,"declare")==0){
                 GET_TOKEN(act);
                 if(act->type==KEYWORD && strcmp(act->val,"function")==0){
-                    decFunc();
+                    S_decFunc();
                 }
         }
         else if(strcmp(act->val,"function")==0){
-                defFunc();
+                S_defFunc();
         }
     }
     else if(act->type==ID)
@@ -193,7 +195,7 @@ int SyntaxAnalyzer(){
 
 }
 
-int decFunc()
+int S_decFunc()
 {
     Token *act;
     GET_TOKEN(act);
@@ -208,7 +210,7 @@ int decFunc()
 
         if(act->type==LBRACKET)
         {
-            return funcArgList(act);
+            return S_funcArgList(act, true);
         }
 
     }
@@ -216,10 +218,11 @@ int decFunc()
     {
         return SYN_ERROR;
     }
-    return 0;
+
+    return SYN_ERROR;
 }
 
-int defFunc()
+int S_defFunc()
 {
     Token *act;
     GET_TOKEN(act);
@@ -233,7 +236,7 @@ int defFunc()
 
         if(act->type==LBRACKET)
         {
-            return funcArgList(act);
+            return S_funcArgList(act, false);
         }
     }
     else
@@ -241,10 +244,10 @@ int defFunc()
         return SYN_ERROR;
     }
 
-    return 0;
+    return SYN_ERROR;
 }
 
-int funcArgList(Token *act)
+int S_funcArgList(Token *act, bool declaration)
 {
     while(act->type!=RBRACKET){
         GET_TOKEN(act);
@@ -276,7 +279,26 @@ int funcArgList(Token *act)
         }
     }
 
-    return 0;
+    return S_functype(declaration);
+}
+
+int S_functype(bool declaration)
+{
+    token *act;
+    GET_TOKEN(act);
+    if(act->type != KEYWORD || strcmp(act->val, "As") != 0){
+           return SYN_ERROR;
+    }
+
+    GET_TOKEN(act);
+    if(act->type != KEYWORD)
+        return SYN_ERROR;
+    if(!isType(act->val))
+        return SYN_ERROR;
+
+    //TBD function return type in sym table
+
+    return SYN_OK;
 }
 
 int inFuction()
