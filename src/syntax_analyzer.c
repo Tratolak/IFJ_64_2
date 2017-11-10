@@ -46,6 +46,7 @@ if(GTOKEN_RES != S_TOKEN_OK)\
 #define MAX_STACK 20
 
 #define ID_NOT_DEFINED -1
+#define ID_ALREADY_DEFINED -1
 #define SYN_ERROR -2
 
 typedef struct {
@@ -182,9 +183,9 @@ int decFunc()
     GET_TOKEN(act);
     if(act->type==ID){
         //TBD
-        if(SEM_regFunc(act->val) != 0)
+        if(!SEM_regFunc(act->val))
         {
-            return ID_NOT_DEFINED;
+            return ID_ALREADY_DEFINED;
         }
 
         GET_TOKEN(act);
@@ -207,7 +208,17 @@ int defFunc()
     Token *act;
     GET_TOKEN(act);
     if(act->type==ID){
-        decFunc();
+        if(!SEM_existId(act->val))
+        {
+            return ID_NOT_DEFINED;
+        }
+
+        GET_TOKEN(act);
+
+        if(act->type==LBRACKET)
+        {
+            return funcArgList();
+        }
     }
     else
     {
