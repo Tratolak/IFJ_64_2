@@ -1,4 +1,5 @@
 #include "syntax_analyzer.h"
+#include "symtable.h"
 #include "string.h"
 #include "stdbool.h"
 /**
@@ -31,6 +32,8 @@ char ArtPreTB [15][15] = {
 
 };
 
+Table sym_table;
+
 int GTOKEN_RES;
 
 #define GET_TOKEN(A)\
@@ -41,6 +44,11 @@ if(GTOKEN_RES != S_TOKEN_OK)\
 }
 
 #define MAX_STACK 1
+
+#define ID_NOT_DEFINED -1
+#define ID_ALREADY_DEFINED -1
+#define SYN_ERROR -2
+
 typedef struct {
     char arr[MAX_STACK];                             /* pole pro uložení hodnot */
     int top;                                /* index prvku na vrcholu zásobníku */
@@ -99,6 +107,31 @@ void stackPush ( tStack* s, char c ) {
 }
 
 
+int ExpRes(){
+    tStack *local;
+    local = (tStack*)malloc(sizeof(tStack));
+}
+
+//Semantic
+
+//register new function with ID into sym table
+int SEM_regFunc(char* name)
+{
+
+}
+
+//register new variable ID into sym table
+int SEM_regId(char* name)
+{
+
+}
+
+//check if sym table contains ID
+int SEM_existId(char* name)
+{
+
+}
+
 /*******
  *
  * Shora dolu
@@ -106,8 +139,106 @@ void stackPush ( tStack* s, char c ) {
  ****************/
 
 int SyntaxAnalyzer(){
-    Token *act,*next;
+    Token *act;
     int err;
+
+    GET_TOKEN(act);
+
+    if (act->type==KEYWORD){
+        if(strcmp(act->val,"scope")==0){
+            GET_TOKEN(act);
+            if(act->type == EOL)
+            {
+                inFuction();
+            }
+            else{
+                return SYN_ERROR;
+            }
+        }
+        else if(strcmp(act->val,"declare")==0){
+                GET_TOKEN(act);
+                if(act->type==KEYWORD && strcmp(act->val,"function")==0){
+                    decFunc();
+                }
+        }
+        else if(strcmp(act->val,"function")==0){
+                defFunc();
+        }
+    }
+    else if(act->type==ID)
+    {
+        err=assigment(act);
+    }
+    else { return false;}
+    if (err==false){
+        return false;
+    }
+
+    return 0;
+
+}
+
+int decFunc()
+{
+    Token *act;
+    GET_TOKEN(act);
+    if(act->type==ID){
+        //TBD
+        if(!SEM_regFunc(act->val))
+        {
+            return ID_ALREADY_DEFINED;
+        }
+
+        GET_TOKEN(act);
+
+        if(act->type==LBRACKET)
+        {
+            return funcArgList();
+        }
+
+    }
+    else
+    {
+        return SYN_ERROR;
+    }
+    return 0;
+}
+
+int defFunc()
+{
+    Token *act;
+    GET_TOKEN(act);
+    if(act->type==ID){
+        if(!SEM_existId(act->val))
+        {
+            return ID_NOT_DEFINED;
+        }
+
+        GET_TOKEN(act);
+
+        if(act->type==LBRACKET)
+        {
+            return funcArgList();
+        }
+    }
+    else
+    {
+        return SYN_ERROR;
+    }
+
+    return 0;
+}
+
+int funcArgList()
+{
+    return 0;
+}
+
+int inFuction()
+{
+    Token *act;
+    int err;
+
     GET_TOKEN(act);
     //printf("%s",act->val);
     if (act->type==KEYWORD){
@@ -115,13 +246,34 @@ int SyntaxAnalyzer(){
         err=Keyword(act);
         printf("serious ? ");
     }
+    else if(act->type==ID)
+    {
+        err=assigment(act);
+    }
     else { return false;}
     if (err==false){
         return false;
     }
-
 }
 
+
+
+int assigment(Token *act)
+{
+    if(SEM_existId(act->val) != 0){
+        return ID_NOT_DEFINED;
+    }
+
+    GetToken(&(act));
+
+    if(act->type == EQL){
+        GetToken(&(act));
+        PreAnalyzer(act);
+    }
+
+    return SYN_ERROR;
+
+}
 
 int Keyword(Token *act){
     int err;
