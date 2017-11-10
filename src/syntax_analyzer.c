@@ -233,11 +233,11 @@ int Declare(){
 }
 int Function(){
     Token *act;
-    GetToken(&(act)){
-        if (act->type==KEYWORD&&(strcmp(act->val, "function")==0){
+    GetToken(&(act));
+        if (act->type==KEYWORD&&(strcmp(act->val, "function")==0)){
             Keyword(act);
         }
-    }
+
 }
 
 
