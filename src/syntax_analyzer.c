@@ -12,14 +12,14 @@
 
 char ArtPreTB [15][15] = {
     // < - 1, > - 2, = - 3, ' ' - 0
-    //     i + - * ( ) e / \ = n l g < >
+    //     i + - * ( ) $ / \ = n l g < >
 /*id */   {0,2,2,2,0,2,2,2,2,2,2,2,2,2,2},
 /* + */   {1,2,2,1,1,2,2,1,1,2,2,2,2,2,2},
 /* - */   {1,2,2,1,1,2,2,1,1,2,2,2,2,2,2},
 /* * */   {1,2,2,2,1,2,2,2,2,2,2,2,2,2,2},
 /* ( */   {1,1,1,1,1,3,0,1,1,1,1,1,1,1,1},
 /* ) */   {0,2,2,2,0,2,2,2,2,2,2,2,2,2,2},
-/* e */   {1,1,1,1,1,3,3,1,1,1,1,1,1,1,1},
+/* $ */   {1,1,1,1,1,3,3,1,1,1,1,1,1,1,1},
 /* / */   {1,2,2,2,1,2,2,2,2,2,2,2,2,2,2},
 /* \ */   {1,2,2,1,1,2,2,1,2,2,2,2,2,2,2},
 /*eql*/   {1,1,1,1,1,2,2,1,1,2,2,2,2,2,2},
@@ -245,14 +245,139 @@ int Function(){
 
 
 //zdola nahoru
+int PrePosition(char c){
 
-int PreAnalyzer(Token *act){
-    printf("%s", act->val);
+    switch(c){
+        case 'i':
+            return 0;
+            break;
+        case '+':
+            return 1;
+            break;
+        case '-':
+            return 2;
+            break;
+        case '*':
+            return 3;
+            break;
+        case '(':
+            return 4;
+            break;
+        case ')':
+            return 5;
+            break;
+        case '$':
+            return 6;
+            break;
+        case '/':
+            return 7;
+            break;
+        case '\\':
+            return 8;
+            break;
+        case '=':
+            return 9;
+            break;
+        case '#':
+            return 10;
+            break;
+        case ',':
+            return 11;
+            break;
+        case '.':
+            return 12;
+            break;
+        case '<':
+            return 13;
+            break;
+        case '>':
+            return 14;
+            break;
+        default:
+            return -1;
+    }
 
+}
+
+
+
+int PreExe(char c, Token* act){
+    char *top;
     tStack *local;
     local = (tStack*)malloc(sizeof(tStack));
     stackInit(local);
 
+    stackTop(local, top);
+
+    switch(ArtPreTB[PrePosition(*top), PrePosition(c)]){
+        case 3:
+
+            break;
+        default:
+            return 0;
+
+    }
+
+
+}
+
+int PreAnalyzer(Token *act){
+    printf("%s", act->val);
+
+
+   // Token *act;
+    switch(act->type){
+        case INTEGER:
+        case DOUBLE:
+        case ID:
+        case STRING:
+            //nejaka synatax
+            PreExe('i', act);
+        break;
+        case DIV:
+            PreExe('/', act);
+            break;
+        case MUL:
+            PreExe('*', act);
+            break;
+        case ADD:
+            PreExe('+', act);
+            break;
+        case SUB:
+            PreExe('-', act);
+            break;
+        case MOD:
+            PreExe('\\', act);
+            break;
+        case EQL:
+            PreExe('=', act);
+            break;
+        case NEQL:
+            PreExe('#', act);
+            break;
+        case LEQL:
+            PreExe(',', act);
+            break;
+        case GEQL:
+            PreExe('.', act);
+            break;
+        case LT:
+            PreExe('<',act);
+            break;
+        case GT:
+            PreExe('>',act);
+            break;
+        case LBRACKET:
+            PreExe('(',act);
+            break;
+        case RBRACKET:
+            PreExe(')',act);
+            break;
+        default:
+            return false;
+    }
 
     return true;
 }
+
+
