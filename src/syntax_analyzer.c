@@ -138,6 +138,21 @@ int SEM_existId(char* name)
  *
  ****************/
 
+int isType(char *val)
+{
+    if(strcmp(val, "integer") == 0){
+        return true;
+    }
+    else if(strcmp(val, "double") == 0){
+        return true;
+    }
+    else if(strcmp(val, "string") == 0){
+        return true;
+    }
+
+    return false;
+}
+
 int SyntaxAnalyzer(){
     Token *act;
     int err;
@@ -193,7 +208,7 @@ int decFunc()
 
         if(act->type==LBRACKET)
         {
-            return funcArgList();
+            return funcArgList(act);
         }
 
     }
@@ -218,7 +233,7 @@ int defFunc()
 
         if(act->type==LBRACKET)
         {
-            return funcArgList();
+            return funcArgList(act);
         }
     }
     else
@@ -229,8 +244,38 @@ int defFunc()
     return 0;
 }
 
-int funcArgList()
+int funcArgList(Token *act)
 {
+    while(act->type!=RBRACKET){
+        GET_TOKEN(act);
+
+        if(act->type == ID){
+            //TBD function arguments in sym table
+        }
+        else{
+            return SYN_ERROR;
+        }
+
+        GET_TOKEN(act);
+        if(act->type != KEYWORD || strcmp(act->val, "As") != 0){
+               return SYN_ERROR;
+        }
+
+        GET_TOKEN(act);
+        if(act->type != KEYWORD)
+            return SYN_ERROR;
+        if(!isType(act->val))
+            return SYN_ERROR;
+
+        //TBD function arguments in sym table
+
+        GET_TOKEN(act);
+
+        if(act->type != COMMA || act->type != RBRACKET){
+            return SYN_ERROR;
+        }
+    }
+
     return 0;
 }
 
