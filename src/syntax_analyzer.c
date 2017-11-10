@@ -34,7 +34,7 @@ char ArtPreTB [15][15] = {
 
 
 
-#define MAX_STACK 20
+#define MAX_STACK 1
 typedef struct {
     char arr[MAX_STACK];                             /* pole pro uložení hodnot */
     int top;                                /* index prvku na vrcholu zásobníku */
@@ -47,7 +47,8 @@ void stackInit ( tStack* s ) {
         printf("stackerror");
     }
     else{
-        s->top = -1;  //inicializace vrcholu
+        s->arr[0]='$';
+        s->top = 0;                //inicializace vrcholu+ zarazka pro precedencni analyzu
     }
 }
 
@@ -92,14 +93,9 @@ void stackPush ( tStack* s, char c ) {
 }
 
 
-int ExpRes(){
-    tStack *local;
-    local = (tStack*)malloc(sizeof(tStack));
-}
-
 /*******
  *
- * Shora dolur
+ * Shora dolu
  *
  ****************/
 
@@ -246,5 +242,11 @@ int Function(){
 
 int PreAnalyzer(Token *act){
     printf("%s", act->val);
+
+    tStack *local;
+    local = (tStack*)malloc(sizeof(tStack));
+    stackInit(local);
+
+
     return true;
 }
