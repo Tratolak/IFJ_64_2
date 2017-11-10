@@ -397,6 +397,8 @@ int Function(){
 
 
 //zdola nahoru
+int PreAnalyzer(Token *act);
+
 int PrePosition(char c){
 
     switch(c){
@@ -439,10 +441,10 @@ int PrePosition(char c){
         case '.':
             return 12;
             break;
-        case '<':
+        case '?':
             return 13;
             break;
-        case '>':
+        case ':':
             return 14;
             break;
         default:
@@ -454,22 +456,60 @@ int PrePosition(char c){
 
 
 int PreExe(char c, Token* act){
-    char *top;
+    Token *next;
+    char *top, *pom;
     tStack *local;
+    STRING vys;
     local = (tStack*)malloc(sizeof(tStack));
+    top = (char*)malloc(sizeof(char));
+    pom = (char*)malloc(sizeof(char));
     stackInit(local);
 
     stackTop(local, top);
+    do {
+        switch (ArtPreTB[PrePosition(*top), PrePosition(c)]) {
+            case 3://=
+                stackPush(local, c);
+                GET_TOKEN(next);
+                PreAnalyzer(next);
+                break;
+            case 1: //<
+                stackPop(local);
+                stackPush(local, '<');
+                stackPush(local, *top);
+                stackPush(local, c);
+                GET_TOKEN(next);
+                PreAnalyzer(next);
+                break;
+            case 2: // >
+                stackTop(local, pom);
+                while(strcmp(*pom, '<')==0){
+                    stackPop(local);
+                    stackTop(local,pom);
+                    vys=*pom+vys;
+                }
+                if(strcmp("E+E",vys)==0){
+                    // tady volani nejake sem akce
+                    // tadz volani generatoru
+                }
+                else if(strcmp("E*E",vys)==0){
 
-    switch(ArtPreTB[PrePosition(*top), PrePosition(c)]){
-        case 3:
+                }
+                else if(strcmp("(E)",vys)){
 
-            break;
-        default:
-            return 0;
+                }
+                else if(strcmp("i",vys)){
+                stackPush(local, 'E');
+                }
+                else {
+                    return 0;
+                }
+                break;
+            default:
+                return 0;
 
-    }
-
+        }
+    }while((strcmp(*top,'$')==0)&&(strcmp(c,'$')));
 
 }
 
@@ -514,10 +554,10 @@ int PreAnalyzer(Token *act){
             PreExe('.', act);
             break;
         case LT:
-            PreExe('<',act);
+            PreExe('?',act);
             break;
         case GT:
-            PreExe('>',act);
+            PreExe(':',act);
             break;
         case LBRACKET:
             PreExe('(',act);
