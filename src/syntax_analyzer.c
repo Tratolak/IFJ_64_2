@@ -137,8 +137,81 @@ int SEM_existId(char* name)
  ****************/
 
 int SyntaxAnalyzer(){
-    Token *act,*next;
+    Token *act;
     int err;
+
+    GET_TOKEN(act);
+
+    if (act->type==KEYWORD){
+        if(strcmp(act->val,"scope")==0){
+            GET_TOKEN(act);
+            if(act->type == EOL)
+            {
+                inFuction();
+            }
+            else{
+                return SYN_ERROR;
+            }
+        }
+        else if(strcmp(act->val,"declare")==0){
+                GET_TOKEN(act);
+                if(act->type==KEYWORD && strcmp(act->val,"function")==0){
+                    decFunc();
+                }
+        }
+        else if(strcmp(act->val,"function")==0){
+                defFunc();
+        }
+    }
+    else if(act->type==ID)
+    {
+        err=assigment(act);
+    }
+    else { return false;}
+    if (err==false){
+        return false;
+    }
+
+    return 0;
+
+}
+
+int decFunc()
+{
+    GET_TOKEN(act);
+    if(act->type==ID){
+        //TBD
+        if(SEM_regFunc(act->val) != 0)
+        {
+            return ID_NOT_DEFINED;
+        }
+    }
+    else
+    {
+        return SYN_ERROR;
+    }
+    return 0;
+}
+
+int defFunc()
+{
+    GET_TOKEN(act);
+    if(act->type==ID){
+        decFunc();
+    }
+    else
+    {
+        return SYN_ERROR;
+    }
+
+    return 0;
+}
+
+int inFuction()
+{
+    Token *act;
+    int err;
+
     GET_TOKEN(act);
     //printf("%s",act->val);
     if (act->type==KEYWORD){
@@ -146,13 +219,34 @@ int SyntaxAnalyzer(){
         err=Keyword(act);
         printf("serious ? ");
     }
+    else if(act->type==ID)
+    {
+        err=assigment(act);
+    }
     else { return false;}
     if (err==false){
         return false;
     }
-
 }
 
+
+
+int assigment(Token *act)
+{
+    if(SEM_existId(act->val) != 0){
+        return ID_NOT_DEFINED;
+    }
+
+    GetToken(&(act));
+
+    if(act->type == EQ){
+        GetToken(&(act));
+        PreAnalyzer(act);
+    }
+
+    return SYN_ERROR;
+
+}
 
 int Keyword(Token *act){
     int err;
