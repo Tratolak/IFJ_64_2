@@ -178,6 +178,7 @@ int SyntaxAnalyzer(){
 
 int decFunc()
 {
+    Token *act;
     GET_TOKEN(act);
     if(act->type==ID){
         //TBD
@@ -185,6 +186,14 @@ int decFunc()
         {
             return ID_NOT_DEFINED;
         }
+
+        GET_TOKEN(act);
+
+        if(act->type==LBRACKET)
+        {
+            return funcArgList();
+        }
+
     }
     else
     {
@@ -195,6 +204,7 @@ int decFunc()
 
 int defFunc()
 {
+    Token *act;
     GET_TOKEN(act);
     if(act->type==ID){
         decFunc();
@@ -204,6 +214,11 @@ int defFunc()
         return SYN_ERROR;
     }
 
+    return 0;
+}
+
+int funcArgList()
+{
     return 0;
 }
 
@@ -239,7 +254,7 @@ int assigment(Token *act)
 
     GetToken(&(act));
 
-    if(act->type == EQ){
+    if(act->type == EQL){
         GetToken(&(act));
         PreAnalyzer(act);
     }
