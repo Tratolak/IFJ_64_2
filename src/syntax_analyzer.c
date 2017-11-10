@@ -1,4 +1,5 @@
 #include "syntax_analyzer.h"
+#include "symtable.h"
 #include "string.h"
 #include "stdbool.h"
 /**
@@ -31,6 +32,8 @@ char ArtPreTB [15][15] = {
 
 };
 
+Table sym_table;
+
 int GTOKEN_RES;
 
 #define GET_TOKEN(A)\
@@ -41,6 +44,10 @@ if(GTOKEN_RES != S_TOKEN_OK)\
 }
 
 #define MAX_STACK 20
+
+#define ID_NOT_DEFINED -1
+#define SYN_ERROR -2
+
 typedef struct {
     char arr[MAX_STACK];                             /* pole pro uložení hodnot */
     int top;                                /* index prvku na vrcholu zásobníku */
@@ -101,6 +108,26 @@ void stackPush ( tStack* s, char c ) {
 int ExpRes(){
     tStack *local;
     local = (tStack*)malloc(sizeof(tStack));
+}
+
+//Semantic
+
+//register new function with ID into sym table
+int SEM_regFunc(char* name)
+{
+
+}
+
+//register new variable ID into sym table
+int SEM_regId(char* name)
+{
+
+}
+
+//check if sym table contains ID
+int SEM_existId(char* name)
+{
+
 }
 
 /*******
