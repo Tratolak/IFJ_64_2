@@ -44,6 +44,7 @@ if(GTOKEN_RES != S_TOKEN_OK)\
 }
 
 #define MAX_STACK 1
+#define DELKAPRAVIDLA 10
 
 #define SYN_OK 0
 #define ID_NOT_DEFINED -1
@@ -526,10 +527,19 @@ int PreExe(char c, Token* act){
     Token *next;
     char *top, *pom;
     tStack *local;
-    STRING vys;
+    char vys[DELKAPRAVIDLA];
     local = (tStack*)malloc(sizeof(tStack));
+    if (local==NULL){
+      return S_MEMORY_ERROR;
+    }
     top = (char*)malloc(sizeof(char));
+    if (top==NULL){
+        return S_MEMORY_ERROR;
+    }
     pom = (char*)malloc(sizeof(char));
+    if (pom==NULL){
+        return S_MEMORY_ERROR;
+    }
     stackInit(local);
 
     stackTop(local, top);
@@ -553,7 +563,7 @@ int PreExe(char c, Token* act){
                 while(strcmp(*pom, '<')==0){
                     stackPop(local);
                     stackTop(local,pom);
-                    vys=*pom+vys;
+                    vys=strcat(*pom, vys);
                 }
                 if(strcmp("E+E",vys)==0){
                     // tady volani nejake sem akce
