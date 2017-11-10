@@ -31,9 +31,21 @@
 		<Compiler>
 			<Add option="-Wall" />
 		</Compiler>
-		<Unit filename="main.c">
+		<Unit filename="src/main.c">
 			<Option compilerVar="CC" />
 		</Unit>
+		<Unit filename="src/scanner.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/scanner.h" />
+		<Unit filename="src/symtable.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/symtable.h" />
+		<Unit filename="src/syntax_analyzer.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/syntax_analyzer.h" />
 		<Extensions>
 			<code_completion />
 			<envvars />
