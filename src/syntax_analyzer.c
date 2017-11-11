@@ -1,5 +1,6 @@
 #include "syntax_analyzer.h"
 #include "symtable.h"
+#include "code_generator.h"
 #include "string.h"
 #include "stdbool.h"
 /**
