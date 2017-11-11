@@ -143,6 +143,9 @@ int SEM_existId(char* name)
 
 int isType(char *val)
 {
+    if(val->type != KEYWORD)
+        return false;
+
     if(strcmp(val, "integer") == 0){
         return true;
     }
@@ -266,8 +269,6 @@ int S_funcArgList(Token *act, bool declaration)
         }
 
         GET_TOKEN(act);
-        if(act->type != KEYWORD)
-            return SYN_ERROR;
         if(!isType(act->val))
             return SYN_ERROR;
 
@@ -285,15 +286,13 @@ int S_funcArgList(Token *act, bool declaration)
 
 int S_functype(bool declaration)
 {
-    token *act;
+    Token *act;
     GET_TOKEN(act);
     if(act->type != KEYWORD || strcmp(act->val, "As") != 0){
            return SYN_ERROR;
     }
 
     GET_TOKEN(act);
-    if(act->type != KEYWORD)
-        return SYN_ERROR;
     if(!isType(act->val))
         return SYN_ERROR;
 
