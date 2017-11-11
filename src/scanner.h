@@ -27,4 +27,15 @@ typedef struct token {
 
 int GetToken(Token **token);
 
+
+typedef struct buffer {
+  char *buffer;
+  int used;
+  int size;
+} DynamicBuffer;
+
+bool BufferInit(DynamicBuffer *b, int size);
+
+bool BufferInsert(DynamicBuffer *b, char c);
+
 #endif // SCANNER_H_INCLUDED

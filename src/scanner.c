@@ -14,13 +14,6 @@ enum enState {START, IDENTIFIER, COMLINE, COMBLOCK, COMBLOCK_F, LESS, GREATER,
 } state;
 
 
-typedef struct buffer {
-  char *buffer;
-  int used;
-  int size;
-} DynamicBuffer;
-
-
 
 Token* FormToken(TokType type, char* value) {
   Token *token = malloc(sizeof(Token));
@@ -371,6 +364,8 @@ int GetToken(Token **token) {
 
       case STR:
         if (c == '\"') {
+          if (!BufferInsert(&str, '\0'))
+            return S_MEMORY_ERROR;
           *token = FormToken(STRING, str.buffer);
           t = true;
         }
@@ -384,6 +379,13 @@ int GetToken(Token **token) {
           count = 0;
           sym = 0;
         }
+        else if (c <= 32 || c == 35 || c == 92) {
+          char esc[3];
+          sprintf(esc, "%03d", c);
+          if (!BufferInsert(&str, '\\') || !BufferInsert(&str, esc[0]) ||
+              !BufferInsert(&str, esc[1]) || !BufferInsert(&str, esc[2]))
+            return S_MEMORY_ERROR;
+        }
         else
           if (!BufferInsert(&str, c))
             return S_MEMORY_ERROR;
@@ -391,24 +393,28 @@ int GetToken(Token **token) {
 
       case ESCAPE:
         if (isdigit(c)) {
-          c = c - '0';
+          // "\number"
           count++;
           switch (count) {
             case 1:
               sym = c * 100;
+              if (!BufferInsert(&str, '\\') || !BufferInsert(&str, c))
+                return S_MEMORY_ERROR;
               break;
             case 2:
               sym = sym + c * 10;
+              if (!BufferInsert(&str, c))
+                return S_MEMORY_ERROR;
               break;
             case 3:
               sym = sym + c;
+              if (!BufferInsert(&str, c))
+                return S_MEMORY_ERROR;
               break;
           }
           if (count == 3) {
             if (sym < 256) {
               state = STR;
-              if (!BufferInsert(&str, sym))
-                return S_MEMORY_ERROR;
             }
             else {
               fprintf(stderr, "ERROR: too big number in escape sequence \"%s\\%d\".\n", str.buffer, sym);
@@ -418,22 +424,33 @@ int GetToken(Token **token) {
           }
         }
         else if (count == 0) {
+          // "\n \t \" \\"
           state = STR;
-          if (c == '"')
-            sym = '"';
-          else if (c == 'n')
-            sym = '\n';
-          else if (c == 't')
-            sym = '\t';
-          else if (c == '\\')
-            sym = '\\';
-          else {
-            fprintf(stderr, "ERROR: unknown escape sequence \"\\%c\" in \"%s\".\n", c, str.buffer);
-            free(str.buffer);
-            return S_LEXEM_FAIL;
+          if (c == '"') {
+            if (!BufferInsert(&str, '"'))
+              return S_MEMORY_ERROR;
           }
-          if (!BufferInsert(&str, sym))
-            return S_MEMORY_ERROR;
+          else {
+            if (!BufferInsert(&str, '\\') || !BufferInsert(&str, '0'))
+              return S_MEMORY_ERROR;
+            if (c == 'n') {
+              if (!BufferInsert(&str, '1') || !BufferInsert(&str, '0'))
+                return S_MEMORY_ERROR;
+            }
+            else if (c == 't') {
+              if (!BufferInsert(&str, '0') || !BufferInsert(&str, '9'))
+                return S_MEMORY_ERROR;
+            }
+            else if (c == '\\') {
+              if (!BufferInsert(&str, '9') || !BufferInsert(&str, '2'))
+                return S_MEMORY_ERROR;
+            }
+            else {
+              fprintf(stderr, "ERROR: unknown escape sequence \"\\%c\" in \"%s\".\n", c, str.buffer);
+              free(str.buffer);
+              return S_LEXEM_FAIL;
+            }
+          }
         }
         else {
           fprintf(stderr, "ERROR: unknown escape sequence \"\\%d\" in \"%s\".\n", sym, str.buffer);
