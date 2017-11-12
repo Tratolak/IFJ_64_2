@@ -3,6 +3,7 @@
 #include "code_generator.h"
 #include "string.h"
 #include "stdbool.h"
+#include "stack_operations.h"
 /**
 *
 *
@@ -44,7 +45,6 @@ if(GTOKEN_RES != S_TOKEN_OK)\
     return GTOKEN_RES;\
 }
 
-#define MAX_STACK 1
 #define DELKAPRAVIDLA 10
 
 #define SYN_OK 0
@@ -53,62 +53,7 @@ if(GTOKEN_RES != S_TOKEN_OK)\
 #define SYN_ERROR -3
 
 
-typedef struct {
-    char arr[MAX_STACK];                             /* pole pro uložení hodnot */
-    int top;                                /* index prvku na vrcholu zásobníku */
-} tStack;
 
-int STACK_SIZE = MAX_STACK;
-
-void stackInit ( tStack* s ) {
-    if (s==NULL){
-        printf("stackerror");
-    }
-    else{
-        s->arr[0]='$';
-        s->top = 0;                //inicializace vrcholu+ zarazka pro precedencni analyzu
-    }
-}
-
-int stackEmpty ( const tStack* s ) {
-    return s->top==-1?1:0;
-}
-
-int stackFull ( const tStack* s ) {
-    return s->top==STACK_SIZE-1?1:0;
-}
-
-void stackTop ( const tStack* s, char* c ) {
-    if (stackEmpty(s)){ //abychom nesahali nahodne do pameti
-        printf("stackerror");
-    }
-    else {
-        *c=s->arr[s->top];
-    }
-}
-
-
-void stackPop ( tStack* s ) {
-    if (stackEmpty(s)){
-        //tady by bylo to varovaní
-    }
-    else
-    {
-        s->top--;
-    }
-}
-
-
-void stackPush ( tStack* s, char c ) {
-    if (stackFull(s)){
-        printf("stackerror");
-    }
-    else
-    {
-        s->top++;						//posunu a vlozim
-        s->arr[s->top]=c;
-    }
-}
 
 
 int ExpRes(){
