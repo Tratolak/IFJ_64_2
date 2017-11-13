@@ -167,34 +167,38 @@ int SyntaxAnalyzer(){
     Token *act;
     int err;
 
-    GET_TOKEN(act);
-
-    if (act->type==KEYWORD){
-        if(strcmp(act->val,"scope")==0){
-            GET_TOKEN(act);
-            if(act->type == EOL)
-            {
-                inFuction();
-            }
-            else{
-                return SYN_ERROR;
-            }
-        }
-        else if(strcmp(act->val,"declare")==0){
+    if(IN_FUCTION){
+        return inFuction();
+    }
+    else{
+        GET_TOKEN(act);
+        if (act->type==KEYWORD){
+            if(strcmp(act->val,"scope")==0){
                 GET_TOKEN(act);
-                if(act->type==KEYWORD && strcmp(act->val,"function")==0){
-                    S_decFunc();
+                if(act->type == EOL)
+                {
+                    IN_FUCTION = true;
                 }
+                else{
+                    return SYN_ERROR;
+                }
+            }
+            else if(strcmp(act->val,"declare")==0){
+                    GET_TOKEN(act);
+                    if(act->type==KEYWORD && strcmp(act->val,"function")==0){
+                        S_decFunc();
+                    }
+            }
+            else if(strcmp(act->val,"function")==0){
+                    S_defFunc();
+            }
         }
-        else if(strcmp(act->val,"function")==0){
-                S_defFunc();
+        else if(act->type==ID)
+        {
+            err=assigment(act);
         }
+        else { return false;}
     }
-    else if(act->type==ID)
-    {
-        err=assigment(act);
-    }
-    else { return false;}
     if (err==false){
         return false;
     }
@@ -257,9 +261,9 @@ int S_defFunc()
 
 int S_funcArgList(Token *act, bool declaration)
 {
-    while(act->type!=RBRACKET){
-        GET_TOKEN(act);
+    GET_TOKEN(act);
 
+    while(act->type!=RBRACKET){
         if(act->type == ID){
             //TBD function arguments in sym table
         }
@@ -268,21 +272,23 @@ int S_funcArgList(Token *act, bool declaration)
         }
 
         GET_TOKEN(act);
-        if(act->type != KEYWORD || strcmp(act->val, "As") != 0){
+        if(act->type != KEYWORD || strcmp(act->val, "as") != 0){
                return SYN_ERROR;
         }
 
         GET_TOKEN(act);
-        if(!isType(act->val))
+        if(!isType(act))
             return SYN_ERROR;
 
         //TBD function arguments in sym table
 
         GET_TOKEN(act);
 
-        if(act->type != COMMA || act->type != RBRACKET){
+        if(act->type != COMMA && act->type != RBRACKET){
             return SYN_ERROR;
         }
+
+        GET_TOKEN(act);
     }
 
     return S_functype(declaration);
@@ -292,15 +298,21 @@ int S_functype(bool declaration)
 {
     Token *act;
     GET_TOKEN(act);
-    if(act->type != KEYWORD || strcmp(act->val, "As") != 0){
+    if(act->type != KEYWORD || strcmp(act->val, "as") != 0){
            return SYN_ERROR;
     }
 
     GET_TOKEN(act);
-    if(!isType(act->val))
+    if(!isType(act))
         return SYN_ERROR;
 
     //TBD function return type in sym table
+
+    GET_TOKEN(act);
+    if(act->type != EOL)
+        return SYN_ERROR;
+
+    IN_FUCTION = true;
 
     return SYN_OK;
 }
@@ -331,18 +343,20 @@ int inFuction()
 
 int assigment(Token *act)
 {
-    if(SEM_existId(act->val) != 0){
+    if(!SEM_existId(act->val)){
         return ID_NOT_DEFINED;
     }
 
-    GetToken(&(act));
+    GET_TOKEN(act);
 
     if(act->type == EQL){
-        GetToken(&(act));
-        PreAnalyzer(act);
+        GET_TOKEN(act);
+
+        //check if fuction call and SEM check for declar
+        //PreAnalyzer(act);
     }
 
-    return SYN_ERROR;
+    return SYN_OK;
 
 }
 
