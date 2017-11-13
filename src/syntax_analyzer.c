@@ -145,18 +145,18 @@ int SEM_existId(char* name)
  *
  ****************/
 
-int isType(char *val)
+int isType(Token *tok)
 {
-    if(val->type != KEYWORD)
+    if(tok->type != KEYWORD)
         return false;
 
-    if(strcmp(val, "integer") == 0){
+    if(strcmp(tok->val, "integer") == 0){
         return true;
     }
-    else if(strcmp(val, "double") == 0){
+    else if(strcmp(tok->val, "double") == 0){
         return true;
     }
-    else if(strcmp(val, "string") == 0){
+    else if(strcmp(tok->val, "string") == 0){
         return true;
     }
 
