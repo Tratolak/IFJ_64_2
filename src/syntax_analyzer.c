@@ -11,6 +11,9 @@
 *
 **/
 
+int S_functype(bool declaration);
+int S_funcArgList(Token *act, bool declaration);
+
 char ArtPreTB [15][15] = {
     // < - 1, > - 2, = - 3, ' ' - 0
     //     i + - * ( ) $ / \ = n l g < >
@@ -35,6 +38,7 @@ char ArtPreTB [15][15] = {
 Table sym_table;
 
 int GTOKEN_RES;
+bool IN_FUCTION = false;
 
 #define GET_TOKEN(A)\
 GTOKEN_RES = GetToken(&(A));\
@@ -120,19 +124,19 @@ int ExpRes(){
 //register new function with ID into sym table
 int SEM_regFunc(char* name)
 {
-
+    return true;
 }
 
 //register new variable ID into sym table
 int SEM_regId(char* name)
 {
-
+    return true;
 }
 
 //check if sym table contains ID
 int SEM_existId(char* name)
 {
-
+    return true;
 }
 
 /*******
