@@ -1,7 +1,10 @@
 #include "syntax_analyzer.h"
 #include "symtable.h"
+#include "code_generator.h"
 #include "string.h"
 #include "stdbool.h"
+#include "DLlist.h"
+#include "stack_operations.h"
 /**
 *
 *
@@ -47,7 +50,6 @@ if(GTOKEN_RES != S_TOKEN_OK)\
     return GTOKEN_RES;\
 }
 
-#define MAX_STACK 1
 #define DELKAPRAVIDLA 10
 
 #define SYN_OK 0
@@ -56,62 +58,7 @@ if(GTOKEN_RES != S_TOKEN_OK)\
 #define SYN_ERROR -3
 
 
-typedef struct {
-    char arr[MAX_STACK];                             /* pole pro uložení hodnot */
-    int top;                                /* index prvku na vrcholu zásobníku */
-} tStack;
 
-int STACK_SIZE = MAX_STACK;
-
-void stackInit ( tStack* s ) {
-    if (s==NULL){
-        printf("stackerror");
-    }
-    else{
-        s->arr[0]='$';
-        s->top = 0;                //inicializace vrcholu+ zarazka pro precedencni analyzu
-    }
-}
-
-int stackEmpty ( const tStack* s ) {
-    return s->top==-1?1:0;
-}
-
-int stackFull ( const tStack* s ) {
-    return s->top==STACK_SIZE-1?1:0;
-}
-
-void stackTop ( const tStack* s, char* c ) {
-    if (stackEmpty(s)){ //abychom nesahali nahodne do pameti
-        printf("stackerror");
-    }
-    else {
-        *c=s->arr[s->top];
-    }
-}
-
-
-void stackPop ( tStack* s ) {
-    if (stackEmpty(s)){
-        //tady by bylo to varovaní
-    }
-    else
-    {
-        s->top--;
-    }
-}
-
-
-void stackPush ( tStack* s, char c ) {
-    if (stackFull(s)){
-        printf("stackerror");
-    }
-    else
-    {
-        s->top++;						//posunu a vlozim
-        s->arr[s->top]=c;
-    }
-}
 
 
 int ExpRes(){
@@ -482,7 +429,7 @@ int Function(){
 
 
 //zdola nahoru
-int PreAnalyzer(Token *act);
+
 
 int PrePosition(char c){
 
@@ -538,132 +485,222 @@ int PrePosition(char c){
 
 }
 
-
-
-int PreExe(char c, Token* act){
-    Token *next;
-    char *top, *pom;
-    tStack *local;
-    char vys[DELKAPRAVIDLA];
-    local = (tStack*)malloc(sizeof(tStack));
-    if (local==NULL){
-      return S_MEMORY_ERROR;
+int DLListInitForParser(tDLList **local,tDLList **rule,tDLList **partrule){
+    *rule = (tDLList*)malloc(sizeof(tDLList));
+    if (*rule==NULL){
+        return S_MEMORY_ERROR;
     }
+    *partrule = (tDLList*)malloc(sizeof(tDLList));
+    if (*partrule==NULL){
+        return S_MEMORY_ERROR;
+    }
+    *local = (tDLList*)malloc(sizeof(tDLList));
+    if (*local==NULL){
+        return S_MEMORY_ERROR;
+    }
+
+    DLInitList(*rule);
+    DLInitList(*partrule);
+    DLInitList$(*local);
+
+    return true;
+}
+
+int PreExe(char c, Token* act, tDLList* local,tDLList* partrule,tDLList* rule){
+    char *top;
+    int ret=0;
+
     top = (char*)malloc(sizeof(char));
     if (top==NULL){
         return S_MEMORY_ERROR;
     }
-    pom = (char*)malloc(sizeof(char));
-    if (pom==NULL){
-        return S_MEMORY_ERROR;
-    }
-    stackInit(local);
 
-    stackTop(local, top);
+
+
     do {
-        switch (ArtPreTB[PrePosition(*top), PrePosition(c)]) {
-            case 3://=
-                stackPush(local, c);
-                GET_TOKEN(next);
-                PreAnalyzer(next);
+        DLCopyLastTerm(local, top);
+        switch (ArtPreTB[PrePosition(*top)][ PrePosition(c)]) {
+            case 3:  //=
+                DLInsertLast(local, c);
                 break;
             case 1: //<
-                stackPop(local);
-                stackPush(local, '<');
-                stackPush(local, *top);
-                stackPush(local, c);
-                GET_TOKEN(next);
-                PreAnalyzer(next);
+                DLInsertLast(local, c); //vlozim prvek na konec
+                DLLast(local); // ukazu na nej
+                DLPreInsert(local, '<'); // vlozim pred nej zarazku
                 break;
             case 2: // >
-                stackTop(local, pom);
-                while(strcmp(*pom, '<')==0){
-                    stackPop(local);
-                    stackTop(local,pom);
-                    vys=strcat(*pom, vys);
-                }
-                if(strcmp("E+E",vys)==0){
+                DLCutUntil(local, partrule);
+                ret=3;
+
+                DLDisposeList(rule);
+                DLInsertLast(rule, 'E');
+                DLInsertLast(rule, '+');
+                DLInsertLast(rule, 'E');
+                if(DLCompare(partrule, rule)==0){
                     // tady volani nejake sem akce
-                    // tadz volani generatoru
+                    //gen
+                    DLInsertLast(local,'E');
+                    continue;
                 }
-                else if(strcmp("E*E",vys)==0){
-
+                DLDisposeList(rule);
+                DLInsertLast(rule, 'E');
+                DLInsertLast(rule, '*');
+                DLInsertLast(rule, 'E');
+                if(DLCompare(partrule, rule)==0){
+                    DLInsertLast(local,'E');
+                    //gen
+                    continue;
                 }
-                else if(strcmp("(E)",vys)){
-
+                DLDisposeList(rule);
+                DLInsertLast(rule, 'E');
+                DLInsertLast(rule, '-');
+                DLInsertLast(rule, 'E');
+                if(DLCompare(partrule, rule)==0){
+                    DLInsertLast(local,'E');
+                    //gen
+                    continue;
                 }
-                else if(strcmp("i",vys)){
-                stackPush(local, 'E');
+                DLDisposeList(rule);
+                DLInsertLast(rule, '(');
+                DLInsertLast(rule, 'E');
+                DLInsertLast(rule, ')');
+                if(DLCompare(partrule, rule)==0){
+                    printf("pravidlo pro uplatneni zavorek\n");
+                    DLInsertLast(local,'E');
+                    //gen
+                    continue;
                 }
-                else {
-                    return 0;
+                DLDisposeList(rule);
+                DLInsertLast(rule, 'i');
+                if(DLCompare(partrule, rule)==0){
+                //odstran <i nahrad za E s typem i
+                    DLInsertLast(local,'E');
+                    printf("uplatneni i->E \n");
+                    //gen
+                    continue;
                 }
+                // sem dojde pokud se yadne pravidlo neuplatni
+                return 1;
                 break;
             default:
-                return 0;
+                return 1; // chyba syntaxe
 
         }
-    }while((strcmp(*top,'$')==0)&&(strcmp(c,'$')));
 
+    }while((local->Last->data!='$')&&(c=='$'));
+
+    free(top);
+    return ret;
 }
-
-int PreAnalyzer(Token *act){
-    printf("%s", act->val);
-
-
-   // Token *act;
+/**
+ * @brief funkce na kategorizaci tokenu pro Precedencni analyzu
+ * @param act ukazatel na token
+ * @param c ukazatel na char -> vystup
+ * @return 1 v pripade nezadouciho tokenu 0-v pripade uspechu
+ */
+int PreTokenAnalyzer(Token *act, char * c){
     switch(act->type){
         case INTEGER:
         case DOUBLE:
         case ID:
         case STRING:
-            //nejaka synatax
-            PreExe('i', act);
-        break;
+            *c='i';
+            break;
         case DIV:
-            PreExe('/', act);
+            *c='/';
             break;
         case MUL:
-            PreExe('*', act);
+            *c='*';
             break;
         case ADD:
-            PreExe('+', act);
+            *c='+';
             break;
         case SUB:
-            PreExe('-', act);
+            *c='-';
             break;
         case MOD:
-            PreExe('\\', act);
+            *c='\\';
             break;
         case EQL:
-            PreExe('=', act);
+            *c='=';
             break;
         case NEQL:
-            PreExe('#', act);
+            *c='#';
             break;
         case LEQL:
-            PreExe(',', act);
+            *c=',';
             break;
         case GEQL:
-            PreExe('.', act);
+            *c='.';
             break;
         case LT:
-            PreExe('?',act);
+            *c='?';
             break;
         case GT:
-            PreExe(':',act);
+            *c=':';
             break;
         case LBRACKET:
-            PreExe('(',act);
+            *c='(';
             break;
         case RBRACKET:
-            PreExe(')',act);
+            *c=')';
             break;
         default:
-            return false;
+            return 1;
     }
 
-    return true;
+    return 0;
+
 }
+Token* PreNextTok(Token* act, tDLList* local,tDLList* partrule,tDLList* rule){
+    int err, ret;
+    char *c;
+    c=(char*)malloc(sizeof(char));
+    if(c==NULL){
+        return NULL;
+    }
+
+    do {
+        if (act == NULL) {
+            GET_TOKEN(act);
+        }
+        err = PreTokenAnalyzer(act, c);
+        if (err == 1) {
+            PreExe('$', NULL, local, partrule, rule);
+        }
+        else
+        {
+            ret=PreExe(*c, act,local,partrule,rule);
+            if(ret==3){
+
+            } else {
+                act = NULL;
+            }
+        }
+    }while(err!=1);
+
+    free(c);
+    c=NULL;
+
+    return act;
+}
+
+ int PreAnalyzer(Token *act, Token**back){
+     printf("vytejete v precedencni analyze \n");
+     tDLList *local, *partrule, *rule;
+     DLListInitForParser(&(local), &(rule), &(partrule));
+     *back=PreNextTok(act, local, partrule, rule);
+     DLDisposeList(local);
+     DLDisposeList(partrule);
+     DLDisposeList(rule);
+     free(local);
+     free(partrule);
+     free(rule);
+     local=NULL;
+     partrule=NULL;
+     rule=NULL;
+
+}
+
 
 
