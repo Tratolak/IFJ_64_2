@@ -33,7 +33,7 @@ void DLInitList$ (tDLList *L) {
 	L->First = NULL;
 	L->Act = NULL;
 	L->Last = NULL;
-	DLInsertFirst(L, '$');
+	DLInsertFirst(L, '$', NULL);
 }
 
 void DLDisposeList (tDLList *L) {
@@ -62,7 +62,7 @@ else
 
 }
 
-void DLInsertFirst (tDLList *L, char val) {
+void DLInsertFirst (tDLList *L, char val, Token *act) {
 /*
 ** Vloží nový prvek na začátek seznamu L.
 ** V případě, že není dostatek paměti pro nový prvek při operaci malloc,
@@ -74,9 +74,10 @@ if (nov==NULL)
 {
 	DLError();
 }
-nov->data=val;
-nov->lptr=NULL;
-nov->rptr=L->First;
+	nov->data=val;
+	nov->act=act;
+	nov->lptr=NULL;
+	nov->rptr=L->First;
 
 	if(L->First==NULL)
 	{
@@ -89,7 +90,7 @@ nov->rptr=L->First;
 L->First=nov;
 }
 
-void DLInsertLast(tDLList *L, char val) {
+void DLInsertLast(tDLList *L, char val, Token *act) {
 /*
 ** Vloží nový prvek na konec seznamu L (symetrická operace k DLInsertFirst).
 ** V případě, že není dostatek paměti pro nový prvek při operaci malloc,
@@ -100,7 +101,8 @@ void DLInsertLast(tDLList *L, char val) {
   if (nov==NULL){ //pokud nastane chyba alokace
   	DLError();
   }
-  nov->data=val;
+  	nov->data=val;
+	nov->act=act;
 	nov->lptr=L->Last;
 	nov->rptr=NULL;
 
@@ -376,7 +378,7 @@ void DLCutUntil(tDLList *L, tDLList *V)
     DLDisposeList(V);
     DLLast(L);
     while((L->Act->data!= '<')&&(L->Act->data!= '$')){
-        DLInsertFirst(V,L->Act->data);
+        DLInsertFirst(V,L->Act->data, L->Act->act);
 		DLPred(L);
 		DLDeleteLast(L);
     }
@@ -410,4 +412,11 @@ void DLCopyLastTerm (tDLList *L, char *val) {
     }
     *val=L->Act->data; //terminal vrati
 
+}
+void DLLastTerm(tDLList* L){
+	DLLast(L);
+	while(PrePosition(L->Act->data)==-1){ //jde seznamem odzadu a pusuzuje zda nasla terminal
+		DLPred(L);
+	}
+	// kdzy najdu tak je na nem nastavena aktivita
 }

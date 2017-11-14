@@ -509,6 +509,7 @@ int DLListInitForParser(tDLList **local,tDLList **rule,tDLList **partrule){
 int PreExe(char c, Token* act, tDLList* local,tDLList* partrule,tDLList* rule){
     char *top;
     int ret=0;
+    Token *vys;
 
     top = (char*)malloc(sizeof(char));
     if (top==NULL){
@@ -517,139 +518,168 @@ int PreExe(char c, Token* act, tDLList* local,tDLList* partrule,tDLList* rule){
 
 
 
+
     do {
         DLCopyLastTerm(local, top);
         switch (ArtPreTB[PrePosition(*top)][ PrePosition(c)]) {
             case 3:  //=
-                DLInsertLast(local, c);
+                DLInsertLast(local, c, act);
                 break;
             case 1: //<
-                DLInsertLast(local, c); //vlozim prvek na konec
-                DLLast(local); // ukazu na nej
-                DLPreInsert(local, '<'); // vlozim pred nej zarazku
+
+              //  DLLast(local); // ukazu na nej
+                DLLastTerm(local); //ukazu na nejlevejsi terminal
+                DLInsertLast(local, c, act); //vlozim prvek na konec
+                DLPostInsert(local, '<'); // vlozi za nej zarazku
                 break;
             case 2: // >
                 DLCutUntil(local, partrule);
                 ret=3;
 
-                                DLDisposeList(rule);
-                                DLInsertLast(rule, 'E');
-                                DLInsertLast(rule, '+');
-                                DLInsertLast(rule, 'E');
-                                if(DLCompare(partrule, rule)==0){
-                                    // tady volani nejake sem akce
-                                    //gen
-                                    DLInsertLast(local,'E');
-                                    continue;
-                                }
-                                DLDisposeList(rule);
-                                DLInsertLast(rule, 'E');
-                                DLInsertLast(rule, '*');
-                                DLInsertLast(rule, 'E');
-                                if(DLCompare(partrule, rule)==0){
-                                    DLInsertLast(local,'E');
-                                    //gen
-                                    continue;
-                                }
-                                DLDisposeList(rule);
-                                DLInsertLast(rule, 'E');
-                                DLInsertLast(rule, '-');
-                                DLInsertLast(rule, 'E');
-                                if(DLCompare(partrule, rule)==0){
-                                    DLInsertLast(local,'E');
-                                    //gen
-                                    continue;
-                                }
-                                DLDisposeList(rule);
-                                DLInsertLast(rule, 'E');
-                                DLInsertLast(rule, '/');
-                                DLInsertLast(rule, 'E');
-                                if(DLCompare(partrule, rule)==0){
-                                    DLInsertLast(local,'E');
-                                    //gen
-                                    continue;
-                                }
-                                DLDisposeList(rule);
-                                DLInsertLast(rule, 'E');
-                                DLInsertLast(rule, '\\');
-                                DLInsertLast(rule, 'E');
-                                if(DLCompare(partrule, rule)==0){
-                                    DLInsertLast(local,'E');
-                                    //gen
-                                    continue;
-                                }
-                                DLDisposeList(rule);
-                                DLInsertLast(rule, 'E');
-                                DLInsertLast(rule, '=');
-                                DLInsertLast(rule, 'E');
-                                if(DLCompare(partrule, rule)==0){
-                                    DLInsertLast(local,'E');
-                                    //gen
-                                    continue;
-                                }
-                                DLDisposeList(rule);
-                                DLInsertLast(rule, 'E');
-                                DLInsertLast(rule, '?');//<
-                                DLInsertLast(rule, 'E');
-                                if(DLCompare(partrule, rule)==0){
-                                    DLInsertLast(local,'E');
-                                    //gen
-                                    continue;
-                                }
-                                DLDisposeList(rule);
-                                DLInsertLast(rule, 'E');
-                                DLInsertLast(rule, ':'); //>
-                                DLInsertLast(rule, 'E');
-                                if(DLCompare(partrule, rule)==0){
-                                    DLInsertLast(local,'E');
-                                    //gen
-                                    continue;
-                                }
-                                DLDisposeList(rule);
-                                DLInsertLast(rule, 'E');
-                                DLInsertLast(rule, ','); //<=
-                                DLInsertLast(rule, 'E');
-                                if(DLCompare(partrule, rule)==0){
-                                    DLInsertLast(local,'E');
-                                    //gen
-                                    continue;
-                                } DLDisposeList(rule);
-                                DLInsertLast(rule, 'E');
-                                DLInsertLast(rule, '.'); //>=
-                                DLInsertLast(rule, 'E');
-                                if(DLCompare(partrule, rule)==0){
-                                    DLInsertLast(local,'E');
-                                    //gen
-                                    continue;
-                                }
-                                DLDisposeList(rule);
-                                DLInsertLast(rule, 'E');
-                                DLInsertLast(rule, '#');
-                                DLInsertLast(rule, 'E');
-                                if(DLCompare(partrule, rule)==0){
-                                    DLInsertLast(local,'E');
-                                    //gen
-                                    continue;
-                                }
-                                DLDisposeList(rule);
-                                DLInsertLast(rule, '(');
-                                DLInsertLast(rule, 'E');
-                                DLInsertLast(rule, ')');
-                                if(DLCompare(partrule, rule)==0){
-                                    printf("pravidlo pro uplatneni zavorek\n");
-                                    DLInsertLast(local,'E');
-                                    //gen
-                                    continue;
-                                }
-                                DLDisposeList(rule);
-                                DLInsertLast(rule, 'i');
-                                if(DLCompare(partrule, rule)==0){
-                                //odstran <i nahrad za E s typem i
-                                    DLInsertLast(local,'E');
-                                    printf("uplatneni i->E \n");
-                                    //gen
-                                    continue;
-                                }
+                DLDisposeList(rule);
+                DLInsertLast(rule, 'E', NULL);
+                DLInsertLast(rule, '+', NULL);
+                DLInsertLast(rule, 'E', NULL);
+                if(DLCompare(partrule, rule)==0){
+                    printf("pravidlo pro uplatneni +\n");
+                    //martinova fce(partrule->First->act, partrule->First->rptr->act, partrule->First->rptr->rptr->act, &(vys) )
+                    //gen
+                    DLInsertLast(local,'E',vys);
+                    continue;
+                }
+                DLDisposeList(rule);
+                DLInsertLast(rule, 'E',NULL);
+                DLInsertLast(rule, '*',NULL);
+                DLInsertLast(rule, 'E',NULL);
+                if(DLCompare(partrule, rule)==0){
+                    printf("pravidlo pro uplatneni *\n");
+                    //martinova fce(partrule->First->act, partrule->First->rptr->act, partrule->First->rptr->rptr->act, &(vys) )
+                    //gen
+                    DLInsertLast(local,'E',vys);
+                    continue;
+                }
+                DLDisposeList(rule);
+                DLInsertLast(rule, 'E',NULL);
+                DLInsertLast(rule, '-',NULL);
+                DLInsertLast(rule, 'E',NULL);
+                if(DLCompare(partrule, rule)==0){
+                    printf("pravidlo pro uplatneni -\n");
+                    //martinova fce(partrule->First->act, partrule->First->rptr->act, partrule->First->rptr->rptr->act, &(vys) )
+                    //gen
+                    DLInsertLast(local,'E',vys);
+                    continue;
+                }
+                DLDisposeList(rule);
+                DLInsertLast(rule, 'E',NULL);
+                DLInsertLast(rule, '/',NULL);
+                DLInsertLast(rule, 'E',NULL);
+                if(DLCompare(partrule, rule)==0){
+                    printf("pravidlo pro uplatneni /\n");
+                    //martinova fce(partrule->First->act, partrule->First->rptr->act, partrule->First->rptr->rptr->act, &(vys) )
+                    //gen
+                    DLInsertLast(local,'E',vys);
+                    continue;
+                }
+                DLDisposeList(rule);
+                DLInsertLast(rule, 'E',NULL);
+                DLInsertLast(rule, '\\',NULL);
+                DLInsertLast(rule, 'E',NULL);
+                if(DLCompare(partrule, rule)==0){
+                    printf("pravidlo pro uplatneni \\ \n");
+                    //martinova fce(partrule->First->act, partrule->First->rptr->act, partrule->First->rptr->rptr->act, &(vys) )
+                    //gen
+                    DLInsertLast(local,'E',vys);
+                    continue;
+                }
+                DLDisposeList(rule);
+                DLInsertLast(rule, 'E',NULL);
+                DLInsertLast(rule, '=',NULL);
+                DLInsertLast(rule, 'E',NULL);
+                if(DLCompare(partrule, rule)==0){
+                    printf("pravidlo pro uplatneni =\n");
+                    //martinova fce(partrule->First->act, partrule->First->rptr->act, partrule->First->rptr->rptr->act, &(vys) )
+                    //gen
+                    DLInsertLast(local,'E',vys);
+                    continue;
+                }
+                DLDisposeList(rule);
+                DLInsertLast(rule, 'E',NULL);
+                DLInsertLast(rule, '?',NULL);//<
+                DLInsertLast(rule, 'E',NULL);
+                if(DLCompare(partrule, rule)==0){
+                    printf("pravidlo pro uplatneni <\n");
+                    //martinova fce(partrule->First->act, partrule->First->rptr->act, partrule->First->rptr->rptr->act, &(vys) )
+                    //gen
+                    DLInsertLast(local,'E',vys);
+                    continue;
+                }
+                DLDisposeList(rule);
+                DLInsertLast(rule, 'E',NULL);
+                DLInsertLast(rule, ':',NULL); //>
+                DLInsertLast(rule, 'E',NULL);
+                if(DLCompare(partrule, rule)==0){
+                    printf("pravidlo pro uplatneni >\n");
+                    //martinova fce(partrule->First->act, partrule->First->rptr->act, partrule->First->rptr->rptr->act, &(vys) )
+
+                    //gen
+                    DLInsertLast(local,'E',&(vys));
+                    continue;
+                }
+                DLDisposeList(rule);
+                DLInsertLast(rule, 'E',NULL);
+                DLInsertLast(rule, ',',NULL); //<=
+                DLInsertLast(rule, 'E',NULL);
+                if(DLCompare(partrule, rule)==0){
+                    printf("pravidlo pro uplatneni <=\n");
+                    //martinova fce(partrule->First->act, partrule->First->rptr->act, partrule->First->rptr->rptr->act, &(vys) )
+                    //gen
+                    DLInsertLast(local,'E',vys);
+                    continue;
+                } DLDisposeList(rule);
+                DLInsertLast(rule, 'E',NULL);
+                DLInsertLast(rule, '.',NULL); //>=
+                DLInsertLast(rule, 'E',NULL);
+                if(DLCompare(partrule, rule)==0){
+                    printf("pravidlo pro uplatneni >=\n");
+                    //martinova fce(partrule->First->act, partrule->First->rptr->act, partrule->First->rptr->rptr->act, &(vys) )
+
+                    //gen
+                    DLInsertLast(local,'E',vys);
+                    continue;
+                }
+                DLDisposeList(rule);
+                DLInsertLast(rule, 'E',NULL);
+                DLInsertLast(rule, '#',NULL);
+                DLInsertLast(rule, 'E',NULL);
+                if(DLCompare(partrule, rule)==0){
+                    printf("pravidlo pro uplatneni #\n");
+                    //martinova fce(partrule->First->act, partrule->First->rptr->act, partrule->First->rptr->rptr->act, &(vys) )
+
+                    //gen
+                    DLInsertLast(local,'E',vys);
+                    continue;
+                }
+                DLDisposeList(rule);
+                DLInsertLast(rule, '(',NULL);
+                DLInsertLast(rule, 'E',NULL);
+                DLInsertLast(rule, ')',NULL);
+                if(DLCompare(partrule, rule)==0){
+                    //martinova fce(partrule->First->act, partrule->First->rptr->act, partrule->First->rptr->rptr->act, &(vys) )
+                    printf("pravidlo pro uplatneni zavorek\n");
+                    //gen
+                    DLInsertLast(local,'E',vys);
+                    continue;
+                }
+                DLDisposeList(rule);
+                DLInsertLast(rule, 'i',NULL);
+                if(DLCompare(partrule, rule)==0){
+                    //martinova fce(partrule->First->act, partrule->First->rptr->act, partrule->First->rptr->rptr->act, &(vys) )
+
+                    //gen
+                    DLInsertLast(local,'E',vys);
+                    printf("uplatneni i->E \n");
+                    continue;
+                }
                 // sem dojde pokud se yadne pravidlo neuplatni
                 return 1;
                 break;
@@ -699,16 +729,16 @@ int PreTokenAnalyzer(Token *act, char * c){
             *c='#';
             break;
         case LEQL:
-            *c=',';
+            *c=','; //<=
             break;
         case GEQL:
-            *c='.';
+            *c='.'; //>=
             break;
         case LT:
-            *c='?';
+            *c='?'; // <
             break;
         case GT:
-            *c=':';
+            *c=':'; // >
             break;
         case LBRACKET:
             *c='(';
