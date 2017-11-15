@@ -280,6 +280,10 @@ int S_StatList(bool scope, Token *act){
             else if(strcmp(act->val,"return") == 0 && !scope){
                 SYN_EXPAND(S_Ret, act);
             }
+            else if(strcmp(act->val,"end") == 0){
+                //TBD
+                endFunc = true;
+            }
             else{
                 return SYN_ERROR;
             }
