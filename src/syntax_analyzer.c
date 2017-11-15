@@ -186,7 +186,13 @@ int S_FuncHeader(bool declare, Token *act){
     char *id;
 
     GET_TOKEN(act);
+    if(act->type != LBRACKET){
+        return SYN_ERROR;
+    }
+
     while(act->type!=RBRACKET){
+        GET_TOKEN(act);
+
         if(act->type == ID){
             id = act->val;
         }
@@ -216,8 +222,6 @@ int S_FuncHeader(bool declare, Token *act){
         if(act->type != COMMA && act->type != RBRACKET){
             return SYN_ERROR;
         }
-
-        GET_TOKEN(act);
     }
 
     //Function Type
@@ -251,9 +255,7 @@ int S_FuncHeader(bool declare, Token *act){
 
 int S_StatList(bool scope, Token *act){
 
-    bool endFunc = false;
-
-    while(!endFunc){
+    while(1){
         GET_TOKEN(act);
         if(act->type == KEYWORD){
             if(strcmp(act->val,"dim") == 0){
@@ -280,11 +282,36 @@ int S_StatList(bool scope, Token *act){
             else if(strcmp(act->val,"return") == 0 && !scope){
                 SYN_EXPAND(S_Ret, act);
             }
-            else if(strcmp(act->val,"end") == 0){
-                //TBD
-                endFunc = true;
+            else if(strcmp(act->val,"end") == 0){   // end function endl OR end scope endl -> SYN_OK
+                GET_TOKEN(act);
+
+                if(act->type == KEYWORD){
+                    if(strcmp(act->val,"scope") == 0 && scope){
+                    }
+                    else if(strcmp(act->val,"function") == 0 && !scope){
+                    }
+                    else{
+                        return SYN_ERROR;
+                    }
+
+                    GET_TOKEN(act);
+
+                    if(act->type == EOL){
+                        return SYN_OK;
+                    }
+
+                }
+                else{
+                    return SYN_ERROR;
+                }
             }
             else{
+                return SYN_ERROR;
+            }
+
+            GET_TOKEN(act);
+
+            if(act->type != EOL){
                 return SYN_ERROR;
             }
         }
