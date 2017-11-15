@@ -14,8 +14,8 @@
 *
 **/
 
-int S_functype(bool declaration);
-int S_funcArgList(Token *act, bool declaration);
+int S_FuncHeader(bool declare);
+int S_StatList(bool scope);
 
 char ArtPreTB [15][15] = {
     // < - 1, > - 2, = - 3, ' ' - 0
@@ -118,19 +118,23 @@ int isType(Token *tok)
 
 int SyntaxAnalyzer(){
     Token *act;
-    int err;
+    bool scope = false;
 
-    if(IN_FUCTION){
-        return inFuction();
-    }
-    else{
+    while(1){
         GET_TOKEN(act);
         if (act->type==KEYWORD){
             if(strcmp(act->val,"scope")==0){
+                if(scope){
+                    return SYN_ERROR;
+                }
+
                 GET_TOKEN(act);
                 if(act->type == EOL)
                 {
-                    IN_FUCTION = true;
+                    scope = true;
+                    //retVal = S_StatList(true);
+
+                    SYN_EXPAND(S_StatList,true);
                 }
                 else{
                     return SYN_ERROR;
@@ -139,295 +143,28 @@ int SyntaxAnalyzer(){
             else if(strcmp(act->val,"declare")==0){
                     GET_TOKEN(act);
                     if(act->type==KEYWORD && strcmp(act->val,"function")==0){
-                        S_decFunc();
+                        SYN_EXPAND(S_FuncHeader, true);
                     }
             }
             else if(strcmp(act->val,"function")==0){
-                    S_defFunc();
+                    SYN_EXPAND(S_FuncHeader, false);
             }
         }
-        else if(act->type==ID)
-        {
-            err=assigment(act);
+        else{
+                return SYN_ERROR;
         }
-        else { return false;}
-    }
-    if (err==false){
-        return false;
     }
 
     return 0;
 
 }
 
-int S_decFunc()
-{
-    Token *act;
-    GET_TOKEN(act);
-    if(act->type==ID){
-        //TBD
-        if(!SEM_regFunc(act->val))
-        {
-            return ID_ALREADY_DEFINED;
-        }
-
-        GET_TOKEN(act);
-
-        if(act->type==LBRACKET)
-        {
-            return S_funcArgList(act, true);
-        }
-
-    }
-    else
-    {
-        return SYN_ERROR;
-    }
-
-    return SYN_ERROR;
-}
-
-int S_defFunc()
-{
-    Token *act;
-    GET_TOKEN(act);
-    if(act->type==ID){
-        if(!SEM_existId(act->val))
-        {
-            return ID_NOT_DEFINED;
-        }
-
-        GET_TOKEN(act);
-
-        if(act->type==LBRACKET)
-        {
-            return S_funcArgList(act, false);
-        }
-    }
-    else
-    {
-        return SYN_ERROR;
-    }
-
-    return SYN_ERROR;
-}
-
-int S_funcArgList(Token *act, bool declaration)
-{
-    GET_TOKEN(act);
-
-    while(act->type!=RBRACKET){
-        if(act->type == ID){
-            //TBD function arguments in sym table
-        }
-        else{
-            return SYN_ERROR;
-        }
-
-        GET_TOKEN(act);
-        if(act->type != KEYWORD || strcmp(act->val, "as") != 0){
-               return SYN_ERROR;
-        }
-
-        GET_TOKEN(act);
-        if(!isType(act))
-            return SYN_ERROR;
-
-        //TBD function arguments in sym table
-
-        GET_TOKEN(act);
-
-        if(act->type != COMMA && act->type != RBRACKET){
-            return SYN_ERROR;
-        }
-
-        GET_TOKEN(act);
-    }
-
-    return S_functype(declaration);
-}
-
-int S_functype(bool declaration)
-{
-    Token *act;
-    GET_TOKEN(act);
-    if(act->type != KEYWORD || strcmp(act->val, "as") != 0){
-           return SYN_ERROR;
-    }
-
-    GET_TOKEN(act);
-    if(!isType(act))
-        return SYN_ERROR;
-
-    //TBD function return type in sym table
-
-    GET_TOKEN(act);
-    if(act->type != EOL)
-        return SYN_ERROR;
-
+int S_FuncHeader(bool declare){
     return SYN_OK;
 }
 
-int inFuction()
-{
-    Token *act;
-    int err;
-
-    GET_TOKEN(act);
-    //printf("%s",act->val);
-    if (act->type==KEYWORD){
-        printf("nasel jsem klicove slovo");
-        err=Keyword(act);
-        printf("serious ? ");
-    }
-    else if(act->type==ID)
-    {
-        err=assigment(act);
-    }
-    else { return false;}
-    if (err==false){
-        return false;
-    }
-}
-
-
-
-int assigment(Token *act)
-{
-    if(!SEM_existId(act->val)){
-        return ID_NOT_DEFINED;
-    }
-
-    GET_TOKEN(act);
-
-    if(act->type == EQL){
-        GET_TOKEN(act);
-
-        //check if fuction call and SEM check for declar
-        //PreAnalyzer(act);
-    }
-
+int S_StatList(bool scope){
     return SYN_OK;
-
-}
-
-int Keyword(Token *act){
-    int err;
-    if(strcmp(act->val,"dim")==0){
-        Dim();
-    }
-    else if(strcmp(act->val,"as")==0){
-        As();
-    }
-    else if(strcmp(act->val,"integer")==0){
-        Int();
-    }
-    else if(strcmp(act->val,"double")==0){
-        Dou();
-    }
-    else if(strcmp(act->val,"string")==0){
-        Str();
-    }
-    else if (strcmp(act->val,"declare")==0){
-        Declare();
-    }
-    else{
-        return false;
-    }
-    if (err==false){
-        return false;
-    }
-
-}
-
-int Dim(){
-    Token *act, *next;
-    GetToken(&(act));
-    if (act->type==ID){
-        printf("trikrat slava musim volat ");
-        GetToken(&(next));
-        Keyword(next);
-    }
-}
-
-int As(){
-    Token *act,*next;
-    GetToken(&(act));// toto je spatne potrevuju overit keyword a v jestli je v nem int nebo double nebo str
-    if (act->type==KEYWORD){
-        if (strcmp(act->val,"integer")==0){
-            Keyword(act);
-        }
-        else if (strcmp(act->val,"double")==0){
-            Keyword(act);
-        }
-        else if (strcmp(act->val,"string")==0){
-            Keyword(act);
-        }
-        else{
-            return false;
-        }
-    }
-    else if(act->type==DOUBLE){
-
-    }
-    else if(act->type==STRING){
-
-    }
-    else{
-        return  false;
-    }
-}
-
-int Eql(){
-    Token *act,*next;
-    GetToken(&(act));
-    if (act->type==INTEGER){
-        PreAnalyzer(act);
-    }
-    else if (act->type==DOUBLE){
-        PreAnalyzer(act);
-    }
-    else if (act->type==STRING){
-        GetToken(&(next));
-        if(next->type==EOL){
-            return true;
-        }
-        else{
-            return false;
-        }
-    }
-    else if (act->type ==LBRACKET){
-        PreAnalyzer(act);
-    }
-    else { return false;}
-}
-int Int(){
-    printf("az na konec csveta a jeste dal!!! ");
-    Token *act;
-    GetToken(&(act));
-    if (act->type==EQL){
-        Eql();
-    }
-    else if(act->type==EOL){
-    return true;
-    }
-}
-int Dou(){
-    return true;
-}
-int Str(){
-    return true;
-}
-int Declare(){
-    Function();
-}
-int Function(){
-    Token *act;
-    GetToken(&(act));
-        if (act->type==KEYWORD&&(strcmp(act->val, "function")==0)){
-            Keyword(act);
-        }
-
 }
 
 
