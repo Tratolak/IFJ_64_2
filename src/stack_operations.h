@@ -1,28 +1,19 @@
-#ifndef IFJ_64_2_STACK_OPERATIONS_H
-#define IFJ_64_2_STACK_OPERATIONS_H
+#ifndef TESTBENCH2_STACK_OPERATIONS_H
+#define TESTBENCH2_STACK_OPERATIONS_H
 
+#include "scanner.h"
 
-#define MAX_STACK 1
+struct stackNode {
+    TokType type;
+    struct stackNode *next;
+};
 
-/**
- * Definice struktury zasobniku
- */
-typedef struct {
-    char arr[MAX_STACK];                             /* pole pro uložení hodnot */
-    int top;                                /* index prvku na vrcholu zásobníku */
-} tStack;
+void stackInit(struct stackNode **head);
 
-void stackInit(tStack* s);
+bool stackEmpty(struct stackNode *head);
 
-int stackEmpty(const tStack* s);
+bool stackPush(struct stackNode **head, TokType type);
 
-int stackFull(const tStack* s);
+void stackPop(struct stackNode **head, TokType *type);
 
-void stackTop(const tStack* s, char* c);
-
-void stackPop(tStack* s);
-
-void stackPush(tStack* s, char c);
-
-
-#endif //IFJ_64_2_STACK_OPERATIONS_H
+#endif //TESTBENCH2_STACK_OPERATIONS_H

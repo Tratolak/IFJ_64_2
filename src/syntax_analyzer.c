@@ -1,10 +1,11 @@
 #include "syntax_analyzer.h"
 #include "symtable.h"
-#include "code_generator.h"
 #include "string.h"
 #include "stdbool.h"
 #include "DLlist.h"
 #include "stack_operations.h"
+#include "code_gen.h"
+
 /**
 *
 *
@@ -68,8 +69,7 @@ if(RET_VAL != SYN_OK)\
 
 
 int ExpRes(){
-    tStack *local;
-    local = (tStack*)malloc(sizeof(tStack));
+
 }
 
 //Semantic
@@ -154,9 +154,6 @@ int SyntaxAnalyzer(){
                 return SYN_ERROR;
         }
     }
-
-    return 0;
-
 }
 
 int S_FuncHeader(bool declare, Token *act){
@@ -256,49 +253,34 @@ int PrePosition(char c){
     switch(c){
         case 'i':
             return 0;
-            break;
         case '+':
             return 1;
-            break;
         case '-':
             return 2;
-            break;
         case '*':
             return 3;
-            break;
         case '(':
             return 4;
-            break;
         case ')':
             return 5;
-            break;
         case '$':
             return 6;
-            break;
         case '/':
             return 7;
-            break;
         case '\\':
             return 8;
-            break;
         case '=':
             return 9;
-            break;
         case '#':
             return 10;
-            break;
         case ',':
             return 11;
-            break;
         case '.':
             return 12;
-            break;
         case '?':
             return 13;
-            break;
         case ':':
             return 14;
-            break;
         default:
             return -1;
     }
@@ -494,7 +476,7 @@ int PreExe(char c, Token* act, tDLList* local,tDLList* partrule,tDLList* rule){
                 DLInsertLast(rule, 'i',NULL);
                 if(DLCompare(partrule, rule)==0){
                     //martinova fce(partrule->First->act, partrule->First->rptr->act, partrule->First->rptr->rptr->act, &(vys) )
-
+                    value(partrule->First->act);
                     //gen
                     DLInsertLast(local,'E',vys);
                     printf("uplatneni i->E \n");
@@ -588,6 +570,7 @@ Token* PreNextTok(Token* act, tDLList* local,tDLList* partrule,tDLList* rule){
         err = PreTokenAnalyzer(act, c);
         if (err == 1) {
             PreExe('$', NULL, local, partrule, rule);
+            getResult();
         }
         else
         {
@@ -608,6 +591,7 @@ Token* PreNextTok(Token* act, tDLList* local,tDLList* partrule,tDLList* rule){
 
  int PreAnalyzer(Token *act, Token**back){
      printf("vytejete v precedencni analyze \n");
+     TFCreation();
      tDLList *local, *partrule, *rule;
      DLListInitForParser(&(local), &(rule), &(partrule));
      *back=PreNextTok(act, local, partrule, rule);
