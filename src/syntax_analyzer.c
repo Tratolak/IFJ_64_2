@@ -16,6 +16,13 @@
 
 int S_FuncHeader(bool declare, Token *act);
 int S_StatList(bool scope, Token *act);
+int S_Dim(Token *act);
+int S_Input(Token *act);
+int S_Print(Token *act);
+int S_If(Token *act);
+int S_While(Token *act);
+int S_Ret(Token *act);
+int S_Assig(Token *act);
 
 char ArtPreTB [15][15] = {
     // < - 1, > - 2, = - 3, ' ' - 0
@@ -243,10 +250,85 @@ int S_FuncHeader(bool declare, Token *act){
 }
 
 int S_StatList(bool scope, Token *act){
+
+    bool endFunc = false;
+
+    while(!endFunc){
+        GET_TOKEN(act);
+        if(act->type == KEYWORD){
+            if(strcmp(act->val,"dim") == 0){
+                SYN_EXPAND(S_Dim, act);
+            }
+            else if(strcmp(act->val,"input") == 0){
+                SYN_EXPAND(S_Input, act);
+            }
+            else if(strcmp(act->val,"print") == 0){
+                SYN_EXPAND(S_Print, act);
+            }
+            else if(strcmp(act->val,"if") == 0){
+                SYN_EXPAND(S_If, act);
+            }
+            else if(strcmp(act->val,"do") == 0){
+                GET_TOKEN(act);
+                if(act->type == KEYWORD && strcmp(act->val,"while") == 0){
+                    SYN_EXPAND(S_While, act);
+                }
+                else{
+                    return SYN_ERROR;
+                }
+            }
+            else if(strcmp(act->val,"return") == 0 && !scope){
+                SYN_EXPAND(S_Ret, act);
+            }
+            else{
+                return SYN_ERROR;
+            }
+        }
+        else if(act->type == ID){
+            GET_TOKEN(act);
+            if(act->type == EQL){
+                SYN_EXPAND(S_Assig, act);
+            }
+            else{
+                return SYN_ERROR;
+            }
+        }
+        else{
+            return SYN_ERROR;
+        }
+    }
+
+
     return SYN_OK;
 }
 
+int S_Dim(Token *act){
+    return SYN_OK;
+}
 
+int S_Input(Token *act){
+    return SYN_OK;
+}
+
+int S_Print(Token *act){
+    return SYN_OK;
+}
+
+int S_If(Token *act){
+    return SYN_OK;
+}
+
+int S_While(Token *act){
+    return SYN_OK;
+}
+
+int S_Ret(Token *act){
+    return SYN_OK;
+}
+
+int S_Assig(Token *act){
+    return SYN_OK;
+}
 
 //zdola nahoru
 
