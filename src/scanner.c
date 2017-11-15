@@ -9,8 +9,8 @@ const char * const Reserved[] = {"as", "asc", "declare", "dim", "do", "double",
 
 
 enum enState {START, IDENTIFIER, COMLINE, COMBLOCK, COMBLOCK_F, LESS, GREATER,
-              SLASH, INT, DOUBLE_N, DOUBLE_ES, DOUBLE_E, EXCLAMATION, STR,
-              ESCAPE
+              SLASH, INT_Z, INT, DOUBLE_NN, DOUBLE_N, DOUBLE_ES, DOUBLE_EN,
+              DOUBLE_E, EXCLAMATION, STR, ESCAPE
 } state;
 
 
@@ -73,8 +73,8 @@ int GetToken(Token **token) {
 
       case START:
 
-        // skip white & 0
-        if (isblank(c) || c == '0')
+        // skip white
+        if (isblank(c))
           break;
 
         // new line
@@ -93,11 +93,15 @@ int GetToken(Token **token) {
         }
 
         else if (isdigit(c)) {
-          state = INT;
           if (!BufferInit(&str, 32))
             return S_MEMORY_ERROR;
-          if (!BufferInsert(&str, c))
-            return S_MEMORY_ERROR;
+          if (c == '0') {
+            state = INT_Z;
+          } else {
+            state = INT;
+            if (!BufferInsert(&str, c))
+              return S_MEMORY_ERROR;
+          }
         }
 
         // line comment
@@ -207,19 +211,48 @@ int GetToken(Token **token) {
         break;
 
 
+      case INT_Z:
+        if (isdigit(c)) {
+          if (c == '0')
+            break;
+          else {
+            state = INT;
+            if (!BufferInsert(&str, c))
+              return S_MEMORY_ERROR;
+          }
+        }
+        else if (c == '.') {
+          state = DOUBLE_NN;
+          if (!BufferInsert(&str, '0') || !BufferInsert(&str, c))
+            return S_MEMORY_ERROR;
+        }
+        else if (c == 'e' || c == 'E') {
+          state = DOUBLE_ES;
+          if (!BufferInsert(&str, '0') || !BufferInsert(&str, 'e'))
+            return S_MEMORY_ERROR;
+        }
+        else {
+          if (!BufferInsert(&str, '0') || !BufferInsert(&str, '\0'))
+            return S_MEMORY_ERROR;
+          ungetc(c, stdin);
+          *token = FormToken(INTEGER, str.buffer);
+          t = true;
+        }
+        break;
+
       case INT:
         if (isdigit(c)) {
           if (!BufferInsert(&str, c))
             return S_MEMORY_ERROR;
         }
         else if (c == '.') {
-          state = DOUBLE_N;
+          state = DOUBLE_NN;
           if (!BufferInsert(&str, c))
             return S_MEMORY_ERROR;
         }
-        else if (c == 'e') {
+        else if (c == 'e' || c == 'E') {
           state = DOUBLE_ES;
-          if (!BufferInsert(&str, c))
+          if (!BufferInsert(&str, 'e'))
             return S_MEMORY_ERROR;
         }
         else {
@@ -232,6 +265,22 @@ int GetToken(Token **token) {
         break;
 
 
+      case DOUBLE_NN:
+        if (isdigit(c)) {
+          state = DOUBLE_N;
+          if (!BufferInsert(&str, c))
+            return S_MEMORY_ERROR;
+        }
+        else {
+          if (c == '\n')
+            fprintf(stderr, "ERROR: Unexpected EOL after %s.\n", str.buffer);
+          else
+            fprintf(stderr, "ERROR: %s%c is not valid double.\n", str.buffer,c);
+          free(str.buffer);
+          return S_LEXEM_FAIL;
+        }
+        break;
+
       case DOUBLE_N:
         if (isdigit(c)) {
           if (!BufferInsert(&str, c))
@@ -239,7 +288,7 @@ int GetToken(Token **token) {
         }
         else if (c == 'e' || c == 'E') {
           state = DOUBLE_ES;
-          if (!BufferInsert(&str, tolower(c)))
+          if (!BufferInsert(&str, 'e'))
             return S_MEMORY_ERROR;
         }
         else {
@@ -259,6 +308,7 @@ int GetToken(Token **token) {
             return S_MEMORY_ERROR;
         }
         else if (c == '+' || c == '-') {
+          state = DOUBLE_EN;
           if (!BufferInsert(&str, c))
             return S_MEMORY_ERROR;
         }
@@ -269,6 +319,21 @@ int GetToken(Token **token) {
         }
         break;
 
+      case DOUBLE_EN:
+        if (isdigit(c)) {
+          state = DOUBLE_E;
+          if (!BufferInsert(&str, c))
+            return S_MEMORY_ERROR;
+        }
+        else {
+          if (c == '\n')
+            fprintf(stderr, "ERROR: Unexpected EOL after %s.\n", str.buffer);
+          else
+            fprintf(stderr, "ERROR: %s%c is not valid double.\n", str.buffer,c);
+          free(str.buffer);
+          return S_LEXEM_FAIL;
+        }
+        break;
 
       case DOUBLE_E:
         if (isdigit(c)) {
