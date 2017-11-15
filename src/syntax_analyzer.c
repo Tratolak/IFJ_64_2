@@ -40,15 +40,21 @@ char ArtPreTB [15][15] = {
 
 Table sym_table;
 
-int GTOKEN_RES;
-bool IN_FUCTION = false;
+int RET_VAL;
 
 #define GET_TOKEN(A)\
-GTOKEN_RES = GetToken(&(A));\
-if(GTOKEN_RES != S_TOKEN_OK)\
+RET_VAL = GetToken(&(A));\
+if(RET_VAL != S_TOKEN_OK)\
 {\
-    return GTOKEN_RES;\
+    return RET_VAL;\
 }
+
+#define SYN_EXPAND(A, ...)\
+RET_VAL = (A)(__VA_ARGS__);\
+if(RET_VAL != SYN_OK)\
+{\
+  return RET_VAL;\
+}\
 
 #define DELKAPRAVIDLA 10
 
@@ -258,8 +264,6 @@ int S_functype(bool declaration)
     GET_TOKEN(act);
     if(act->type != EOL)
         return SYN_ERROR;
-
-    IN_FUCTION = true;
 
     return SYN_OK;
 }
