@@ -14,8 +14,8 @@
 *
 **/
 
-int S_FuncHeader(bool declare);
-int S_StatList(bool scope);
+int S_FuncHeader(bool declare, Token *act);
+int S_StatList(bool scope, Token *act);
 
 char ArtPreTB [15][15] = {
     // < - 1, > - 2, = - 3, ' ' - 0
@@ -98,7 +98,7 @@ int SEM_existId(char* name)
  *
  ****************/
 
-int isType(Token *tok)
+bool isType(Token *tok)
 {
     if(tok->type != KEYWORD)
         return false;
@@ -134,7 +134,7 @@ int SyntaxAnalyzer(){
                     scope = true;
                     //retVal = S_StatList(true);
 
-                    SYN_EXPAND(S_StatList,true);
+                    SYN_EXPAND(S_StatList,true,act);
                 }
                 else{
                     return SYN_ERROR;
@@ -143,11 +143,11 @@ int SyntaxAnalyzer(){
             else if(strcmp(act->val,"declare")==0){
                     GET_TOKEN(act);
                     if(act->type==KEYWORD && strcmp(act->val,"function")==0){
-                        SYN_EXPAND(S_FuncHeader, true);
+                        SYN_EXPAND(S_FuncHeader, true, act);
                     }
             }
             else if(strcmp(act->val,"function")==0){
-                    SYN_EXPAND(S_FuncHeader, false);
+                    SYN_EXPAND(S_FuncHeader, false, act);
             }
         }
         else{
@@ -159,11 +159,90 @@ int SyntaxAnalyzer(){
 
 }
 
-int S_FuncHeader(bool declare){
+int S_FuncHeader(bool declare, Token *act){
+    //Function ID
+    GET_TOKEN(act);
+    if(act->type == ID){
+        //TBD function arguments in sym table
+        if(declare){
+
+        }
+        else{
+
+        }
+    }
+    else{
+        return SYN_ERROR;
+    }
+
+    //Function Arguments
+    char *id;
+
+    GET_TOKEN(act);
+    while(act->type!=RBRACKET){
+        if(act->type == ID){
+            id = act->val;
+        }
+        else{
+            return SYN_ERROR;
+        }
+
+        GET_TOKEN(act);
+        if(act->type != KEYWORD || strcmp(act->val, "as") != 0){
+               return SYN_ERROR;
+        }
+
+        GET_TOKEN(act);
+        if(!isType(act))
+            return SYN_ERROR;
+
+        //TBD function arguments in sym table
+        if(declare){
+
+        }
+        else{
+
+        }
+
+        GET_TOKEN(act);
+
+        if(act->type != COMMA && act->type != RBRACKET){
+            return SYN_ERROR;
+        }
+
+        GET_TOKEN(act);
+    }
+
+    //Function Type
+    GET_TOKEN(act);
+    if(act->type != KEYWORD || strcmp(act->val, "as") != 0){
+           return SYN_ERROR;
+    }
+
+    GET_TOKEN(act);
+    if(!isType(act))
+        return SYN_ERROR;
+
+    //TBD function return type in sym table
+    if(declare){
+
+    }
+    else{
+
+    }
+
+    GET_TOKEN(act);
+    if(act->type != EOL)
+        return SYN_ERROR;
+
+    if(!declare){
+        SYN_EXPAND(S_StatList, false, act);
+    }
+
     return SYN_OK;
 }
 
-int S_StatList(bool scope){
+int S_StatList(bool scope, Token *act){
     return SYN_OK;
 }
 
