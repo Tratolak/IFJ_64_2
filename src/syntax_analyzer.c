@@ -297,6 +297,7 @@ int S_StatList(Token *act, Token **back, bool isScope){
             }
             else if(strcmp(act->val,"print") == 0){
                 SYN_EXPAND(S_Print, act);
+                continue;
             }
             else if(strcmp(act->val,"if") == 0){
                 SYN_EXPAND(S_If, act, isScope);
@@ -386,17 +387,13 @@ int S_Input(Token *act){
 int S_Print(Token *act){
     Token *back;
 
-    //For now
-    GET_TOKEN(act);
-    back = malloc(sizeof(Token));
-    back->type = EOL;
-
     do{
-        //TBD - PreAnalyzer
-        //PreAnalyzer(act, &back);
+        GET_TOKEN(act);
+        PreAnalyzer(act, &back);
     }while(back->type == SEMICOLON);
 
-    free(back);
+    if(back->type != EOL)
+        return SYN_ERROR;
 
     return SYN_OK;
 }
