@@ -19,8 +19,8 @@ int S_StatList(Token *act, Token **back, bool isScope);
 int S_Dim(Token *act);
 int S_Input(Token *act);
 int S_Print(Token *act);
-int S_If(Token *act);
-int S_While(Token *act);
+int S_If(Token *act, bool isScope);
+int S_While(Token *act, bool isScope);
 int S_Ret(Token *act);
 int S_Assig(Token *act);
 
@@ -299,12 +299,12 @@ int S_StatList(Token *act, Token **back, bool isScope){
                 SYN_EXPAND(S_Print, act);
             }
             else if(strcmp(act->val,"if") == 0){
-                SYN_EXPAND(S_If, act);
+                SYN_EXPAND(S_If, act, isScope);
             }
             else if(strcmp(act->val,"do") == 0){
                 GET_TOKEN(act);
                 if(act->type == KEYWORD && strcmp(act->val,"while") == 0){
-                    SYN_EXPAND(S_While, act);
+                    SYN_EXPAND(S_While, act, isScope);
                 }
                 else{
                     return SYN_ERROR;
@@ -397,7 +397,7 @@ int S_Print(Token *act){
     return SYN_OK;
 }
 
-int S_If(Token *act){
+int S_If(Token *act, bool isScope){
     Token *back;
     //TBD - PreAnalyzer
     //PreAnalyzer(act, back);
@@ -412,7 +412,7 @@ int S_If(Token *act){
            return SYN_ERROR;
     }
 
-    SYN_EXPAND(S_StatList, act, &back, false);
+    SYN_EXPAND(S_StatList, act, &back, isScope);
 
     if(back->type != KEYWORD || strcmp(back->val, "else") != 0){
            return SYN_ERROR;
@@ -423,7 +423,7 @@ int S_If(Token *act){
            return SYN_ERROR;
     }
 
-    SYN_EXPAND(S_StatList, act, &back, false);
+    SYN_EXPAND(S_StatList, act, &back, isScope);
 
     if(back->type != KEYWORD || strcmp(back->val, "end") != 0){
        return SYN_ERROR;
@@ -437,7 +437,22 @@ int S_If(Token *act){
     return SYN_OK;
 }
 
-int S_While(Token *act){
+int S_While(Token *act, bool isScope){
+    Token *back;
+    //TBD - PreAnalyzer
+    //PreAnalyzer(act, back);
+
+    GET_TOKEN(act);
+    if(act->type != EOL){
+           return SYN_ERROR;
+    }
+
+    SYN_EXPAND(S_StatList, act, &back, isScope);
+
+    if(back->type != KEYWORD || strcmp(back->val, "loop") != 0){
+       return SYN_ERROR;
+    }
+
     return SYN_OK;
 }
 
