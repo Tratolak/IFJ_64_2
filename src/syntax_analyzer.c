@@ -468,12 +468,13 @@ int S_Assig(Token *act){
 
     GET_TOKEN(act);
     if(act->type == ID){
-        //TBD - Semantic check
+        //TBD SEM check for function call
         //if func - params else preanalyzer
     }
     else{
-        //TBD - PreAnalyzer
-        //PreAnalyzer(act, &back);
+        PreAnalyzer(act, &back);
+        if(back->type != EOL)
+            return SYN_ERROR;
     }
 
     return SYN_OK;
