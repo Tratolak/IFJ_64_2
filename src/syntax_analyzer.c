@@ -434,11 +434,11 @@ int S_If(Token *act, bool isScope){
 
 int S_While(Token *act, bool isScope){
     Token *back;
-    //TBD - PreAnalyzer
-    //PreAnalyzer(act, &back);
 
     GET_TOKEN(act);
-    if(act->type != EOL){
+    PreAnalyzer(act, &back);
+
+    if(back->type != EOL){
            return SYN_ERROR;
     }
 
@@ -454,19 +454,11 @@ int S_While(Token *act, bool isScope){
 int S_Ret(Token *act){
     Token *back;
 
-    //For now
     GET_TOKEN(act);
-    back = malloc(sizeof(Token));
-    back->type = EOL;
-
-    //TBD - PreAnalyzer
-    //PreAnalyzer(act, &back);
+    PreAnalyzer(act, &back);
 
     if(back->type != EOL)
            return SYN_ERROR;
-
-    //For now
-    free(back);
 
     return SYN_OK;
 }
