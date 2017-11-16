@@ -15,7 +15,7 @@
 **/
 
 int S_FuncHeader(bool declare, Token *act);
-int S_StatList(bool isScope, bool isWhile, Token *act);
+int S_StatList(Token *act, Token **back, bool isScope);
 int S_Dim(Token *act);
 int S_Input(Token *act);
 int S_Print(Token *act);
@@ -124,7 +124,7 @@ bool isType(Token *tok)
 }
 
 int SyntaxAnalyzer(){
-    Token *act;
+    Token *act,*back;
     bool scope = false;
 
     while(1){
@@ -141,7 +141,11 @@ int SyntaxAnalyzer(){
                     scope = true;
                     //retVal = S_StatList(true);
 
-                    SYN_EXPAND(S_StatList,true, false,act);
+                    SYN_EXPAND(S_StatList,act,&back,true);
+
+                    if(back->type != KEYWORD || strcmp(back->val, "end") != 0){
+                       return SYN_ERROR;
+                    }
 
                     GET_TOKEN(act);
 
@@ -168,6 +172,11 @@ int SyntaxAnalyzer(){
             }
             else if(strcmp(act->val,"function")==0){
                     SYN_EXPAND(S_FuncHeader, false, act);
+                    SYN_EXPAND(S_StatList,act,&back,false);
+
+                    if(back->type != KEYWORD || strcmp(back->val, "end") != 0){
+                       return SYN_ERROR;
+                    }
 
                     GET_TOKEN(act);
 
@@ -272,14 +281,10 @@ int S_FuncHeader(bool declare, Token *act){
     if(act->type != EOL)
         return SYN_ERROR;
 
-    if(!declare){
-        SYN_EXPAND(S_StatList, false, false, act);
-    }
-
     return SYN_OK;
 }
 
-int S_StatList(bool isScope, bool isWhile, Token *act){
+int S_StatList(Token *act, Token **back, bool isScope){
 
     while(1){
         GET_TOKEN(act);
@@ -308,10 +313,8 @@ int S_StatList(bool isScope, bool isWhile, Token *act){
             else if(strcmp(act->val,"return") == 0 && !isScope){
                 SYN_EXPAND(S_Ret, act);
             }
-            else if(strcmp(act->val,"end") == 0 && !isWhile){
-                return SYN_OK;
-            }
-            else if(strcmp(act->val,"loop") == 0 && isWhile){
+            else if(strcmp(act->val,"end") == 0 || strcmp(act->val,"loop") == 0 || strcmp(act->val,"else") == 0){
+                *back = act;
                 return SYN_OK;
             }
             else{
