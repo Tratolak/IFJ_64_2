@@ -463,6 +463,18 @@ int S_Ret(Token *act){
 }
 
 int S_Assig(Token *act){
+    Token *back;
+
+    GET_TOKEN(act);
+    if(act->type == ID){
+        //TBD - Semantic check
+        //if func - params else preanalyzer
+    }
+    else{
+        //TBD - PreAnalyzer
+        //PreAnalyzer(act, &back);
+    }
+
     return SYN_OK;
 }
 
