@@ -66,9 +66,11 @@ if(RET_VAL != SYN_OK)\
 #define DELKAPRAVIDLA 10
 
 #define SYN_OK 0
-#define ID_NOT_DEFINED -1
-#define ID_ALREADY_DEFINED -2
-#define SYN_ERROR -3
+#define SYN_ERROR -1
+#define ID_NOT_DEFINED -2
+#define ID_ALREADY_DEFINED -3
+#define BIN_OP_INCOMPAT -4
+
 
 
 
