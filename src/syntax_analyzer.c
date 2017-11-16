@@ -349,6 +349,27 @@ int S_StatList(bool isScope, bool isWhile, Token *act){
 }
 
 int S_Dim(Token *act){
+    char *id;
+
+    GET_TOKEN(act);
+    if(act->type == ID){
+        id = act->val;
+    }
+    else{
+        return SYN_ERROR;
+    }
+
+    GET_TOKEN(act);
+    if(act->type != KEYWORD || strcmp(act->val, "as") != 0){
+           return SYN_ERROR;
+    }
+
+    GET_TOKEN(act);
+    if(!isType(act))
+        return SYN_ERROR;
+
+    //TBD - Semantic check
+
     return SYN_OK;
 }
 
