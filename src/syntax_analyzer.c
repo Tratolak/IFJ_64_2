@@ -307,6 +307,7 @@ int S_StatList(Token *act, Token **back, bool isScope){
             }
             else if(strcmp(act->val,"return") == 0 && !isScope){
                 SYN_EXPAND(S_Ret, act);
+                continue;
             }
             else if(strcmp(act->val,"end") == 0 || strcmp(act->val,"loop") == 0 || strcmp(act->val,"else") == 0){
                 *back = act;
@@ -442,6 +443,22 @@ int S_While(Token *act, bool isScope){
 }
 
 int S_Ret(Token *act){
+    Token *back;
+
+    //For now
+    GET_TOKEN(act);
+    back = malloc(sizeof(Token));
+    back->type = EOL;
+
+    //TBD - PreAnalyzer
+    //PreAnalyzer(act, &back);
+
+    if(back->type != EOL)
+           return SYN_ERROR;
+
+    //For now
+    free(back);
+
     return SYN_OK;
 }
 
