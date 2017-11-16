@@ -15,7 +15,7 @@
 **/
 
 int S_FuncHeader(bool declare, Token *act);
-int S_StatList(bool scope, Token *act);
+int S_StatList(bool isScope, bool isWhile, Token *act);
 int S_Dim(Token *act);
 int S_Input(Token *act);
 int S_Print(Token *act);
@@ -141,7 +141,20 @@ int SyntaxAnalyzer(){
                     scope = true;
                     //retVal = S_StatList(true);
 
-                    SYN_EXPAND(S_StatList,true,act);
+                    SYN_EXPAND(S_StatList,true, false,act);
+
+                    GET_TOKEN(act);
+
+                    if(act->type != KEYWORD)
+                        return SYN_ERROR;
+                    if((strcmp(act->val,"scope") != 0))
+                        return SYN_ERROR;
+
+                    GET_TOKEN(act);
+
+                    if(act->type != EOL){
+                        return SYN_ERROR;
+                    }
                 }
                 else{
                     return SYN_ERROR;
@@ -155,6 +168,19 @@ int SyntaxAnalyzer(){
             }
             else if(strcmp(act->val,"function")==0){
                     SYN_EXPAND(S_FuncHeader, false, act);
+
+                    GET_TOKEN(act);
+
+                    if(act->type != KEYWORD)
+                        return SYN_ERROR;
+                    if((strcmp(act->val,"function") != 0))
+                        return SYN_ERROR;
+
+                    GET_TOKEN(act);
+
+                    if(act->type != EOL){
+                        return SYN_ERROR;
+                    }
             }
         }
         else{
@@ -247,13 +273,13 @@ int S_FuncHeader(bool declare, Token *act){
         return SYN_ERROR;
 
     if(!declare){
-        SYN_EXPAND(S_StatList, false, act);
+        SYN_EXPAND(S_StatList, false, false, act);
     }
 
     return SYN_OK;
 }
 
-int S_StatList(bool scope, Token *act){
+int S_StatList(bool isScope, bool isWhile, Token *act){
 
     while(1){
         GET_TOKEN(act);
@@ -279,31 +305,14 @@ int S_StatList(bool scope, Token *act){
                     return SYN_ERROR;
                 }
             }
-            else if(strcmp(act->val,"return") == 0 && !scope){
+            else if(strcmp(act->val,"return") == 0 && !isScope){
                 SYN_EXPAND(S_Ret, act);
             }
-            else if(strcmp(act->val,"end") == 0){   // end function endl OR end scope endl -> SYN_OK
-                GET_TOKEN(act);
-
-                if(act->type == KEYWORD){
-                    if(strcmp(act->val,"scope") == 0 && scope){
-                    }
-                    else if(strcmp(act->val,"function") == 0 && !scope){
-                    }
-                    else{
-                        return SYN_ERROR;
-                    }
-
-                    GET_TOKEN(act);
-
-                    if(act->type == EOL){
-                        return SYN_OK;
-                    }
-
-                }
-                else{
-                    return SYN_ERROR;
-                }
+            else if(strcmp(act->val,"end") == 0 && !isWhile){
+                return SYN_OK;
+            }
+            else if(strcmp(act->val,"loop") == 0 && isWhile){
+                return SYN_OK;
             }
             else{
                 return SYN_ERROR;
@@ -319,6 +328,12 @@ int S_StatList(bool scope, Token *act){
             GET_TOKEN(act);
             if(act->type == EQL){
                 SYN_EXPAND(S_Assig, act);
+
+                GET_TOKEN(act);
+
+                if(act->type != EOL){
+                    return SYN_ERROR;
+                }
             }
             else{
                 return SYN_ERROR;
