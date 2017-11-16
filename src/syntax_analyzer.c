@@ -374,6 +374,14 @@ int S_Dim(Token *act){
 }
 
 int S_Input(Token *act){
+    GET_TOKEN(act);
+    if(act->type == ID){
+        //TBD - Semantic check
+    }
+    else{
+        return SYN_ERROR;
+    }
+
     return SYN_OK;
 }
 
