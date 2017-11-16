@@ -389,15 +389,51 @@ int S_Input(Token *act){
 }
 
 int S_Print(Token *act){
-    Token **back;
+    Token *back;
     do{
         //TBD - PreAnalyzer
-        //PreAnalyzer(act, back);
-    }while((*back)->type == SEMICOLON);
+        //PreAnalyzer(act, &back);
+    }while(back->type == SEMICOLON);
     return SYN_OK;
 }
 
 int S_If(Token *act){
+    Token *back;
+    //TBD - PreAnalyzer
+    //PreAnalyzer(act, back);
+
+    GET_TOKEN(act);
+    if(act->type != KEYWORD || strcmp(act->val, "then") != 0){
+           return SYN_ERROR;
+    }
+
+    GET_TOKEN(act);
+    if(act->type != EOL){
+           return SYN_ERROR;
+    }
+
+    SYN_EXPAND(S_StatList, act, &back, false);
+
+    if(back->type != KEYWORD || strcmp(back->val, "else") != 0){
+           return SYN_ERROR;
+    }
+
+    GET_TOKEN(act);
+    if(act->type != EOL){
+           return SYN_ERROR;
+    }
+
+    SYN_EXPAND(S_StatList, act, &back, false);
+
+    if(back->type != KEYWORD || strcmp(back->val, "end") != 0){
+       return SYN_ERROR;
+    }
+
+    GET_TOKEN(act);
+    if(act->type != KEYWORD || strcmp(act->val, "if") != 0){
+           return SYN_ERROR;
+    }
+
     return SYN_OK;
 }
 
