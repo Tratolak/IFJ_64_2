@@ -403,11 +403,11 @@ int S_Print(Token *act){
 
 int S_If(Token *act, bool isScope){
     Token *back;
-    //TBD - PreAnalyzer
-    //PreAnalyzer(act, &back);
 
     GET_TOKEN(act);
-    if(act->type != KEYWORD || strcmp(act->val, "then") != 0)
+    PreAnalyzer(act, &back);
+
+    if(back->type != KEYWORD || strcmp(back->val, "then") != 0)
            return SYN_ERROR;
 
     GET_TOKEN(act);
