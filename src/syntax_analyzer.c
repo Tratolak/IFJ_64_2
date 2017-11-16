@@ -191,6 +191,9 @@ int SyntaxAnalyzer(){
                         return SYN_ERROR;
             }
         }
+        else if(act->type == EOL){
+            continue;
+        }
         else{
                 return SYN_ERROR;
         }
@@ -325,15 +328,13 @@ int S_StatList(Token *act, Token **back, bool isScope){
             GET_TOKEN(act);
             if(act->type == EQL){
                 SYN_EXPAND(S_Assig, act);
-
-                GET_TOKEN(act);
-
-                if(act->type != EOL)
-                    return SYN_ERROR;
             }
             else{
                 return SYN_ERROR;
             }
+        }
+        else if(act->type == EOL){
+            continue;
         }
         else{
             return SYN_ERROR;
@@ -382,10 +383,19 @@ int S_Input(Token *act){
 
 int S_Print(Token *act){
     Token *back;
+
+    //For now
+    GET_TOKEN(act);
+    back = malloc(sizeof(Token));
+    back->type = EOL;
+
     do{
         //TBD - PreAnalyzer
         //PreAnalyzer(act, &back);
     }while(back->type == SEMICOLON);
+
+    free(back);
+
     return SYN_OK;
 }
 
