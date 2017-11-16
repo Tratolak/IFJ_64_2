@@ -386,6 +386,11 @@ int S_Input(Token *act){
 }
 
 int S_Print(Token *act){
+    Token **back;
+    do{
+        //TBD - PreAnalyzer
+        //PreAnalyzer(act, back);
+    }while((*back)->type == SEMICOLON);
     return SYN_OK;
 }
 
