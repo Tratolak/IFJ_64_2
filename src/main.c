@@ -5,6 +5,17 @@
 
 int main()
 {
+    int err;
     printf("Hello world!\n");
+    err=SyntaxAnalyzer();
+    switch (err){
+        case 1:
+            return 1;
+            break;
+        case 2:
+            return 2;
+            break;
+
+    }
     return 0;
 }
