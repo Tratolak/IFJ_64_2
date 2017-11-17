@@ -73,14 +73,6 @@ if(RET_VAL != SYN_OK)\
 #define BIN_OP_INCOMPAT -4
 
 
-
-
-
-
-int ExpRes(){
-
-}
-
 //Semantic
 
 //register new function with ID into sym table
@@ -577,7 +569,8 @@ int PreExe(char c, Token* act, tDLList* local,tDLList* partrule,tDLList* rule){
                 if(DLCompare(partrule, rule)==0){
                     printf("pravidlo pro uplatneni +\n");
                     //martinova fce(partrule->First->act, partrule->First->rptr->act, partrule->First->rptr->rptr->act, &(vys) )
-                    //gen
+
+                    // PROSIM UPRAVTE ZDE PARAMETRY VKLADANE DO FCE A ODKOMENTUJTE operationSelect('+',BOOL,TOKTYPE);
                     DLInsertLast(local,'E',vys);
                     continue;
                 }
@@ -588,7 +581,8 @@ int PreExe(char c, Token* act, tDLList* local,tDLList* partrule,tDLList* rule){
                 if(DLCompare(partrule, rule)==0){
                     printf("pravidlo pro uplatneni *\n");
                     //martinova fce(partrule->First->act, partrule->First->rptr->act, partrule->First->rptr->rptr->act, &(vys) )
-                    //gen
+
+                    // PROSIM UPRAVTE ZDE PARAMETRY VKLADANE DO FCE A ODKOMENTUJTE operationSelect('*',BOOL,TOKTYPE);
                     DLInsertLast(local,'E',vys);
                     continue;
                 }
@@ -599,7 +593,8 @@ int PreExe(char c, Token* act, tDLList* local,tDLList* partrule,tDLList* rule){
                 if(DLCompare(partrule, rule)==0){
                     printf("pravidlo pro uplatneni -\n");
                     //martinova fce(partrule->First->act, partrule->First->rptr->act, partrule->First->rptr->rptr->act, &(vys) )
-                    //gen
+
+                    // PROSIM UPRAVTE ZDE PARAMETRY VKLADANE DO FCE A ODKOMENTUJTE operationSelect('-',BOOL,TOKTYPE);
                     DLInsertLast(local,'E',vys);
                     continue;
                 }
@@ -610,7 +605,8 @@ int PreExe(char c, Token* act, tDLList* local,tDLList* partrule,tDLList* rule){
                 if(DLCompare(partrule, rule)==0){
                     printf("pravidlo pro uplatneni /\n");
                     //martinova fce(partrule->First->act, partrule->First->rptr->act, partrule->First->rptr->rptr->act, &(vys) )
-                    //gen
+
+                    // PROSIM UPRAVTE ZDE PARAMETRY VKLADANE DO FCE A ODKOMENTUJTE operationSelect('/',BOOL,TOKTYPE);
                     DLInsertLast(local,'E',vys);
                     continue;
                 }
@@ -621,7 +617,7 @@ int PreExe(char c, Token* act, tDLList* local,tDLList* partrule,tDLList* rule){
                 if(DLCompare(partrule, rule)==0){
                     printf("pravidlo pro uplatneni \\ \n");
                     //martinova fce(partrule->First->act, partrule->First->rptr->act, partrule->First->rptr->rptr->act, &(vys) )
-                    //gen
+                    // PROSIM UPRAVTE ZDE PARAMETRY VKLADANE DO FCE A ODKOMENTUJTE operationSelect('\\',BOOL,TOKTYPE);
                     DLInsertLast(local,'E',vys);
                     continue;
                 }
@@ -699,8 +695,7 @@ int PreExe(char c, Token* act, tDLList* local,tDLList* partrule,tDLList* rule){
                 DLInsertLast(rule, ')',NULL);
                 if(DLCompare(partrule, rule)==0){
                     //martinova fce(partrule->First->act, partrule->First->rptr->act, partrule->First->rptr->rptr->act, &(vys) )
-                    printf("pravidlo pro uplatneni zavorek\n");
-                    //gen
+
                     DLInsertLast(local,'E',vys);
                     continue;
                 }
@@ -708,8 +703,8 @@ int PreExe(char c, Token* act, tDLList* local,tDLList* partrule,tDLList* rule){
                 DLInsertLast(rule, 'i',NULL);
                 if(DLCompare(partrule, rule)==0){
                     //martinova fce(partrule->First->act, partrule->First->rptr->act, partrule->First->rptr->rptr->act, &(vys) )
-                    value(partrule->First->act);
-                    //gen
+
+                    getOperand(partrule->First->act);
                     DLInsertLast(local,'E',vys);
                     printf("uplatneni i->E \n");
                     continue;

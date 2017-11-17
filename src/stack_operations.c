@@ -1,33 +1,52 @@
 #include "stack_operations.h"
 
 /**
- * Inicializace prazdneho zasobniku
+ * Inicializace prazdneho zasobniku pto ukladani typu promennych.
  *
- * @param head - neinicializovany zasobnik (struct stackNode**)
+ * @param head - neinicializovany zasobnik (struct typeStackNode**)
  */
-void stackInit(struct stackNode **head) {
+void typeStackInit(struct typeStackNode **head) {
+    *head = NULL;
+}
+
+/**
+ * Inicializace prazdneho zasobniku pro ukladani navesti.
+ *
+ * @param head - neinicializovany zasobnik (struct labelStackNode**)
+ */
+void labelStackInit(struct labelStackNode **head) {
     *head = NULL;
 }
 
 /**
  * Zjisteni zda-li je zasobnik prazdny.
  *
- * @param head - ukazatel na vrchol zasobnik (struct stackNode*)
- * @return true | false
+ * @param head - ukazatel na vrchol zasobnik (struct typeStackNode*)
+ * @return true | false (bool)
  */
-bool stackEmpty(struct stackNode *head) {
+bool typeStackEmpty(struct typeStackNode *head) {
+    return head == NULL ? true : false;
+}
+
+/**
+ * Zjisteni zda-li je zasobnik prazdny.
+ *
+ * @param head - ukazatel na vrchol zasobnik (struct labelStackNode*)
+ * @return true | false (bool)
+ */
+bool labelStackEmpty(struct labelStackNode *head) {
     return head == NULL ? true : false;
 }
 
 /**
  * Vlozeni typu promenne (TokType) na zasobnik.
  *
- * @param head   - ukazatel na vrchol zasobniku (struct stackNode**)
+ * @param head   - ukazatel na vrchol zasobniku (struct typeStackNode**)
  * @param type   - vkladany typ hodnoty (TokType)
- * @return false - alokace neprobehla uspesne | true - vse ok
+ * @return false - false = alokace neprobehla uspesne | true - vse ok
  */
-bool stackPush(struct stackNode **head, TokType type) {
-    struct stackNode *newNode = (struct stackNode *) malloc(sizeof(struct stackNode));
+bool typeStackPush(struct typeStackNode **head, TokType type) {
+    struct typeStackNode *newNode = (struct typeStackNode *) malloc(sizeof(struct typeStackNode));
     if (newNode == NULL) {
         return false;
     }
@@ -38,14 +57,49 @@ bool stackPush(struct stackNode **head, TokType type) {
 }
 
 /**
- * Odstraneni TokType z vrcholu zasobniku. U ulozeni hodnoty do promenne 'type'.
+ * Odstraneni TokType z vrcholu zasobniku. Ulozeni typu do promenne 'type'.
  *
- * @param head - ukazatel na vrchol zasobniku (struct stackNode**)
+ * @param head - ukazatel na vrchol zasobniku (struct typeStackNode**)
  * @param type - ukazatel na typ promenne (TokType)
  */
-void stackPop(struct stackNode **head, TokType *type) {
-    struct stackNode *node = *head;
+void typeStackPop(struct typeStackNode **head, TokType *type) {
+    struct typeStackNode *node = *head;
     *type = (*head)->type;
+    *head = (*head)->next;
+    free(node);
+}
+
+/**
+ * Vlozeni typu a jmena generovanych navesti na zasobnik.
+ *
+ * @param head      - ukazatel na vrchol zasobniku (struct labelStackNode**)
+ * @param labelName - jmeno navesti (char *)
+ * @param labelType - typ navesti (labelType)
+ * @return false    - false  = alokace neprobehla uspesne | true = vse ok
+ */
+bool labelStackPush(struct labelStackNode **head,char *labelName,labelType labelType) {
+    struct labelStackNode *newNode = (struct labelStackNode *) malloc(sizeof(struct labelStackNode));
+    if (newNode == NULL) {
+        return false;
+    }
+    (*newNode).labelName = labelName;
+    (*newNode).labelType = labelType;
+    (*newNode).next = *head;
+    *head = newNode;
+    return true;
+}
+
+/**
+ * Odstraneni navesti z vrcholu zasobniku. Ulozi jmeno navesi do promenne 'labelName' a typ navesti do labelType.
+ *
+ * @param head      - ukazatel na vrchol zasobniku (struct labelStackNode**)
+ * @param labelName - jmeno navesti (char *)
+ * @param labelType - typ navesti (labelType)
+ */
+void labelStackPop(struct labelStackNode **head,char **labelName,labelType *labelType) {
+    struct labelStackNode *node = *head;
+    *labelType = (*head)->labelType;
+    *labelName = (*head)->labelName;
     *head = (*head)->next;
     free(node);
 }

@@ -3,7 +3,8 @@
 
 #include "scanner.h"
 
-struct stackNode* typeStack;
+struct typeStackNode* typeStack;
+struct labelStackNode* labelStack;
 
 void header();
 
@@ -13,7 +14,9 @@ void convertInstructionSelect(TokType original, TokType new, char *string);
 
 void operationSelect(char operation,bool convert,TokType type);
 
-void getOperand(Token *t);
+bool getOperand(Token *t);
+
+bool getLabel(char* label);
 
 void TFCreation();
 
