@@ -622,6 +622,16 @@ int PreExe(char c, Token* act, tDLList* local,tDLList* partrule,tDLList* rule){
                     continue;
                 }
                 DLDisposeList(rule);
+                DLInsertLast(rule, '-',NULL);
+                DLInsertLast(rule, 'E',NULL);
+                if(DLCompare(partrule, rule)==0){
+                    printf("pravidlo pro uplatneni -E\n");
+                    //martinova fce(partrule->First->act, partrule->First->rptr->act, partrule->First->rptr->rptr->act, &(vys) )
+                    //gen
+                    DLInsertLast(local,'E',vys);
+                    continue;
+                }
+                DLDisposeList(rule);
                 DLInsertLast(rule, 'E',NULL);
                 DLInsertLast(rule, '/',NULL);
                 DLInsertLast(rule, 'E',NULL);
@@ -839,7 +849,7 @@ Token* PreNextTok(Token* act, tDLList* local,tDLList* partrule,tDLList* rule){
 }
 
  int PreAnalyzer(Token *act, Token**back){
-     printf("vytejete v precedencni analyze \n");
+     printf("vitejete v precedencni analyze \n");
      tDLList *local, *partrule, *rule;
      DLListInitForParser(&(local), &(rule), &(partrule));
      *back=PreNextTok(act, local, partrule, rule);
