@@ -11,9 +11,9 @@ void typeConvert(bool convert, TokType type);
 
 void convertInstructionSelect(TokType original, TokType new, char *string);
 
-void actionSelect(char operation,bool convert,TokType type);
+void operationSelect(char operation,bool convert,TokType type);
 
-void value(Token *t);
+void getOperand(Token *t);
 
 void TFCreation();
 

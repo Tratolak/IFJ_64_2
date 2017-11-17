@@ -8,6 +8,7 @@
  */
 void header() {
     printf(".IFJcode17\n");
+    //skok na scope
 }
 
 /**
@@ -70,7 +71,7 @@ void convertInstructionSelect(TokType original, TokType new, char *string) {
  *
  * @param operation - provadena operace
  */
-void actionSelect(char operand, bool convert, TokType type) {
+void operationSelect(char operand, bool convert, TokType type) {
     typeConvert(convert, type);
     switch (operand) {
         case '+':
@@ -86,8 +87,25 @@ void actionSelect(char operand, bool convert, TokType type) {
             printf("SUB TF@_exprResult TF@_exprOperand2 TF@_exprOperand1\n");
             printf("PUSHS TF@_exprResult\n");
             break;
+        case '*':
+            printf("MUL TF@_exprResult TF@_exprOperand2 TF@_exprOperand1\n");
+            printf("PUSHS TF@_exprResult");
+            break;
+        case '/': //Vysledek je vzdy double
+            printf("DIV TF@_exprResult TF@_exprOperand2 TF@_exprOperand1\n");
+            if(type != DOUBLE){
+                convertInstructionSelect(type, DOUBLE, "TF@_exprResult");
+            }
+            printf("PUSHS TF@_exprResult");
+                break;
+        case '\\': //Operandy a vysledek jsou typu INTEGER
+            if(type == INTEGER){
+                printf("DIV TF@_exprResult TF@_exprOperand2 TF@_exprOperand1\n");
+                printf("PUSHS TF@_exprResult");
+            }
+            break;
         default://je to hodnota
-            //TODO something is wrong :D
+            //TODO something is wrong
             break;
     }
 
@@ -98,7 +116,7 @@ void actionSelect(char operand, bool convert, TokType type) {
  *
  * @param t - promenna/absolutni hodnota
  */
-void value(Token *t) {
+void getOperand(Token *t) {
     if (t->type == INTEGER) {
         printf("PUSHS int@%s\n", t->val);
         stackPush(&typeStack, t->type);
