@@ -1,10 +1,11 @@
 #include "syntax_analyzer.h"
 #include "symtable.h"
-#include "code_generator.h"
 #include "string.h"
 #include "stdbool.h"
 #include "DLlist.h"
 #include "stack_operations.h"
+#include "code_gen.h"
+
 /**
 *
 *
@@ -71,15 +72,6 @@ if(RET_VAL != SYN_OK)\
 #define ID_ALREADY_DEFINED -3
 #define BIN_OP_INCOMPAT -4
 
-
-
-
-
-
-int ExpRes(){
-    tStack *local;
-    local = (tStack*)malloc(sizeof(tStack));
-}
 
 //Semantic
 
@@ -488,49 +480,34 @@ int PrePosition(char c){
     switch(c){
         case 'i':
             return 0;
-            break;
         case '+':
             return 1;
-            break;
         case '-':
             return 2;
-            break;
         case '*':
             return 3;
-            break;
         case '(':
             return 4;
-            break;
         case ')':
             return 5;
-            break;
         case '$':
             return 6;
-            break;
         case '/':
             return 7;
-            break;
         case '\\':
             return 8;
-            break;
         case '=':
             return 9;
-            break;
         case '#':
             return 10;
-            break;
         case ',':
             return 11;
-            break;
         case '.':
             return 12;
-            break;
         case '?':
             return 13;
-            break;
         case ':':
             return 14;
-            break;
         default:
             return -1;
     }
@@ -595,7 +572,8 @@ int PreExe(char c, Token* act, tDLList* local,tDLList* partrule,tDLList* rule){
                 if(DLCompare(partrule, rule)==0){
                     printf("pravidlo pro uplatneni +\n");
                     //martinova fce(partrule->First->act, partrule->First->rptr->act, partrule->First->rptr->rptr->act, &(vys) )
-                    //gen
+
+                    // PROSIM UPRAVTE ZDE PARAMETRY VKLADANE DO FCE A ODKOMENTUJTE operationSelect('+',BOOL,TOKTYPE);
                     DLInsertLast(local,'E',vys);
                     continue;
                 }
@@ -606,7 +584,8 @@ int PreExe(char c, Token* act, tDLList* local,tDLList* partrule,tDLList* rule){
                 if(DLCompare(partrule, rule)==0){
                     printf("pravidlo pro uplatneni *\n");
                     //martinova fce(partrule->First->act, partrule->First->rptr->act, partrule->First->rptr->rptr->act, &(vys) )
-                    //gen
+
+                    // PROSIM UPRAVTE ZDE PARAMETRY VKLADANE DO FCE A ODKOMENTUJTE operationSelect('*',BOOL,TOKTYPE);
                     DLInsertLast(local,'E',vys);
                     continue;
                 }
@@ -617,17 +596,8 @@ int PreExe(char c, Token* act, tDLList* local,tDLList* partrule,tDLList* rule){
                 if(DLCompare(partrule, rule)==0){
                     printf("pravidlo pro uplatneni -\n");
                     //martinova fce(partrule->First->act, partrule->First->rptr->act, partrule->First->rptr->rptr->act, &(vys) )
-                    //gen
-                    DLInsertLast(local,'E',vys);
-                    continue;
-                }
-                DLDisposeList(rule);
-                DLInsertLast(rule, '-',NULL);
-                DLInsertLast(rule, 'E',NULL);
-                if(DLCompare(partrule, rule)==0){
-                    printf("pravidlo pro uplatneni -E\n");
-                    //martinova fce(partrule->First->act, partrule->First->rptr->act, partrule->First->rptr->rptr->act, &(vys) )
-                    //gen
+
+                    // PROSIM UPRAVTE ZDE PARAMETRY VKLADANE DO FCE A ODKOMENTUJTE operationSelect('-',BOOL,TOKTYPE);
                     DLInsertLast(local,'E',vys);
                     continue;
                 }
@@ -638,7 +608,8 @@ int PreExe(char c, Token* act, tDLList* local,tDLList* partrule,tDLList* rule){
                 if(DLCompare(partrule, rule)==0){
                     printf("pravidlo pro uplatneni /\n");
                     //martinova fce(partrule->First->act, partrule->First->rptr->act, partrule->First->rptr->rptr->act, &(vys) )
-                    //gen
+
+                    // PROSIM UPRAVTE ZDE PARAMETRY VKLADANE DO FCE A ODKOMENTUJTE operationSelect('/',BOOL,TOKTYPE);
                     DLInsertLast(local,'E',vys);
                     continue;
                 }
@@ -649,7 +620,7 @@ int PreExe(char c, Token* act, tDLList* local,tDLList* partrule,tDLList* rule){
                 if(DLCompare(partrule, rule)==0){
                     printf("pravidlo pro uplatneni \\ \n");
                     //martinova fce(partrule->First->act, partrule->First->rptr->act, partrule->First->rptr->rptr->act, &(vys) )
-                    //gen
+                    // PROSIM UPRAVTE ZDE PARAMETRY VKLADANE DO FCE A ODKOMENTUJTE operationSelect('\\',BOOL,TOKTYPE);
                     DLInsertLast(local,'E',vys);
                     continue;
                 }
@@ -727,8 +698,7 @@ int PreExe(char c, Token* act, tDLList* local,tDLList* partrule,tDLList* rule){
                 DLInsertLast(rule, ')',NULL);
                 if(DLCompare(partrule, rule)==0){
                     //martinova fce(partrule->First->act, partrule->First->rptr->act, partrule->First->rptr->rptr->act, &(vys) )
-                    printf("pravidlo pro uplatneni zavorek\n");
-                    //gen
+
                     DLInsertLast(local,'E',vys);
                     continue;
                 }
@@ -737,7 +707,7 @@ int PreExe(char c, Token* act, tDLList* local,tDLList* partrule,tDLList* rule){
                 if(DLCompare(partrule, rule)==0){
                     //martinova fce(partrule->First->act, partrule->First->rptr->act, partrule->First->rptr->rptr->act, &(vys) )
 
-                    //gen
+                    getOperand(partrule->First->act);
                     DLInsertLast(local,'E',vys);
                     printf("uplatneni i->E \n");
                     continue;
@@ -849,7 +819,8 @@ Token* PreNextTok(Token* act, tDLList* local,tDLList* partrule,tDLList* rule){
 }
 
  int PreAnalyzer(Token *act, Token**back){
-     printf("vitejete v precedencni analyze \n");
+     printf("vytejete v precedencni analyze \n");
+     TFCreation();
      tDLList *local, *partrule, *rule;
      DLListInitForParser(&(local), &(rule), &(partrule));
      *back=PreNextTok(act, local, partrule, rule);

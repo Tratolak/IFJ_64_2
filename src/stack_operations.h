@@ -1,28 +1,37 @@
-#ifndef IFJ_64_2_STACK_OPERATIONS_H
-#define IFJ_64_2_STACK_OPERATIONS_H
+#ifndef TESTBENCH2_STACK_OPERATIONS_H
+#define TESTBENCH2_STACK_OPERATIONS_H
 
+#include "scanner.h"
 
-#define MAX_STACK 1
+typedef enum enLabelType{
+    WHILE, IF
+}labelType;
 
-/**
- * Definice struktury zasobniku
- */
-typedef struct {
-    char arr[MAX_STACK];                             /* pole pro uložení hodnot */
-    int top;                                /* index prvku na vrcholu zásobníku */
-} tStack;
+struct typeStackNode {
+    TokType type;
+    struct typeStackNode *next;
+};
 
-void stackInit(tStack* s);
+struct labelStackNode {
+    labelType labelType;
+    char *labelName;
+    struct labelStackNode *next;
+};
 
-int stackEmpty(const tStack* s);
+void typeStackInit(struct typeStackNode **head);
 
-int stackFull(const tStack* s);
+void labelStackInit(struct labelStackNode **head);
 
-void stackTop(const tStack* s, char* c);
+bool typeStackEmpty(struct typeStackNode *head);
 
-void stackPop(tStack* s);
+bool labelStackEmpty(struct labelStackNode *head);
 
-void stackPush(tStack* s, char c);
+bool typeStackPush(struct typeStackNode **head, TokType type);
 
+void typeStackPop(struct typeStackNode **head, TokType *type);
 
-#endif //IFJ_64_2_STACK_OPERATIONS_H
+bool labelStackPush(struct labelStackNode **head, char *labelName, labelType labelType);
+
+void labelStackPop(struct labelStackNode **head, char **labelName, labelType *labelType);
+
+#endif //TESTBENCH2_STACK_OPERATIONS_H
