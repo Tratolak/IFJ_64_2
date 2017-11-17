@@ -16,7 +16,14 @@
 **/
 
 int S_FuncHeader(bool declare, Token *act);
-int S_StatList(bool scope, Token *act);
+int S_StatList(Token *act, Token **back, bool isScope);
+int S_Dim(Token *act);
+int S_Input(Token *act);
+int S_Print(Token *act);
+int S_If(Token *act, bool isScope);
+int S_While(Token *act, bool isScope);
+int S_Ret(Token *act);
+int S_Assig(Token *act);
 
 char ArtPreTB [15][15] = {
     // < - 1, > - 2, = - 3, ' ' - 0
@@ -60,9 +67,11 @@ if(RET_VAL != SYN_OK)\
 #define DELKAPRAVIDLA 10
 
 #define SYN_OK 0
-#define ID_NOT_DEFINED -1
-#define ID_ALREADY_DEFINED -2
-#define SYN_ERROR -3
+#define SYN_ERROR -1
+#define ID_NOT_DEFINED -2
+#define ID_ALREADY_DEFINED -3
+#define BIN_OP_INCOMPAT -4
+
 
 
 
@@ -117,7 +126,7 @@ bool isType(Token *tok)
 }
 
 int SyntaxAnalyzer(){
-    Token *act;
+    Token *act,*back;
     bool scope = false;
 
     while(1){
@@ -134,7 +143,24 @@ int SyntaxAnalyzer(){
                     scope = true;
                     //retVal = S_StatList(true);
 
-                    SYN_EXPAND(S_StatList,true,act);
+                    SYN_EXPAND(S_StatList,act,&back,true);
+
+                    if(back->type != KEYWORD || strcmp(back->val, "end") != 0){
+                       return SYN_ERROR;
+                    }
+
+                    GET_TOKEN(act);
+
+                    if(act->type != KEYWORD)
+                        return SYN_ERROR;
+                    if((strcmp(act->val,"scope") != 0))
+                        return SYN_ERROR;
+
+                    GET_TOKEN(act);
+
+                    if(act->type != EOL){
+                        return SYN_ERROR;
+                    }
                 }
                 else{
                     return SYN_ERROR;
@@ -145,10 +171,30 @@ int SyntaxAnalyzer(){
                     if(act->type==KEYWORD && strcmp(act->val,"function")==0){
                         SYN_EXPAND(S_FuncHeader, true, act);
                     }
+                    else{
+                        return SYN_ERROR;
+                    }
             }
             else if(strcmp(act->val,"function")==0){
                     SYN_EXPAND(S_FuncHeader, false, act);
+                    SYN_EXPAND(S_StatList,act,&back,false);
+
+                    if(back->type != KEYWORD || strcmp(back->val, "end") != 0)
+                       return SYN_ERROR;
+
+                    GET_TOKEN(act);
+                    if(act->type != KEYWORD)
+                        return SYN_ERROR;
+                    if((strcmp(act->val,"function") != 0))
+                        return SYN_ERROR;
+
+                    GET_TOKEN(act);
+                    if(act->type != EOL)
+                        return SYN_ERROR;
             }
+        }
+        else if(act->type == EOL){
+            continue;
         }
         else{
                 return SYN_ERROR;
@@ -176,7 +222,12 @@ int S_FuncHeader(bool declare, Token *act){
     char *id;
 
     GET_TOKEN(act);
+    if(act->type != LBRACKET)
+        return SYN_ERROR;
+
     while(act->type!=RBRACKET){
+        GET_TOKEN(act);
+
         if(act->type == ID){
             id = act->val;
         }
@@ -185,9 +236,8 @@ int S_FuncHeader(bool declare, Token *act){
         }
 
         GET_TOKEN(act);
-        if(act->type != KEYWORD || strcmp(act->val, "as") != 0){
+        if(act->type != KEYWORD || strcmp(act->val, "as") != 0)
                return SYN_ERROR;
-        }
 
         GET_TOKEN(act);
         if(!isType(act))
@@ -203,18 +253,14 @@ int S_FuncHeader(bool declare, Token *act){
 
         GET_TOKEN(act);
 
-        if(act->type != COMMA && act->type != RBRACKET){
+        if(act->type != COMMA && act->type != RBRACKET)
             return SYN_ERROR;
-        }
-
-        GET_TOKEN(act);
     }
 
     //Function Type
     GET_TOKEN(act);
-    if(act->type != KEYWORD || strcmp(act->val, "as") != 0){
+    if(act->type != KEYWORD || strcmp(act->val, "as") != 0)
            return SYN_ERROR;
-    }
 
     GET_TOKEN(act);
     if(!isType(act))
@@ -232,18 +278,204 @@ int S_FuncHeader(bool declare, Token *act){
     if(act->type != EOL)
         return SYN_ERROR;
 
-    if(!declare){
-        SYN_EXPAND(S_StatList, false, act);
+    return SYN_OK;
+}
+
+int S_StatList(Token *act, Token **back, bool isScope){
+
+    while(1){
+        GET_TOKEN(act);
+        if(act->type == KEYWORD){
+            if(strcmp(act->val,"dim") == 0){
+                SYN_EXPAND(S_Dim, act);
+            }
+            else if(strcmp(act->val,"input") == 0){
+                SYN_EXPAND(S_Input, act);
+            }
+            else if(strcmp(act->val,"print") == 0){
+                SYN_EXPAND(S_Print, act);
+                continue;
+            }
+            else if(strcmp(act->val,"if") == 0){
+                SYN_EXPAND(S_If, act, isScope);
+            }
+            else if(strcmp(act->val,"do") == 0){
+                GET_TOKEN(act);
+                if(act->type == KEYWORD && strcmp(act->val,"while") == 0){
+                    SYN_EXPAND(S_While, act, isScope);
+                }
+                else{
+                    return SYN_ERROR;
+                }
+            }
+            else if(strcmp(act->val,"return") == 0 && !isScope){
+                SYN_EXPAND(S_Ret, act);
+                continue;
+            }
+            else if(strcmp(act->val,"end") == 0 || strcmp(act->val,"loop") == 0 || strcmp(act->val,"else") == 0){
+                *back = act;
+                return SYN_OK;
+            }
+            else{
+                return SYN_ERROR;
+            }
+
+            GET_TOKEN(act);
+            if(act->type != EOL)
+                return SYN_ERROR;
+        }
+        else if(act->type == ID){
+            GET_TOKEN(act);
+            if(act->type == EQL){
+                SYN_EXPAND(S_Assig, act);
+            }
+            else{
+                return SYN_ERROR;
+            }
+        }
+        else if(act->type == EOL){
+            continue;
+        }
+        else{
+            return SYN_ERROR;
+        }
+    }
+
+
+    return SYN_OK;
+}
+
+int S_Dim(Token *act){
+    char *id;
+
+    GET_TOKEN(act);
+    if(act->type == ID){
+        id = act->val;
+    }
+    else{
+        return SYN_ERROR;
+    }
+
+    GET_TOKEN(act);
+    if(act->type != KEYWORD || strcmp(act->val, "as") != 0)
+           return SYN_ERROR;
+
+    GET_TOKEN(act);
+    if(!isType(act))
+        return SYN_ERROR;
+
+    //TBD - Semantic check
+
+    return SYN_OK;
+}
+
+int S_Input(Token *act){
+    GET_TOKEN(act);
+    if(act->type == ID){
+        //TBD - Semantic check
+    }
+    else{
+        return SYN_ERROR;
     }
 
     return SYN_OK;
 }
 
-int S_StatList(bool scope, Token *act){
+int S_Print(Token *act){
+    Token *back;
+
+    do{
+        GET_TOKEN(act);
+        PreAnalyzer(act, &back);
+    }while(back->type == SEMICOLON);
+
+    if(back->type != EOL)
+        return SYN_ERROR;
+
     return SYN_OK;
 }
 
+int S_If(Token *act, bool isScope){
+    Token *back;
 
+    GET_TOKEN(act);
+    PreAnalyzer(act, &back);
+
+    if(back->type != KEYWORD || strcmp(back->val, "then") != 0)
+           return SYN_ERROR;
+
+    GET_TOKEN(act);
+    if(act->type != EOL)
+           return SYN_ERROR;
+
+    SYN_EXPAND(S_StatList, act, &back, isScope);
+
+    if(back->type != KEYWORD || strcmp(back->val, "else") != 0)
+           return SYN_ERROR;
+
+    GET_TOKEN(act);
+    if(act->type != EOL)
+           return SYN_ERROR;
+
+    SYN_EXPAND(S_StatList, act, &back, isScope);
+
+    if(back->type != KEYWORD || strcmp(back->val, "end") != 0)
+       return SYN_ERROR;
+
+    GET_TOKEN(act);
+    if(act->type != KEYWORD || strcmp(act->val, "if") != 0)
+           return SYN_ERROR;
+
+    return SYN_OK;
+}
+
+int S_While(Token *act, bool isScope){
+    Token *back;
+
+    GET_TOKEN(act);
+    PreAnalyzer(act, &back);
+
+    if(back->type != EOL){
+           return SYN_ERROR;
+    }
+
+    SYN_EXPAND(S_StatList, act, &back, isScope);
+
+    if(back->type != KEYWORD || strcmp(back->val, "loop") != 0){
+       return SYN_ERROR;
+    }
+
+    return SYN_OK;
+}
+
+int S_Ret(Token *act){
+    Token *back;
+
+    GET_TOKEN(act);
+    PreAnalyzer(act, &back);
+
+    if(back->type != EOL)
+           return SYN_ERROR;
+
+    return SYN_OK;
+}
+
+int S_Assig(Token *act){
+    Token *back;
+
+    GET_TOKEN(act);
+    if(act->type == ID){
+        //TBD SEM check for function call
+        //if func - params else preanalyzer
+    }
+    else{
+        PreAnalyzer(act, &back);
+        if(back->type != EOL)
+            return SYN_ERROR;
+    }
+
+    return SYN_OK;
+}
 
 //zdola nahoru
 
