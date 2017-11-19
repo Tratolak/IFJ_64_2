@@ -3,8 +3,12 @@
 #include "stack_operations.h"
 
 //Pocitani poctu navesti daneho typu
-int whileLabel = 0;
-int ifLabel = 0;
+int whileLabelQuantity = 0;
+int ifLabelQuantity = 0;
+
+//================================================================================
+//
+//================================================================================
 
 /**
  * Utvoreni povinne hlavicky IFJcode17, inicializace zasobniku pro navesti.
@@ -16,6 +20,11 @@ void header() {
     printf("JMP scope\n");
 }
 
+//================================================================================
+// Funkce potrebne pro generovani instrukci na vyhodnoceni vyrazu
+//================================================================================
+
+/**
 /**
  * Vytvoreni docasneho ramce pro vypocet vyrazu. A inicializace zasobniku typu.
  */
@@ -100,16 +109,17 @@ void operationSelect(char operand, bool convert, TokType type) {
             break;
         case '/': //Vysledek je vzdy double
             printf("DIV TF@_exprResult TF@_exprOperand2 TF@_exprOperand1\n");
-            if(type != DOUBLE){
+            if (type != DOUBLE) {
                 convertInstructionSelect(type, DOUBLE, "TF@_exprResult");
             }
             printf("PUSHS TF@_exprResult\n");
-                break;
-        case '\\': //Operandy a vysledek jsou typu INTEGER
-                printf("DIV TF@_exprResult TF@_exprOperand2 TF@_exprOperand1\n");
-                printf("PUSHS TF@_exprResult\n");
             break;
-        default:break;
+        case '\\': //Operandy a vysledek jsou typu INTEGER
+            printf("DIV TF@_exprResult TF@_exprOperand2 TF@_exprOperand1\n");
+            printf("PUSHS TF@_exprResult\n");
+            break;
+        default:
+            break;
     }
 }
 
@@ -137,21 +147,108 @@ bool getOperand(Token *t) {
     return mallocOk;
 }
 
+
+/**
+ * Generovani prirazeni vysledku vyrazu do urcene promenne a uvolneni celeho zasobniku.
+ * Nastaveni zasobniku typu do vychoziho stavu.
+ *
+ * @param variableName - nazev promenne, do ktere bude vysledek prirazen (char*)
+ */
+void getResult(char *variableName) {
+    printf("POPS TF@_exprResult\n");
+    printf("MOVE TF@_%s TF@_expResult\n", variableName);
+    printf("CLEARS\n");
+    typeStackDispose(&typeStack);
+}
+
+//================================================================================
+// Generovani instrukci pro vytvoreni a volani fce
+//================================================================================
+
+/**
+ * Generovani instrukci navesti funkce, ulozeni TF na zasobnik a utvoreni noveho TF.
+ *
+ * @param functionName - jmeno funkce (char*)
+ */
+void functionBegin(char *functionName) {
+    printf("LABEL %s\n", functionName);
+    printf("PUSHFRAME\n");
+    printf("CREATEFRAME\n");
+}
+
+/**
+ * Generovani instrukce pro ulozeni navratove hodnoty z LF do TF.
+ *
+ * @param LFVariable - copy to (char*)
+ * @param TFVariable - copy from (char*)
+ */
+void functionEnd(char *LFVariable, char *TFVariable) {
+    printf("MOVE LF@_%s TF@_%s\n", LFVariable, TFVariable);
+    printf("RETURN\n");
+}
+
+/**
+ * Generovani instrukci pro volani fce a odstraneni TF utvoreneho ve fci.
+ *
+ * @param functionName - jmeno navesti zacatku funkce (char*)
+ */
+void functionCall(char *functionName) {
+    printf("CALL %s\n", functionName);
+    printf("POPFRAME\n");
+}
+
+//================================================================================
+// Generovani pomocnych konstrukci
+//================================================================================
+
 /**
  * Ulozeni navesti na vrchol zasobniku.
- *
+ *       //TODO
  * @return mallocOk - true = ok | false = error (bool)
  */
-bool getLabel(char *label){
+bool whileIfBegin(labelType type) {
     bool mallocOk = true;
-
+    if (type == WHILE) {
+        mallocOk = labelStackPush(&labelStack,"While", type, whileLabelQuantity);
+        whileLabelQuantity++;
+        printf("LABEL while%d\n",whileLabelQuantity);
+        //Generovani podminky
+    } else if (type == IF) {
+        mallocOk = labelStackPush(&labelStack, "If", type, ifLabelQuantity);
+        ifLabelQuantity++;
+    }
     return mallocOk;
 }
 
 /**
- * //TODO vlozeni vysledku do promene
+ * Generovani prikazu na vytvoreni nove promenne v docasnem ramci.
+ *
+ * @param name - jmeno promenne (char*)
  */
-void getResult() {
-    printf("POPS TF@_exprResult\n");
-    printf("WRITE TF@_exprResult\n");
+void variableDeclaration(char *name) {
+    printf("DEFVAR TF@_%s\n", name);
+}
+
+/**
+ * Generovani instrukce pro nacteni do promenne.
+ *
+ * @param variable - jmeno promenne (char*)
+ * @param type     - typ promenne (TokType)
+ */
+void input(char *variable, TokType type) {
+    char *inputType = "";
+    switch (type) {
+        case INTEGER:
+            inputType = "int";
+            break;
+        case DOUBLE:
+            inputType = "float";
+            break;
+        case STRING:
+            inputType = "string";
+            break;
+        default:
+            break;
+    }
+    printf("READ TF@_%s %s\n", variable, inputType);
 }

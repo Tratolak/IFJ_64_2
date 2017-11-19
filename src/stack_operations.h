@@ -3,9 +3,9 @@
 
 #include "scanner.h"
 
-typedef enum enLabelType{
+typedef enum enLabelType {
     WHILE, IF
-}labelType;
+} labelType;
 
 struct typeStackNode {
     TokType type;
@@ -15,23 +15,29 @@ struct typeStackNode {
 struct labelStackNode {
     labelType labelType;
     char *labelName;
+    int quantity;
     struct labelStackNode *next;
 };
 
 void typeStackInit(struct typeStackNode **head);
 
-void labelStackInit(struct labelStackNode **head);
-
 bool typeStackEmpty(struct typeStackNode *head);
-
-bool labelStackEmpty(struct labelStackNode *head);
 
 bool typeStackPush(struct typeStackNode **head, TokType type);
 
 void typeStackPop(struct typeStackNode **head, TokType *type);
 
-bool labelStackPush(struct labelStackNode **head, char *labelName, labelType labelType);
+void typeStackDispose(struct typeStackNode **head);
 
-void labelStackPop(struct labelStackNode **head, char **labelName, labelType *labelType);
+
+void labelStackInit(struct labelStackNode **head);
+
+bool labelStackEmpty(struct labelStackNode *head);
+
+bool labelStackPush(struct labelStackNode **head, char *labelName, labelType labelType,int quantity);
+
+void labelStackPop(struct labelStackNode **head, char **labelName, labelType *labelType,int *quantity);
+
+void labelStackDispose(struct labelStackNode **head);
 
 #endif //TESTBENCH2_STACK_OPERATIONS_H
