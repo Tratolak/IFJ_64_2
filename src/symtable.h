@@ -15,6 +15,7 @@ typedef tItem* Table[MAX_TSIZE];
 struct tItem{
   char* name;
   TokType type;
+  bool isdef;
   Table *arg;
   Table *var;
 	struct tItem* next;
@@ -28,7 +29,7 @@ bool Symtable_Init();
 void Symtable_Destroy();
 
 
-bool Dec_Func(char *funcname);
+bool Dec_Func(char *funcname, bool define);
 
 bool Dec_Func_Set_Type(char *funcname, TokType type);
 
@@ -37,7 +38,9 @@ bool Dec_Func_AddArgument(char *funcname, int n, TokType argtype);
 bool Add_Var(char *funcname, char *varname, TokType vartype);
 
 
-bool Search_Func(char *funcname);
+bool Define_Func(char *funcname);
+
+bool Search_Func(char *funcname, bool *isdef);
 
 bool Ret_Func_Type(char *funcname, TokType rettype);
 
