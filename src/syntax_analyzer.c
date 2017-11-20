@@ -256,6 +256,7 @@ int S_FuncHeader(bool declare, Token *act){
             myStrCpy(&id, act->val);
         }
         else{
+            free(id);
             return SYN_ERROR;
         }
 
@@ -265,14 +266,17 @@ int S_FuncHeader(bool declare, Token *act){
         }
 
         GET_TOKEN(act);
-        if(act->type != KEYWORD || strcmp(act->val, "as") != 0)
-               return SYN_ERROR;
+        if(act->type != KEYWORD || strcmp(act->val, "as") != 0){
+            free(id);
+            return SYN_ERROR;
+        }
 
         GET_TOKEN(act);
-        if(!isType(act, &type))
+        if(!isType(act, &type)){
+            free(id);
             return SYN_ERROR;
+        }
 
-        //TBD function arguments in sym table
         if(declare)
             Dec_Func_AddArgument(FUNC, i, type);
         if(definition){
@@ -284,11 +288,13 @@ int S_FuncHeader(bool declare, Token *act){
 
         GET_TOKEN(act);
 
-        if(act->type != COMMA && act->type != RBRACKET)
+        if(act->type != COMMA && act->type != RBRACKET){
+            free(id);
             return SYN_ERROR;
-
+        }
         i++;
     }
+    free(id);
 
     //Function Type
     GET_TOKEN(act);
