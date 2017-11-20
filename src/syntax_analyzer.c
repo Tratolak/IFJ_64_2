@@ -499,11 +499,71 @@ int S_Ret(Token *act){
 
 int S_Assig(Token *act){
     Token *back;
+    TokType type;
 
     GET_TOKEN(act);
     if(act->type == ID){
-        //TBD SEM check for function call
         //if func - params else preanalyzer
+        if(Search_Func(act->val, NULL)){
+            char *id;
+            myStrCpy(&id, act->val);
+
+            GET_TOKEN(act);
+            if(act->type != LBRACKET)
+                return SYN_ERROR;
+
+            int i = 0;
+            while(act->type!=RBRACKET){
+                GET_TOKEN(act);
+
+                if(act->type == ID){
+                    if(!Search_Var(FUNC, act->val, &type)){
+                        free(id);
+                        return SEM_ERROR;
+                    }
+                    if(!Nth_Func_ArgType(id, i, type)){
+                        free(id);
+                        return SEM_ERROR;
+                    }
+                }
+                else if(act->type == INTEGER){
+                    if(!Nth_Func_ArgType(id, i, INTEGER)){
+                        free(id);
+                        return SEM_ERROR;
+                    }
+                }
+                else if(act->type == DOUBLE){
+                    if(!Nth_Func_ArgType(id, i, DOUBLE)){
+                        free(id);
+                        return SEM_ERROR;
+                    }
+                }
+                else if(act->type == STRING){
+                    if(!Nth_Func_ArgType(id, i, STRING)){
+                        free(id);
+                        return SEM_ERROR;
+                    }
+                }
+                else{
+                    free(id);
+                    return SYN_ERROR;
+                }
+
+                GET_TOKEN(act);
+
+                if(act->type != COMMA && act->type != RBRACKET){
+                    free(id);
+                    return SYN_ERROR;
+                }
+                i++;
+            }
+            free(id);
+        }
+        else{
+            PreAnalyzer(act, &back);
+            if(back->type != EOL)
+                return SYN_ERROR;
+        }
     }
     else{
         PreAnalyzer(act, &back);
@@ -793,7 +853,7 @@ int PreTokenAnalyzer(Token *act, char * c){
         case SUB:
             *c='-';
             break;
-        case MOD:
+        case IDIV:
             *c='\\';
             break;
         case EQL:
