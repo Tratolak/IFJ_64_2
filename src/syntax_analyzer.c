@@ -145,8 +145,6 @@ int SyntaxAnalyzer(){
                 if(act->type == EOL)
                 {
                     scope = true;
-                    //retVal = S_StatList(true);
-
                     SYN_EXPAND(S_StatList,act,&back,true);
 
                     if(back->type != KEYWORD || strcmp(back->val, "end") != 0){
@@ -210,15 +208,32 @@ int SyntaxAnalyzer(){
 }
 
 int S_FuncHeader(bool declare, Token *act){
+
+    bool definition = !declare;
+    bool temp;
     //Function ID
     GET_TOKEN(act);
-    if(act->type == ID){
-        //TBD function arguments in sym table
-        if(declare){
 
+    if(act->type == ID){
+        setCurrFunc(act->val);
+
+        if(declare){
+            if(Search_Func(FUNC, NULL))
+                return SEM_ERROR;
+
+            Dec_Func(FUNC, false);
         }
         else{
+            if(!Search_Func(FUNC, &temp)){
+                declare = true;
+                Dec_Func(FUNC, true);
+            }
+            else{
+                if(temp != false)
+                    return SEM_ERROR;
 
+                Define_Func(FUNC);
+            }
         }
     }
     else{
@@ -226,7 +241,9 @@ int S_FuncHeader(bool declare, Token *act){
     }
 
     //Function Arguments
-    char *id;
+    char *id = NULL;
+    int i = 0;
+    TokType type;
 
     GET_TOKEN(act);
     if(act->type != LBRACKET)
@@ -236,10 +253,15 @@ int S_FuncHeader(bool declare, Token *act){
         GET_TOKEN(act);
 
         if(act->type == ID){
-            id = act->val;
+            myStrCpy(&id, act->val);
         }
         else{
             return SYN_ERROR;
+        }
+
+        if(SEM_existId(id)){
+            free(id);
+            return SEM_ERROR;
         }
 
         GET_TOKEN(act);
@@ -247,21 +269,25 @@ int S_FuncHeader(bool declare, Token *act){
                return SYN_ERROR;
 
         GET_TOKEN(act);
-        if(!isType(act))
+        if(!isType(act, &type))
             return SYN_ERROR;
 
         //TBD function arguments in sym table
-        if(declare){
-
+        if(declare)
+            Dec_Func_AddArgument(FUNC, i, type);
+        if(definition){
+            Add_Var(FUNC, id, type);
         }
         else{
-
+            free(id);
         }
 
         GET_TOKEN(act);
 
         if(act->type != COMMA && act->type != RBRACKET)
             return SYN_ERROR;
+
+        i++;
     }
 
     //Function Type
@@ -270,16 +296,10 @@ int S_FuncHeader(bool declare, Token *act){
            return SYN_ERROR;
 
     GET_TOKEN(act);
-    if(!isType(act))
+    if(!isType(act, &type))
         return SYN_ERROR;
 
-    //TBD function return type in sym table
-    if(declare){
-
-    }
-    else{
-
-    }
+    Dec_Func_Set_Type(FUNC, type);
 
     GET_TOKEN(act);
     if(act->type != EOL)
