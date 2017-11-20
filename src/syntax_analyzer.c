@@ -352,6 +352,9 @@ int S_StatList(Token *act, Token **back, bool isScope){
                 return SYN_ERROR;
         }
         else if(act->type == ID){
+            if(!SEM_existId(act->val))
+                return SEM_ERROR;
+
             GET_TOKEN(act);
             if(act->type == EQL){
                 SYN_EXPAND(S_Assig, act);
