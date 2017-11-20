@@ -229,7 +229,7 @@ bool Nth_Func_ArgType(char *funcname, int n, TokType argtype) {
     return false;
 }
 
-bool Search_Var(char *funcname, char *varname, TokType vartype) {
+bool Search_Var(char *funcname, char *varname, TokType *vartype) {
   tItem *item = TRead(Func, funcname);
   if (item == NULL)
     return false;
@@ -238,8 +238,8 @@ bool Search_Var(char *funcname, char *varname, TokType vartype) {
   if (item == NULL)
     return false;
 
-  if (item->type == vartype)
+  if (vartype != NULL)
+    *vartype = item->type;
+
     return true;
-  else
-    return false;
 }

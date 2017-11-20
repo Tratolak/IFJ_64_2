@@ -37,8 +37,8 @@ bool Dec_Func_AddArgument(char *funcname, int n, TokType argtype);
 
 bool Add_Var(char *funcname, char *varname, TokType vartype);
 
-
 bool Define_Func(char *funcname);
+
 
 bool Search_Func(char *funcname, bool *isdef);
 
@@ -46,7 +46,7 @@ bool Ret_Func_Type(char *funcname, TokType rettype);
 
 bool Nth_Func_ArgType(char *funcname, int n, TokType argtype);
 
-bool Search_Var(char *funcname, char *varname, TokType vartype);
+bool Search_Var(char *funcname, char *varname, TokType *vartype);
 
 
 #endif // SYMTABLE_H_INCLUDED
