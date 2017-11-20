@@ -105,18 +105,24 @@ void myStrCpy(char **to, char *from)
  *
  ****************/
 
-bool isType(Token *tok)
+bool isType(Token *tok, TokType *type)
 {
     if(tok->type != KEYWORD)
         return false;
 
     if(strcmp(tok->val, "integer") == 0){
+        if(type != NULL)
+            *type = INTEGER;
         return true;
     }
     else if(strcmp(tok->val, "double") == 0){
+        if(type != NULL)
+            *type = DOUBLE;
         return true;
     }
     else if(strcmp(tok->val, "string") == 0){
+        if(type != NULL)
+            *type = STRING;
         return true;
     }
 
