@@ -49,6 +49,7 @@ char ArtPreTB [15][15] = {
 Table sym_table;
 
 int RET_VAL;
+char *FUNC;
 
 #define GET_TOKEN(A)\
 RET_VAL = GetToken(&(A));\
@@ -68,29 +69,34 @@ if(RET_VAL != SYN_OK)\
 
 #define SYN_OK 0
 #define SYN_ERROR -1
-#define ID_NOT_DEFINED -2
-#define ID_ALREADY_DEFINED -3
+#define SEM_ERROR -2
 #define BIN_OP_INCOMPAT -4
 
 
 //Semantic
 
-//register new function with ID into sym table
-int SEM_regFunc(char* name)
-{
-    return true;
-}
-
-//register new variable ID into sym table
-int SEM_regId(char* name)
-{
-    return true;
-}
-
 //check if sym table contains ID
 int SEM_existId(char* name)
 {
+    if(!Search_Func(name, NULL))
+        if(!Search_Var(FUNC, name, NULL))
+            return false;
+
     return true;
+}
+
+void setCurrFunc(char* name)
+{
+    free(FUNC);
+    FUNC = malloc((strlen(name)+1) * sizeof(char));
+    strcpy(FUNC, name);
+}
+
+void myStrCpy(char **to, char *from)
+{
+    free(*to);
+    *to = malloc((strlen(from)+1) * sizeof(char));
+    strcpy(*to, from);
 }
 
 /*******
