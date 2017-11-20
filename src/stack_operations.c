@@ -97,16 +97,17 @@ bool labelStackEmpty(struct labelStackNode *head) {
  * @param head      - ukazatel na vrchol zasobniku (struct labelStackNode**)
  * @param labelName - jmeno navesti (char *)
  * @param labelType - typ navesti (labelType)
+ * @param ifElse    - plati pouze pro if a indikuje yda-li byl jiz vygenerovan ELSE
  * @return false    - false  = alokace neprobehla uspesne | true = vse ok
  */
-bool labelStackPush(struct labelStackNode **head, char *labelName, labelType labelType, int quantity) {
+bool labelStackPush(struct labelStackNode **head, labelType labelType, int quantity, bool ifElse) {
     struct labelStackNode *newNode = (struct labelStackNode *) malloc(sizeof(struct labelStackNode));
     if (newNode == NULL) {
         return false;
     }
-    (*newNode).labelName = labelName;
     (*newNode).labelType = labelType;
     (*newNode).quantity = quantity;
+    (*newNode).ifElse = ifElse;
     (*newNode).next = *head;
     *head = newNode;
     return true;
@@ -118,14 +119,29 @@ bool labelStackPush(struct labelStackNode **head, char *labelName, labelType lab
  * @param head      - ukazatel na vrchol zasobniku (struct labelStackNode**)
  * @param labelName - jmeno navesti (char *)
  * @param labelType - typ navesti (labelType)
+ * @param ifElse    - plati pouze pro if a indikuje yda-li byl jiz vygenerovan ELSE
+ * @param quantity  - pocitadlo: o kolikate navesti daneho typu se jedna (int*)
  */
-void labelStackPop(struct labelStackNode **head, char **labelName, labelType *labelType, int *quantity) {
+void labelStackPop(struct labelStackNode **head, labelType *labelType, int *quantity, bool *ifElse) {
     struct labelStackNode *node = *head;
     *labelType = (*head)->labelType;
-    *labelName = (*head)->labelName;
     *quantity = (*head)->quantity;
+    *ifElse = (*head)->ifElse;
     *head = (*head)->next;
     free(node);
+}
+
+/**
+ * Precte navesti z vrcholu zasobniku. Ulozi jmeno navesi do promenne 'labelName' a typ navesti do labelType.
+ *
+ * @param head      - ukazatel na vrchol zasobniku (struct labelStackNode**)
+ * @param labelName - jmeno navesti (char *)
+ * @param labelType - typ navesti (labelType)
+ * @param quantity  - pocitadlo: o kolikate navesti daneho typu se jedna (int*)
+ */
+void labelStackTop(struct labelStackNode **head, labelType *labelType, int *quantity) {
+    *labelType = (*head)->labelType;
+    *quantity = (*head)->quantity;
 }
 
 /**

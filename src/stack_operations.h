@@ -4,7 +4,7 @@
 #include "scanner.h"
 
 typedef enum enLabelType {
-    WHILE, IF
+    WHILE, IF, ELSE
 } labelType;
 
 struct typeStackNode {
@@ -14,7 +14,7 @@ struct typeStackNode {
 
 struct labelStackNode {
     labelType labelType;
-    char *labelName;
+    bool ifElse;
     int quantity;
     struct labelStackNode *next;
 };
@@ -34,9 +34,11 @@ void labelStackInit(struct labelStackNode **head);
 
 bool labelStackEmpty(struct labelStackNode *head);
 
-bool labelStackPush(struct labelStackNode **head, char *labelName, labelType labelType,int quantity);
+bool labelStackPush(struct labelStackNode **head, labelType labelType, int quantity, bool ifElse);
 
-void labelStackPop(struct labelStackNode **head, char **labelName, labelType *labelType,int *quantity);
+void labelStackPop(struct labelStackNode **head, labelType *labelType, int *quantity, bool *ifElse);
+
+void labelStackTop(struct labelStackNode **head, labelType *labelType, int *quantity);
 
 void labelStackDispose(struct labelStackNode **head);
 

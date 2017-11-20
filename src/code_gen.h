@@ -16,7 +16,9 @@ void convertInstructionSelect(TokType original, TokType new, char *string);
 
 void operationSelect(char operation, bool convert, TokType type);
 
-bool getOperand(Token *t);
+void boolOperationSelect(char operation, bool convert, TokType type);
+
+bool getOperand(Token *t, bool isVariable, TokType type);
 
 void TFCreation();
 
@@ -31,9 +33,11 @@ void functionCall(char *functionName);
 
 bool whileIfBegin(labelType type);
 
+void whileIfElseEnd(labelType type);
+
 void variableDeclaration(char *name);
 
 
-void input(char *variable, TokType type);
+void input(char *variableName, TokType type);
 
 #endif //TESTBENCH2_CODE_GEN_H
