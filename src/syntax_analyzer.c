@@ -377,10 +377,11 @@ int S_StatList(Token *act, Token **back, bool isScope){
 
 int S_Dim(Token *act){
     char *id;
+    TokType type;
 
     GET_TOKEN(act);
     if(act->type == ID){
-        id = act->val;
+        myStrCpy(&id, act->val);
     }
     else{
         return SYN_ERROR;
@@ -391,10 +392,15 @@ int S_Dim(Token *act){
            return SYN_ERROR;
 
     GET_TOKEN(act);
-    if(!isType(act))
+    if(!isType(act, &type))
         return SYN_ERROR;
 
-    //TBD - Semantic check
+    if(SEM_existId(id)){
+        free(id);
+        return SEM_ERROR;
+    }
+
+    Add_Var(FUNC, id, type);
 
     return SYN_OK;
 }
