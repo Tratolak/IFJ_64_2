@@ -563,7 +563,7 @@ int PreExe(char c, Token* act, tDLList* local,tDLList* partrule,tDLList* rule){
                 break;
             case 2: // >
                 DLCutUntil(local, partrule);
-                ret=3;
+                ret=7;
 
                 DLDisposeList(rule);
                 DLInsertLast(rule, 'E', NULL);
@@ -788,6 +788,7 @@ int PreTokenAnalyzer(Token *act, char * c){
 int PreNextTok(Token* act, tDLList* local,tDLList* partrule,tDLList* rule, Token** vys){
     int err, ret;
     char *c;
+
     c=(char*)malloc(sizeof(char));
     if(c==NULL){
         *vys=NULL;
@@ -805,7 +806,7 @@ int PreNextTok(Token* act, tDLList* local,tDLList* partrule,tDLList* rule, Token
         else
         {
             ret=PreExe(*c, act,local,partrule,rule);
-            if(ret==3){
+            if(ret==7){
 
             } else {
                 act = NULL;
