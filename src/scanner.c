@@ -27,6 +27,16 @@ Token* FormToken(TokType type, char* value) {
 }
 
 
+void FreeToken(Token **token) {
+  TokType type = (*token)->type;
+  if (type == INTEGER || type == DOUBLE || type == STRING
+      || type == ID || type == KEYWORD)
+    free((*token)->val);
+  free(*token);
+  *token = NULL;
+}
+
+
 bool IsReserved(char* str) {
   for (int i = 0; i < 35; i++) {
     if (strcmp(str, Reserved[i]) == 0)

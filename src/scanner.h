@@ -27,6 +27,8 @@ typedef struct token {
 
 int GetToken(Token **token);
 
+void FreeToken(Token **token);
+
 
 typedef struct buffer {
   char *buffer;
