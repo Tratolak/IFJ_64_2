@@ -64,6 +64,10 @@ if(RET_VAL != SYN_OK)\
   return RET_VAL;\
 }\
 
+#define  FREEPARTRULE()\
+FreeToken(&(partrule->First->act));\
+FreeToken(&(partrule->First->rptr->act));\
+FreeToken(&(partrule->First->rptr->rptr->act));\
 
 #define SYN_OK 0
 #define SYN_ERROR -1
@@ -574,6 +578,7 @@ int PreExe(char c, Token* act, tDLList* local,tDLList* partrule,tDLList* rule){
 
                     // PROSIM UPRAVTE ZDE PARAMETRY VKLADANE DO FCE A ODKOMENTUJTE operationSelect('+',BOOL,TOKTYPE);
                     DLInsertLast(local,'E',vys);
+                    FREEPARTRULE();
                     continue;
                 }
                 DLDisposeList(rule);
@@ -586,6 +591,7 @@ int PreExe(char c, Token* act, tDLList* local,tDLList* partrule,tDLList* rule){
 
                     // PROSIM UPRAVTE ZDE PARAMETRY VKLADANE DO FCE A ODKOMENTUJTE operationSelect('*',BOOL,TOKTYPE);
                     DLInsertLast(local,'E',vys);
+                    FREEPARTRULE();
                     continue;
                 }
                 DLDisposeList(rule);
@@ -598,6 +604,7 @@ int PreExe(char c, Token* act, tDLList* local,tDLList* partrule,tDLList* rule){
 
                     // PROSIM UPRAVTE ZDE PARAMETRY VKLADANE DO FCE A ODKOMENTUJTE operationSelect('-',BOOL,TOKTYPE);
                     DLInsertLast(local,'E',vys);
+                    FREEPARTRULE();
                     continue;
                 }
                 DLDisposeList(rule);
@@ -610,6 +617,7 @@ int PreExe(char c, Token* act, tDLList* local,tDLList* partrule,tDLList* rule){
 
                     // PROSIM UPRAVTE ZDE PARAMETRY VKLADANE DO FCE A ODKOMENTUJTE operationSelect('/',BOOL,TOKTYPE);
                     DLInsertLast(local,'E',vys);
+                    FREEPARTRULE();
                     continue;
                 }
                 DLDisposeList(rule);
@@ -621,6 +629,7 @@ int PreExe(char c, Token* act, tDLList* local,tDLList* partrule,tDLList* rule){
                     //martinova fce(partrule->First->act, partrule->First->rptr->act, partrule->First->rptr->rptr->act, &(vys) )
                     // PROSIM UPRAVTE ZDE PARAMETRY VKLADANE DO FCE A ODKOMENTUJTE operationSelect('\\',BOOL,TOKTYPE);
                     DLInsertLast(local,'E',vys);
+                    FREEPARTRULE();
                     continue;
                 }
                 DLDisposeList(rule);
@@ -632,6 +641,7 @@ int PreExe(char c, Token* act, tDLList* local,tDLList* partrule,tDLList* rule){
                     //martinova fce(partrule->First->act, partrule->First->rptr->act, partrule->First->rptr->rptr->act, &(vys) )
                     //gen
                     DLInsertLast(local,'E',vys);
+                    FREEPARTRULE();
                     continue;
                 }
                 DLDisposeList(rule);
@@ -643,6 +653,7 @@ int PreExe(char c, Token* act, tDLList* local,tDLList* partrule,tDLList* rule){
 
                     //gen
                     DLInsertLast(local,'E',vys);
+                    FREEPARTRULE();
                     continue;
                 }
                 DLDisposeList(rule);
@@ -656,6 +667,7 @@ int PreExe(char c, Token* act, tDLList* local,tDLList* partrule,tDLList* rule){
                     //gen
 
                     DLInsertLast(local,'E',vys);
+                    FREEPARTRULE();
                     continue;
                 }
                 DLDisposeList(rule);
@@ -667,6 +679,7 @@ int PreExe(char c, Token* act, tDLList* local,tDLList* partrule,tDLList* rule){
                     //martinova fce(partrule->First->act, partrule->First->rptr->act, partrule->First->rptr->rptr->act, &(vys) )
                     //gen
                     DLInsertLast(local,'E',vys);
+                    FREEPARTRULE();
                     continue;
                 } DLDisposeList(rule);
                 DLInsertLast(rule, 'E',NULL);
@@ -678,6 +691,7 @@ int PreExe(char c, Token* act, tDLList* local,tDLList* partrule,tDLList* rule){
 
                     //gen
                     DLInsertLast(local,'E',vys);
+                    FREEPARTRULE();
                     continue;
                 }
                 DLDisposeList(rule);
@@ -690,6 +704,7 @@ int PreExe(char c, Token* act, tDLList* local,tDLList* partrule,tDLList* rule){
 
                     //gen
                     DLInsertLast(local,'E',vys);
+                    FREEPARTRULE();
                     continue;
                 }
                 DLDisposeList(rule);
@@ -697,9 +712,10 @@ int PreExe(char c, Token* act, tDLList* local,tDLList* partrule,tDLList* rule){
                 DLInsertLast(rule, 'E',NULL);
                 DLInsertLast(rule, ')',NULL);
                 if(DLCompare(partrule, rule)==0){
-                    //martinova fce(partrule->First->act, partrule->First->rptr->act, partrule->First->rptr->rptr->act, &(vys) )
+                    //tady Martin nebude
 
                     DLInsertLast(local,'E',vys);
+                    FREEPARTRULE();
                     continue;
                 }
                 DLDisposeList(rule);
