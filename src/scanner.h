@@ -7,10 +7,10 @@
 #include <string.h>
 #include <stdbool.h>
 
-#define S_END_OF_FILE 0     // returns after succesfully readed file
-#define S_TOKEN_OK 1        // returns after token succesfully readed
-#define S_LEXEM_FAIL 2      // returns after wrong lexem is readed
-#define S_MEMORY_ERROR 3    // returns after memory allocation error
+#define S_END_OF_FILE -1     // returns after succesfully readed file
+#define S_TOKEN_OK 0        // returns after token succesfully readed
+#define S_LEXEM_FAIL 1      // returns after wrong lexem is readed
+#define S_MEMORY_ERROR 99    // returns after memory allocation error
 
 
 typedef enum TokenType {INTEGER, DOUBLE, STRING, ID, KEYWORD, DIV, MUL, ADD,
