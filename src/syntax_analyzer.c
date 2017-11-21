@@ -64,7 +64,6 @@ if(RET_VAL != SYN_OK)\
   return RET_VAL;\
 }\
 
-#define DELKAPRAVIDLA 10
 
 #define SYN_OK 0
 #define SYN_ERROR -1
@@ -542,7 +541,7 @@ int PreExe(char c, Token* act, tDLList* local,tDLList* partrule,tDLList* rule){
 
     top = (char*)malloc(sizeof(char));
     if (top==NULL){
-        return S_MEMORY_ERROR;
+        return 99;
     }
 
 
@@ -655,7 +654,7 @@ int PreExe(char c, Token* act, tDLList* local,tDLList* partrule,tDLList* rule){
                     //martinova fce(partrule->First->act, partrule->First->rptr->act, partrule->First->rptr->rptr->act, &(vys) )
 
                     //gen
-                    DLInsertLast(local,'E',&(vys));
+                    DLInsertLast(local,'E',vys);
                     continue;
                 }
                 DLDisposeList(rule);
@@ -712,7 +711,7 @@ int PreExe(char c, Token* act, tDLList* local,tDLList* partrule,tDLList* rule){
                     printf("uplatneni i->E \n");
                     continue;
                 }
-                // sem dojde pokud se yadne pravidlo neuplatni
+                // sem dojde pokud se zadne pravidlo neuplatni
                 return 2;
                 break;
             default:
