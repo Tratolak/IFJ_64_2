@@ -825,7 +825,7 @@ int PreNextTok(Token* act, tDLList* local,tDLList* partrule,tDLList* rule, Token
     return 0;
 }
 
- int PreAnalyzer(Token *act, Token**back){
+ int PreAnalyzer(Token *act, Token**back, TokType* res){
      tDLList *local, *partrule, *rule;
      Token* vys;
      int err;
@@ -834,7 +834,7 @@ int PreNextTok(Token* act, tDLList* local,tDLList* partrule,tDLList* rule, Token
      DLListInitForParser(&(local), &(rule), &(partrule));
 
      err=PreNextTok(act, local, partrule, rule, &(vys)); // hlavni funkce ridici precedencni analyzu
-
+     *res=local->First->rptr->act->type;
 
      DLDisposeList(local);  //cisteni
      DLDisposeList(partrule);
