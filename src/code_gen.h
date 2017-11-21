@@ -27,7 +27,7 @@ void getResult(char *variableName);
 
 void functionBegin(char *functionName);
 
-void functionEnd(char *LFVariable, char *TFVariable);
+void functionEnd(bool fReturn, char *variableName);
 
 void functionCall(char *functionName);
 
@@ -37,7 +37,10 @@ void whileIfElseEnd(labelType type);
 
 void variableDeclaration(char *name);
 
+void write(char *string, bool isVariable);
 
 void input(char *variableName, TokType type);
+
+void scopeLabel();
 
 #endif //TESTBENCH2_CODE_GEN_H

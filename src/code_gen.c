@@ -30,6 +30,7 @@ void header() {
  */
 void TFCreation() {
     typeStackInit(&typeStack);
+    printf("PUSHFRAME\n");
     printf("CREATEFRAME\n");
     printf("DEFVAR TF@_exprOperand1\n");
     printf("DEFVAR TF@_exprOperand2\n");
@@ -219,6 +220,7 @@ void boolOperationSelect(char operand, bool convert, TokType type) {
             break;
     }
     printf("CLEARS\n");
+    printf("POPFRAME\n");
 }
 
 /**
@@ -260,8 +262,9 @@ bool getOperand(Token *t, bool isVariable, TokType type) {
  */
 void getResult(char *variableName) {
     printf("POPS TF@_exprResult\n");
-    printf("MOVE TF@_%s TF@_expResult\n", variableName);
+    printf("MOVE LF@_%s TF@_expResult\n", variableName);
     printf("CLEARS\n");
+    printf("POPFRAME\n");
     typeStackDispose(&typeStack);
 }
 
@@ -276,9 +279,17 @@ void getResult(char *variableName) {
  */
 void functionBegin(char *functionName) {
     printf("LABEL %s\n", functionName);
-    printf("PUSHFRAME\n");
-    printf("CREATEFRAME\n");
 }
+
+/**
+ *Presouvani prome
+ *
+ * @param paramName
+ */
+/*void functionParams(char *paramName){
+    variableDeclaration(paramName);
+    printf("MOVE TF@_%s LF@_%s\n",paramName,paramName);
+}*/
 
 /**
  * Generovani instrukce pro ulozeni navratove hodnoty z LF do TF. Pokud fce nic nevraci jsou oba
@@ -287,12 +298,20 @@ void functionBegin(char *functionName) {
  * @param LFVariable - copy to (char*)
  * @param TFVariable - copy from (char*)
  */
-void functionEnd(char *LFVariable, char *TFVariable) {
-    if (LFVariable != "" && TFVariable != "") {
-        printf("MOVE LF@_%s TF@_%s\n", LFVariable, TFVariable);
+void functionEnd(bool fReturn, char *variableName) {
+    if (fReturn == true) {
+        printf("PUSH TF@_%s\n",variableName);
     }
     printf("RETURN\n");
 }
+
+/**
+ *
+ */
+/*void functionTFPreparation(){
+    printf("PUSHFRAME\n");
+    printf("CREATEFRAME\n");
+}*/
 
 /**
  * Generovani instrukci pro volani fce a odstraneni TF utvoreneho ve fci.
@@ -304,6 +323,13 @@ void functionCall(char *functionName) {
     printf("POPFRAME\n");
 }
 
+/**
+ *
+ * @param variableName
+ */
+/*void functionReturn(char *variableName){
+    printf("POPS LF@_%s\n",variableName);
+}*/
 //================================================================================
 // Generovani pomocnych konstrukci
 //================================================================================
@@ -365,6 +391,20 @@ void variableDeclaration(char *name) {
 }
 
 /**
+ * Generovani instrukce pro vypis.
+ *
+ * @param string      - vypisovany retezec/ jmeno promenne (char *)
+ * @param isVariable  - TRUE pokud je retezec promenna (bool)
+ */
+void write(char *string, bool isVariable){
+    if(isVariable){
+        printf("WRITE TF@_%s\n", string);
+    }else{
+        printf("WRITE %s\n", string);
+    }
+}
+
+/**
  * Generovani instrukce pro nacteni do promenne.
  *
  * @param variableName - jmeno promenne (char*)
@@ -387,3 +427,11 @@ void input(char *variableName, TokType type) {
     }
     printf("READ TF@_%s %s\n", variableName, inputType);
 }
+
+/**
+ * Generovani navesti hlavniho tela programu.
+ */
+void scopeLabel(){
+    printf("LABEL scope\n");
+}
+
