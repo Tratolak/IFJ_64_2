@@ -24,11 +24,7 @@ void DLInitList (tDLList *L) {
 
 void DLInitList$ (tDLList *L) {
 /*
-** Provede inicializaci seznamu L před jeho prvním použitím (tzn. žádná
-** z následujících funkcí nebude volána nad neinicializovaným seznamem).
-** Tato inicializace se nikdy nebude provádět nad již inicializovaným
-** seznamem, a proto tuto možnost neošetřujte. Vždy předpokládejte,
-** že neinicializované proměnné mají nedefinovanou hodnotu.
+** Provede inicializaci seznamu L i s $
 **/
 	L->First = NULL;
 	L->Act = NULL;
@@ -38,9 +34,7 @@ void DLInitList$ (tDLList *L) {
 
 void DLDisposeList (tDLList *L) {
 /*
-** Zruší všechny prvky seznamu L a uvede seznam do stavu, v jakém
-** se nacházel po inicializaci. Rušené prvky seznamu budou korektně
-** uvolněny voláním operace free.
+** Zruší všechny prvky seznamu L + free
 **/
 if(L->First != NULL){
 while(L->First != L->Last)
