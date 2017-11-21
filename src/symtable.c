@@ -90,6 +90,7 @@ void TClearAll (Table* t) {
     ptr = (*t)[i];
     while (ptr != NULL) {
       nextptr = ptr->next;
+      free(ptr->name);
       free(ptr);
       ptr = nextptr;
     }
