@@ -786,7 +786,7 @@ int PreTokenAnalyzer(Token *act, char * c){
 
 }
 int PreNextTok(Token* act, tDLList* local,tDLList* partrule,tDLList* rule, Token** vys){
-    int err, ret;
+    int err, ret, tok;
     char *c;
 
     c=(char*)malloc(sizeof(char));
@@ -796,23 +796,23 @@ int PreNextTok(Token* act, tDLList* local,tDLList* partrule,tDLList* rule, Token
     }
 
     do {
-        if (act == NULL) {
+        if (act == NULL) { //umoznuje zpracovavat jeden token vicekrat
             GET_TOKEN(act);
         }
-        err = PreTokenAnalyzer(act, c);
-        if (err == 1) {
-            PreExe('$', NULL, local, partrule, rule);
+        tok = PreTokenAnalyzer(act, c); //overeni zda token je validni pro precedencni analyzu
+        if (tok == 1) { //kdyz token nepotri ukoncujeme prec analyzu
+            PreExe('$', NULL, local, partrule, rule); // posleme ukoncovaci znak
         }
-        else
+        else // novy nebo stavajici token
         {
             ret=PreExe(*c, act,local,partrule,rule);
-            if(ret==7){
+            if(ret==7){ // pokud neprobehlo zpracovani stavajiciho tokenu TOTO NENI CHYBA
 
             } else {
-                act = NULL;
+                act = NULL; // zpracovano, chceme dalsi token
             }
         }
-    }while(err!=1);
+    }while(tok!=1);
 
     free(c);
     c=NULL;
