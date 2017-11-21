@@ -713,10 +713,10 @@ int PreExe(char c, Token* act, tDLList* local,tDLList* partrule,tDLList* rule){
                     continue;
                 }
                 // sem dojde pokud se yadne pravidlo neuplatni
-                return 1;
+                return 2;
                 break;
             default:
-                return 1; // chyba syntaxe
+                return 2; // chyba syntaxe
 
         }
 
@@ -786,7 +786,7 @@ int PreTokenAnalyzer(Token *act, char * c){
 
 }
 int PreNextTok(Token* act, tDLList* local,tDLList* partrule,tDLList* rule, Token** vys){
-    int err, ret, tok;
+    int err, tok;
     char *c;
 
     c=(char*)malloc(sizeof(char));
@@ -805,11 +805,15 @@ int PreNextTok(Token* act, tDLList* local,tDLList* partrule,tDLList* rule, Token
         }
         else // novy nebo stavajici token
         {
-            ret=PreExe(*c, act,local,partrule,rule);
-            if(ret==7){ // pokud neprobehlo zpracovani stavajiciho tokenu TOTO NENI CHYBA
+            err=PreExe(*c, act,local,partrule,rule);
+            if(err==7){ // pokud neprobehlo zpracovani stavajiciho tokenu TOTO NENI CHYBA
 
-            } else {
+            }
+            else if(err==0){
                 act = NULL; // zpracovano, chceme dalsi token
+            }
+            else {
+                return err; // nejaka chyba
             }
         }
     }while(tok!=1);
