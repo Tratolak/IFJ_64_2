@@ -785,12 +785,13 @@ int PreTokenAnalyzer(Token *act, char * c){
     return 0;
 
 }
-Token* PreNextTok(Token* act, tDLList* local,tDLList* partrule,tDLList* rule){
+int PreNextTok(Token* act, tDLList* local,tDLList* partrule,tDLList* rule, Token** vys){
     int err, ret;
     char *c;
     c=(char*)malloc(sizeof(char));
     if(c==NULL){
-        return NULL;
+        *vys=NULL;
+        return 99;
     }
 
     do {
@@ -815,23 +816,32 @@ Token* PreNextTok(Token* act, tDLList* local,tDLList* partrule,tDLList* rule){
     free(c);
     c=NULL;
 
-    return act;
+    *vys=act;
+    return 0;
 }
 
  int PreAnalyzer(Token *act, Token**back){
-     printf("vytejete v precedencni analyze \n");
-     TFCreation();
      tDLList *local, *partrule, *rule;
+     Token* vys;
+     int err;
+
+     TFCreation();   // blok inicializaci
      DLListInitForParser(&(local), &(rule), &(partrule));
-     *back=PreNextTok(act, local, partrule, rule);
-     DLDisposeList(local);
+
+     err=PreNextTok(act, local, partrule, rule, &(vys)); // hlavni funkce ridici precedencni analyzu
+
+
+     DLDisposeList(local);  //cisteni
      DLDisposeList(partrule);
      DLDisposeList(rule);
+
      free(local);
      free(partrule);
      free(rule);
+
      local=NULL;
      partrule=NULL;
      rule=NULL;
 
+     return err; // vraceni pripadnych chyb
 }
