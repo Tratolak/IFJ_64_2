@@ -68,9 +68,10 @@ if(RET_VAL != SYN_OK)\
 #define DELKAPRAVIDLA 10
 
 #define SYN_OK 0
-#define SYN_ERROR -1
-#define SEM_ERROR -2
-#define BIN_OP_INCOMPAT -4
+#define SEM_OK 0
+#define SYN_ERROR 2
+#define SEM_ERROR 3
+#define BIN_OP_INCOMPAT 4
 
 
 //Semantic
