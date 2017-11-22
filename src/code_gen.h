@@ -1,5 +1,5 @@
 #ifndef IFJ_64_2_CODE_GEN_H
-#define IFJ_64_2_CODE_GEN_H
+#define IFJ_64_2_CODE_GEN_HT
 
 #include "scanner.h"
 #include "stack_operations.h"
@@ -16,7 +16,9 @@ void convertInstructionSelect(TokType original, TokType new, char *string);
 
 void operationSelect(char operation, bool convert, TokType type);
 
-void boolOperationSelect(char operation, bool convert, TokType type);
+void boolOperationSelect(char operation, TokType var1, TokType var2);
+
+void boolOperationConvert(TokType var1, TokType var2);
 
 bool getOperand(Token *t, bool isVariable, TokType type);
 
@@ -24,6 +26,19 @@ void TFCreation();
 
 void getResult(char *variableName);
 
+void functionFramePreparation();
+
+void callParamLoad(Token t);
+
+void callParamsPush();
+
+void callInstruction(char *functionName);
+
+void functionDefinition(char *functionName);
+
+void functionParamLoad(Token t);
+
+void functionReturn(bool fReturn, char *variableName);
 
 bool whileIfBegin(labelType type);
 
