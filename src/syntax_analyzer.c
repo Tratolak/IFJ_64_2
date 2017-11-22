@@ -952,7 +952,7 @@ int PreExe(char c, Token* act, tDLList* local,tDLList* partrule,tDLList* rule){
                 if(DLCompare(partrule, rule)==0){
                     //martinova fce(partrule->First->act, partrule->First->rptr->act, partrule->First->rptr->rptr->act, &(vys) )
 
-                    getOperand(partrule->First->act);
+                    //getOperand(partrule->First->act, isVariable, type);
                     DLInsertLast(local,'E',vys);
                     printf("uplatneni i->E \n");
                     continue;
