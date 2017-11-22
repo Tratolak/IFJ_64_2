@@ -495,16 +495,24 @@ int S_StatList(Token *act, Token **back, bool isScope){
                 return SYN_ERROR;
         }
         else if(act->type == ID){
-            if(!SEM_existId(act->val))
+            char *id = NULL;
+            myStrCpy(&id, act->val);
+            if(!SEM_existId(act->val)){
+                free(id);
                 return SEM_ERROR;
+            }
 
             GET_TOKEN(act);
             if(act->type == EQL){
                 SYN_EXPAND(S_Assig, act);
             }
             else{
+                free(id);
                 return SYN_ERROR;
             }
+
+            getResult(id, false);
+            free(id);
         }
         else if(act->type == EOL){
             continue;
