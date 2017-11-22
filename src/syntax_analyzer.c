@@ -721,11 +721,11 @@ int PreExe(char c, Token* act, tDLList* local,tDLList* partrule,tDLList* rule){
                 DLDisposeList(rule);
                 DLInsertLast(rule, 'i',NULL);
                 if(DLCompare(partrule, rule)==0){
-                    //martinova fce(partrule->First->act, partrule->First->rptr->act, partrule->First->rptr->rptr->act, &(vys) )
+                    //checkid(partrule->First->act, &(vys) );
 
                     //getOperand(partrule->First->act, isVariable, type);
                     DLInsertLast(local,'E',vys);
-
+                    FreeToken(partrule->First->act);
                     continue;
                 }
                 // sem dojde pokud se zadne pravidlo neuplatni
