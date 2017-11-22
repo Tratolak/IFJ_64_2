@@ -18,6 +18,7 @@ int variableQuantity;
 void header() {
     printf(".IFJcode17\n");
     labelStackInit(&labelStack);
+    printf("CREATEFRAME\n");
     printf("JMP scope\n");
 }
 
@@ -262,13 +263,9 @@ void boolOperationSelect(char operand, TokType var1, TokType var2) {
  * @param type       - typ promenne (TokType)
  * @return mallocOk - true = ok | false = error (bool)
  */
-bool getOperand(Token *t, bool isVariable, TokType type) {
+bool getOperand(Token *t) {
     bool mallocOk = true;
-    if (isVariable) {
-        //Timto si nejsem uplne jisty. Sem se program dostane, kdyz je ve vyrazu promenna.
-        printf("PUSHS TF@_%s\n", t->val);
-        mallocOk = typeStackPush(&typeStack, type);
-    } else if (t->type == INTEGER) {
+    if (t->type == INTEGER) {
         printf("PUSHS int@%s\n", t->val);
         mallocOk = typeStackPush(&typeStack, t->type);
     } else if (t->type == DOUBLE) {
@@ -278,7 +275,7 @@ bool getOperand(Token *t, bool isVariable, TokType type) {
         printf("PUSHS string@%s\n", t->val);
         mallocOk = typeStackPush(&typeStack, t->type);
     } else if (t->type == ID) {
-        printf("PUSHS %s\n", t->val);
+        printf("PUSHS LF@_%s\n", t->val);
         mallocOk = typeStackPush(&typeStack, t->type);
     }
     return mallocOk;
@@ -291,12 +288,16 @@ bool getOperand(Token *t, bool isVariable, TokType type) {
  *
  * @param variableName - nazev promenne, do ktere bude vysledek prirazen (char*)
  */
-void getResult(char *variableName) {
-    printf("POPS TF@_exprResult\n");
-    printf("MOVE LF@_%s TF@_expResult\n", variableName);
-    printf("CLEARS\n");
-    printf("POPFRAME\n");
-    typeStackDispose(&typeStack);
+void getResult(char *variableName, bool isFunction) {
+    if (!isFunction) {
+        printf("POPS TF@_exprResult\n");
+        printf("MOVE LF@_%s TF@_exprResult\n", variableName);
+        printf("CLEARS\n");
+        printf("POPFRAME\n");
+        typeStackDispose(&typeStack);
+    }else{
+        printf("MOVE LF@_%s LF@_returValue\n", variableName);
+    }
 }
 
 //================================================================================
@@ -309,6 +310,7 @@ void getResult(char *variableName) {
 void functionFramePreparation() {
     printf("PUSHFRAME\n");
     printf("CREATEFRAME\n");
+    printf("DEFVAR LF@_returValue\n");
     variableQuantity = 0;
 }
 
@@ -322,11 +324,11 @@ void callParamLoad(Token t) {
     if (t.type == ID) {
         printf("MOVE TF@_%d LF@_%s\n", variableQuantity, t.val);
     } else if (t.type == INTEGER) {
-        printf("MOVE TF@_%d int@%s", variableQuantity, t.val);
+        printf("MOVE TF@_%d int@%s\n", variableQuantity, t.val);
     } else if (t.type == DOUBLE) {
-        printf("MOVE TF@_%d float@%s", variableQuantity, t.val);
+        printf("MOVE TF@_%d float@%s\n", variableQuantity, t.val);
     } else if (t.type == STRING) {
-        printf("MOVE TF@_%d string@%s", variableQuantity, t.val);
+        printf("MOVE TF@_%d string@%s\n", variableQuantity, t.val);
     }
     variableQuantity++;
 }
@@ -358,7 +360,7 @@ void callInstruction(char *functionName) {
  */
 void functionDefinition(char *functionName) {
     printf("LABEL %s\n", functionName);
-    printf("CREATEFRAME");
+    printf("CREATEFRAME\n");
 }
 
 /**
@@ -377,9 +379,9 @@ void functionParamLoad(Token t) {
  * @param LFVariable - copy to (char*)
  * @param TFVariable - copy from (char*)
  */
-void functionReturn(bool fReturn, char *variableName) {
+void functionReturn(bool fReturn) {
     if (fReturn == true) {
-        printf("PUSH TF@_%s\n", variableName);
+        printf("POPS LF@_returValue\n");
     }
     printf("RETURN\n");
 }
@@ -449,12 +451,10 @@ void variableDeclaration(char *name) {
  * @param string      - vypisovany retezec/ jmeno promenne (char *)
  * @param isVariable  - TRUE pokud je retezec promenna (bool)
  */
-void write(char *string, bool isVariable) {
-    if (isVariable) {
-        printf("WRITE TF@_%s\n", string);
-    } else {
-        printf("WRITE %s\n", string);
-    }
+void write() {
+    printf("POPS TF@_expResult\n");
+    printf("WRITE TF@_expResult\n");
+    printf("POPFRAME\n");
 }
 
 /**
@@ -464,21 +464,19 @@ void write(char *string, bool isVariable) {
  * @param type     - typ promenne (TokType)
  */
 void input(char *variableName, TokType type) {
-    char *inputType = "";
     switch (type) {
         case INTEGER:
-            inputType = "int";
+            printf("READ TF@_%s int\n", variableName);
             break;
         case DOUBLE:
-            inputType = "float";
+            printf("READ TF@_%s float\n", variableName);
             break;
         case STRING:
-            inputType = "string";
+            printf("READ TF@_%s string\n", variableName);
             break;
         default:
             break;
     }
-    printf("READ TF@_%s %s\n", variableName, inputType);
 }
 
 /**
