@@ -207,6 +207,35 @@ int CheckRule(Token *op1, Token *oper, Token* op2, Token** res, TokType *typ1, T
     return SEM_OK;
 }
 
+int Checkid(Token *in, Token **out)
+{
+    TokType type;
+    *out = malloc(sizeof(Token));
+    if(out == NULL)
+        return S_MEMORY_ERROR;
+
+    if(in->type == ID){
+        Search_Var(FUNC, in->val, &type);
+    }
+    else if(in->type == INTEGER){
+        type = INTEGER;
+    }
+    else if(in->type == DOUBLE){
+        type = DOUBLE;
+    }
+    else if(in->type == STRING){
+        type = STRING;
+    }
+    else{
+        return SEM_ERROR;
+    }
+
+    (*out)->type = type;
+
+    return SEM_OK;
+}
+
+
 /*******
  *
  * Shora dolu
