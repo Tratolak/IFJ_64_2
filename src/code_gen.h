@@ -25,12 +25,6 @@ void TFCreation();
 void getResult(char *variableName);
 
 
-void functionBegin(char *functionName);
-
-void functionEnd(bool fReturn, char *variableName);
-
-void functionCall(char *functionName);
-
 bool whileIfBegin(labelType type);
 
 void whileIfElseEnd(labelType type);

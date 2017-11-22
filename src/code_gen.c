@@ -272,64 +272,7 @@ void getResult(char *variableName) {
 // Generovani instrukci pro vytvoreni a volani fce
 //================================================================================
 
-/**
- * Generovani instrukci navesti funkce, ulozeni TF na zasobnik a utvoreni noveho TF.
- *
- * @param functionName - jmeno funkce (char*)
- */
-void functionBegin(char *functionName) {
-    printf("LABEL %s\n", functionName);
-}
 
-/**
- *Presouvani prome
- *
- * @param paramName
- */
-/*void functionParams(char *paramName){
-    variableDeclaration(paramName);
-    printf("MOVE TF@_%s LF@_%s\n",paramName,paramName);
-}*/
-
-/**
- * Generovani instrukce pro ulozeni navratove hodnoty z LF do TF. Pokud fce nic nevraci jsou oba
- * predane parametry nastaveny na "".
- *
- * @param LFVariable - copy to (char*)
- * @param TFVariable - copy from (char*)
- */
-void functionEnd(bool fReturn, char *variableName) {
-    if (fReturn == true) {
-        printf("PUSH TF@_%s\n",variableName);
-    }
-    printf("RETURN\n");
-}
-
-/**
- *
- */
-/*void functionTFPreparation(){
-    printf("PUSHFRAME\n");
-    printf("CREATEFRAME\n");
-}*/
-
-/**
- * Generovani instrukci pro volani fce a odstraneni TF utvoreneho ve fci.
- *
- * @param functionName - jmeno navesti zacatku funkce (char*)
- */
-void functionCall(char *functionName) {
-    printf("CALL %s\n", functionName);
-    printf("POPFRAME\n");
-}
-
-/**
- *
- * @param variableName
- */
-/*void functionReturn(char *variableName){
-    printf("POPS LF@_%s\n",variableName);
-}*/
 //================================================================================
 // Generovani pomocnych konstrukci
 //================================================================================
