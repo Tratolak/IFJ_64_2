@@ -31,6 +31,14 @@
 		<Compiler>
 			<Add option="-Wall" />
 		</Compiler>
+		<Unit filename="src/DLlist.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/DLlist.h" />
+		<Unit filename="src/code_gen.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/code_gen.h" />
 		<Unit filename="src/main.c">
 			<Option compilerVar="CC" />
 		</Unit>
@@ -38,6 +46,10 @@
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="src/scanner.h" />
+		<Unit filename="src/stack_operations.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/stack_operations.h" />
 		<Unit filename="src/symtable.c">
 			<Option compilerVar="CC" />
 		</Unit>
