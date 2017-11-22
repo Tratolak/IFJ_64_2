@@ -552,6 +552,7 @@ int S_Dim(Token *act){
     }
 
     Add_Var(FUNC, id, type);
+    variableDeclaration(id);
 
     return SYN_OK;
 }
