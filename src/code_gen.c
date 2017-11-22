@@ -3,8 +3,12 @@
 #include "stack_operations.h"
 
 //Pocitani poctu navesti daneho typu
-int whileLabel = 0;
-int ifLabel = 0;
+int whileLabelQuantity = 0;
+int ifLabelQuantity = 0;
+
+//================================================================================
+//
+//================================================================================
 
 /**
  * Utvoreni povinne hlavicky IFJcode17, inicializace zasobniku pro navesti.
@@ -16,11 +20,17 @@ void header() {
     printf("JMP scope\n");
 }
 
+//================================================================================
+// Funkce potrebne pro generovani instrukci na vyhodnoceni vyrazu
+//================================================================================
+
+/**
 /**
  * Vytvoreni docasneho ramce pro vypocet vyrazu. A inicializace zasobniku typu.
  */
 void TFCreation() {
     typeStackInit(&typeStack);
+    printf("PUSHFRAME\n");
     printf("CREATEFRAME\n");
     printf("DEFVAR TF@_exprOperand1\n");
     printf("DEFVAR TF@_exprOperand2\n");
@@ -75,7 +85,7 @@ void convertInstructionSelect(TokType original, TokType new, char *string) {
  * dle operand a ulozeni vysledku na vrchol zasobniku.
  *
  * @param operation - provadena operace (char)
- * @param convert   - true = je treba pretypovat | false= neni treba pretypovat (bool)
+ * @param convert   - true = je treba pretypovat | false = neni treba pretypovat (bool)
  * @param type      - typ do ktereho se provede pripadne pretypovani (TokType)
  */
 void operationSelect(char operand, bool convert, TokType type) {
@@ -100,28 +110,134 @@ void operationSelect(char operand, bool convert, TokType type) {
             break;
         case '/': //Vysledek je vzdy double
             printf("DIV TF@_exprResult TF@_exprOperand2 TF@_exprOperand1\n");
-            if(type != DOUBLE){
+            if (type != DOUBLE) {
                 convertInstructionSelect(type, DOUBLE, "TF@_exprResult");
             }
             printf("PUSHS TF@_exprResult\n");
-                break;
-        case '\\': //Operandy a vysledek jsou typu INTEGER
-                printf("DIV TF@_exprResult TF@_exprOperand2 TF@_exprOperand1\n");
-                printf("PUSHS TF@_exprResult\n");
             break;
-        default:break;
+        case '\\': //Operandy a vysledek jsou typu INTEGER
+            printf("DIV TF@_exprResult TF@_exprOperand2 TF@_exprOperand1\n");
+            printf("PUSHS TF@_exprResult\n");
+            break;
+        default:
+            break;
     }
+}
+
+/**
+ * Generovani vyrazu pro konstrukce IF,IF ELSE a WHILE.
+ *
+ * @param operation - provadena operace (char)
+ * @param convert   - true = je treba pretypovat | false = neni treba pretypovat (bool)
+ * @param type      - typ do ktereho se provede pripadne pretypovani (TokType)
+ */
+void boolOperationSelect(char operand, bool convert, TokType type) {
+    typeConvert(convert, type);
+    labelType lType;
+    int quantity;
+
+    switch (operand) {
+        case '=':
+            printf("PUSHS TF@_exprOperand2\n");
+            printf("PUSHS TF@_exprOperand1\n");
+            printf("EQS\n");
+            printf("PUSHS bool@true\n");
+            labelStackTop(&labelStack, &lType, &quantity);
+            if (lType == WHILE) {
+                printf("JUMPIFNEQS while%dEnd\n", quantity); //while%dEnd - navesti konce cyklu
+            } else if (lType == IF) {
+                printf("JUMPIFNEQS else%d\n", quantity); //if%dFalse - zacatek false vetve podminky
+            }
+            break;
+        case '#':  //!=
+            printf("PUSHS TF@_exprOperand2\n");
+            printf("PUSHS TF@_exprOperand1\n");
+            printf("EQS\n");
+            printf("PUSHS bool@false\n");
+            labelStackTop(&labelStack, &lType, &quantity);
+            if (lType == WHILE) {
+                printf("JUMPIFNEQS while%dEnd\n", quantity); //while%dEnd - navesti konce cyklu
+            } else if (lType == IF) {
+                printf("JUMPIFNEQS else%d\n", quantity); //if%dFalse - zacatek false vetve podminky
+            }
+            break;
+        case ',': //<=
+            printf("PUSHS TF@_exprOperand2\n");
+            printf("PUSHS TF@_exprOperand1\n");
+            printf("EQS\n");
+            printf("PUSHS TF@_exprOperand2\n");
+            printf("PUSHS TF@_exprOperand1\n");
+            printf("LTS\n");
+            printf("ORS\n");
+            printf("PUSHS bool@true\n");
+            labelStackTop(&labelStack, &lType, &quantity);
+            if (lType == WHILE) {
+                printf("JUMPIFNEQS while%dEnd\n", quantity); //while%dEnd - navesti konce cyklu
+            } else if (lType == IF) {
+                printf("JUMPIFNEQS else%d\n", quantity); //if%dFalse - zacatek false vetve podminky
+            }
+            break;
+        case '.': //>=
+            printf("PUSHS TF@_exprOperand2\n");
+            printf("PUSHS TF@_exprOperand1\n");
+            printf("EQS\n");
+            printf("PUSHS TF@_exprOperand2\n");
+            printf("PUSHS TF@_exprOperand1\n");
+            printf("GTS\n");
+            printf("ORS\n");
+            printf("PUSHS bool@true\n");
+            labelStackTop(&labelStack, &lType, &quantity);
+            if (lType == WHILE) {
+                printf("JUMPIFNEQS while%dEnd\n", quantity); //while%dEnd - navesti konce cyklu
+            } else if (lType == IF) {
+                printf("JUMPIFNEQS else%d\n", quantity); //if%dFalse - zacatek false vetve podminky
+            }
+            break;
+        case '?': // <
+            printf("PUSHS TF@_exprOperand2\n");
+            printf("PUSHS TF@_exprOperand1\n");
+            printf("LTS\n");
+            printf("PUSHS bool@true\n");
+            labelStackTop(&labelStack, &lType, &quantity);
+            if (lType == WHILE) {
+                printf("JUMPIFNEQS while%dEnd\n", quantity); //while%dEnd - navesti konce cyklu
+            } else if (lType == IF) {
+                printf("JUMPIFNEQS else%d\n", quantity); //if%dFalse - zacatek false vetve podminky
+            }
+            break;
+        case ':': //>
+            printf("PUSHS TF@_exprOperand2\n");
+            printf("PUSHS TF@_exprOperand1\n");
+            printf("GTS\n");
+            printf("PUSHS bool@true\n");
+            labelStackTop(&labelStack, &lType, &quantity);
+            if (lType == WHILE) {
+                printf("JUMPIFNEQS while%dEnd\n", quantity); //while%dEnd - navesti konce cyklu
+            } else if (lType == IF) {
+                printf("JUMPIFNEQS else%d\n", quantity); //if%dFalse - zacatek false vetve podminky
+            }
+        default:
+            break;
+    }
+    printf("CLEARS\n");
+    printf("POPFRAME\n");
 }
 
 /**
  * Ulozeni hodnoty/promenne na vrchol zasobniku.
  *
- * @param t - promenna/absolutni hodnota (Token)
+ * @param t          - promenna/absolutni hodnota (Token)
+ * @param isVariable - true jedna-li se o promennou (bool)
+ * @param type       - typ promenne (TokType)
  * @return mallocOk - true = ok | false = error (bool)
  */
-bool getOperand(Token *t) {
+bool getOperand(Token *t, bool isVariable, TokType type) {
     bool mallocOk = true;
-    if (t->type == INTEGER) {
+    if (isVariable) {
+        //Timto si nejsem uplne jisty. Sem se program dostane, kdyz je ve vyrazu promenna.
+        printf("PUSHS TF@_%s\n", t->val);
+        mallocOk = typeStackPush(&typeStack, type);
+    } else if (t->type == INTEGER) {
         printf("PUSHS int@%s\n", t->val);
         mallocOk = typeStackPush(&typeStack, t->type);
     } else if (t->type == DOUBLE) {
@@ -137,21 +253,185 @@ bool getOperand(Token *t) {
     return mallocOk;
 }
 
+
 /**
- * Ulozeni navesti na vrchol zasobniku.
+ * Generovani prirazeni vysledku vyrazu do urcene promenne a uvolneni celeho zasobniku.
+ * Nastaveni zasobniku typu do vychoziho stavu.
  *
+ * @param variableName - nazev promenne, do ktere bude vysledek prirazen (char*)
+ */
+void getResult(char *variableName) {
+    printf("POPS TF@_exprResult\n");
+    printf("MOVE LF@_%s TF@_expResult\n", variableName);
+    printf("CLEARS\n");
+    printf("POPFRAME\n");
+    typeStackDispose(&typeStack);
+}
+
+//================================================================================
+// Generovani instrukci pro vytvoreni a volani fce
+//================================================================================
+
+/**
+ * Generovani instrukci navesti funkce, ulozeni TF na zasobnik a utvoreni noveho TF.
+ *
+ * @param functionName - jmeno funkce (char*)
+ */
+void functionBegin(char *functionName) {
+    printf("LABEL %s\n", functionName);
+}
+
+/**
+ *Presouvani prome
+ *
+ * @param paramName
+ */
+/*void functionParams(char *paramName){
+    variableDeclaration(paramName);
+    printf("MOVE TF@_%s LF@_%s\n",paramName,paramName);
+}*/
+
+/**
+ * Generovani instrukce pro ulozeni navratove hodnoty z LF do TF. Pokud fce nic nevraci jsou oba
+ * predane parametry nastaveny na "".
+ *
+ * @param LFVariable - copy to (char*)
+ * @param TFVariable - copy from (char*)
+ */
+void functionEnd(bool fReturn, char *variableName) {
+    if (fReturn == true) {
+        printf("PUSH TF@_%s\n",variableName);
+    }
+    printf("RETURN\n");
+}
+
+/**
+ *
+ */
+/*void functionTFPreparation(){
+    printf("PUSHFRAME\n");
+    printf("CREATEFRAME\n");
+}*/
+
+/**
+ * Generovani instrukci pro volani fce a odstraneni TF utvoreneho ve fci.
+ *
+ * @param functionName - jmeno navesti zacatku funkce (char*)
+ */
+void functionCall(char *functionName) {
+    printf("CALL %s\n", functionName);
+    printf("POPFRAME\n");
+}
+
+/**
+ *
+ * @param variableName
+ */
+/*void functionReturn(char *variableName){
+    printf("POPS LF@_%s\n",variableName);
+}*/
+//================================================================================
+// Generovani pomocnych konstrukci
+//================================================================================
+
+/**
+ * Ulozeni navesti na vrchol zasobniku. A vytvoreni instrukce pro navesti.
+ *
+ * @param type - typ konstrukce (labelType)
  * @return mallocOk - true = ok | false = error (bool)
  */
-bool getLabel(char *label){
+bool whileIfBegin(labelType type) {
     bool mallocOk = true;
-
+    if (type == WHILE) {
+        mallocOk = labelStackPush(&labelStack, type, whileLabelQuantity, false);
+        printf("LABEL while%d\n", whileLabelQuantity);
+        whileLabelQuantity++;
+    } else if (type == IF) {
+        mallocOk = labelStackPush(&labelStack, type, ifLabelQuantity, false);
+        printf("LABEL if%d\n", ifLabelQuantity);
+        ifLabelQuantity++;
+    }
     return mallocOk;
 }
 
 /**
- * //TODO vlozeni vysledku do promene
+ * Generovani instrukci pro konstrukce IF ,ELSE, WHILE.
+ *
+ * @param type - typ konstrukce (labelType)
  */
-void getResult() {
-    printf("POPS TF@_exprResult\n");
-    printf("WRITE TF@_exprResult\n");
+void whileIfElseEnd(labelType type) {
+    labelType lType;
+    int quantity;
+    bool ifElse;
+    labelStackPop(&labelStack, &lType, &quantity, &ifElse);
+
+    if (type == WHILE) {
+        printf("JUMP while%d\n", quantity);
+        printf("LABEL while%dEnd\n", quantity);
+    } else if (type == IF) {
+        //Pokud nebyl vygenerovano ELSE
+        if (!ifElse) {
+            printf("LABEL else%d\n", quantity);
+        }
+        printf("LABEL if%dEnd\n", quantity);
+    } else if (type == ELSE) {
+        printf("JUMP if%dEnd\n", quantity);
+        printf("LABEL else%d\n", quantity);
+        labelStackPush(&labelStack, type, ifLabelQuantity, true);
+    }
 }
+
+/**
+ * Generovani prikazu na vytvoreni nove promenne v docasnem ramci.
+ *
+ * @param name - jmeno promenne (char*)
+ */
+void variableDeclaration(char *name) {
+    printf("DEFVAR TF@_%s\n", name);
+}
+
+/**
+ * Generovani instrukce pro vypis.
+ *
+ * @param string      - vypisovany retezec/ jmeno promenne (char *)
+ * @param isVariable  - TRUE pokud je retezec promenna (bool)
+ */
+void write(char *string, bool isVariable){
+    if(isVariable){
+        printf("WRITE TF@_%s\n", string);
+    }else{
+        printf("WRITE %s\n", string);
+    }
+}
+
+/**
+ * Generovani instrukce pro nacteni do promenne.
+ *
+ * @param variableName - jmeno promenne (char*)
+ * @param type     - typ promenne (TokType)
+ */
+void input(char *variableName, TokType type) {
+    char *inputType = "";
+    switch (type) {
+        case INTEGER:
+            inputType = "int";
+            break;
+        case DOUBLE:
+            inputType = "float";
+            break;
+        case STRING:
+            inputType = "string";
+            break;
+        default:
+            break;
+    }
+    printf("READ TF@_%s %s\n", variableName, inputType);
+}
+
+/**
+ * Generovani navesti hlavniho tela programu.
+ */
+void scopeLabel(){
+    printf("LABEL scope\n");
+}
+
