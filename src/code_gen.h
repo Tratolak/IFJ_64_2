@@ -40,6 +40,14 @@ void functionParamLoad(Token t);
 
 void functionReturn(bool fReturn);
 
+void inBuiltLength();
+
+void inBuiltSubStr();
+
+void inBuiltChr();
+
+void inBuiltAsc();
+
 bool whileIfBegin(labelType type);
 
 void whileIfElseEnd(labelType type);

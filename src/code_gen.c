@@ -19,7 +19,11 @@ void header() {
     printf(".IFJcode17\n");
     labelStackInit(&labelStack);
     printf("CREATEFRAME\n");
-    printf("JMP scope\n");
+    printf("JUMP scope\n");
+    inBuiltLength();
+    inBuiltSubStr();
+    inBuiltAsc();
+    inBuiltChr();
 }
 
 //================================================================================
@@ -295,8 +299,8 @@ void getResult(char *variableName, bool isFunction) {
         printf("CLEARS\n");
         printf("POPFRAME\n");
         typeStackDispose(&typeStack);
-    }else{
-        printf("MOVE LF@_%s LF@_returValue\n", variableName);
+    } else {
+        printf("MOVE TF@_%s TF@_returnValue\n", variableName);
     }
 }
 
@@ -310,7 +314,7 @@ void getResult(char *variableName, bool isFunction) {
 void functionFramePreparation() {
     printf("PUSHFRAME\n");
     printf("CREATEFRAME\n");
-    printf("DEFVAR LF@_returValue\n");
+    printf("DEFVAR LF@_returnValue\n");
     variableQuantity = 0;
 }
 
@@ -381,10 +385,144 @@ void functionParamLoad(Token t) {
  */
 void functionReturn(bool fReturn) {
     if (fReturn == true) {
-        printf("POPS LF@_returValue\n");
+        printf("POPS LF@_returnValue\n");
     }
     printf("RETURN\n");
 }
+
+//================================================================================
+// Vestavene funkce
+//================================================================================
+
+/**
+ * Generovani vestavene funkce pro zjisteni delky retezce.
+ */
+void inBuiltLength() {
+    printf("LABEL Length\n");
+    printf("CREATEFRAME\n");
+    printf("DEFVAR TF@_s\n");
+    printf("POPS TF@_s\n");
+    printf("DEFVAR TF@_Length\n");
+    printf("STRLEN TF@_Length TF@_s\n");
+    printf("MOVE LF@_returnValue TF@_Length\n");
+    printf("RETURN\n");
+}
+
+/**
+ * Generovani vestavene funkce pro ziskani podretezce od i do n.
+ */
+void inBuiltSubStr() {
+    printf("LABEL SubStr\n");
+    printf("CREATEFRAME\n");
+    printf("MOVE LF@_returnValue string@\n");
+    printf("DEFVAR TF@_s\n");
+    printf("POPS TF@_s\n");
+    printf("DEFVAR TF@_i\n");
+    printf("POPS TF@_i\n");
+    printf("DEFVAR TF@_n\n");
+    printf("POPS TF@_n\n");
+
+    printf("PUSHS TF@_s\n");
+    printf("PUSHS string@\n");
+    printf("EQS\n");
+    printf("PUSHS TF@_i\n");
+    printf("PUSHS int@0\n");
+    printf("EQS\n");
+    printf("PUSHS TF@_i\n");
+    printf("PUSHS int@0\n");
+    printf("LTS\n");
+    printf("ORS\n");
+    printf("ORS\n");
+    printf("PUSHS bool@true\n");
+    printf("JUMPIFNEQS SubStr$\n");
+    printf("RETURN\n");
+    printf("LABEL SubStr$\n");
+    printf("PUSHS TF@_n\n");
+    printf("PUSHS int@0\n");
+    printf("LTS\n");
+    printf("DEFVAR TF@_length\n");
+    functionFramePreparation();
+    printf("PUSHS LF@_s\n");
+    callInstruction("Length");
+    printf("MOVE TF@_length TF@_returnValue\n");
+    printf("PUSHS TF@_length\n");
+    printf("PUSHS TF@_i\n");
+    printf("SUBS\n");
+    printf("PUSHS TF@_n\n");
+    printf("LTS\n");
+    printf("ORS\n");
+    printf("PUSHS bool@true\n");
+    printf("DEFVAR TF@_char\n");
+    printf("JUMPIFEQS NOOKSubStr$\n");
+    printf("LABEL OKSubStr\n");
+    printf("PUSHS TF@_n\n");
+    printf("PUSHS int@0\n");
+    printf("GTS\n");
+    printf("PUSHS bool@false\n");
+    printf("JUMPIFEQS SubStrEnd$\n");
+    printf("GETCHAR TF@_char TF@_s TF@_i\n");
+    printf("CONCAT LF@_returnValue LF@_returnValue TF@_char\n");
+    printf("SUB TF@_n TF@_n int@1\n");
+    printf("ADD TF@_i TF@_i int@1\n");
+    printf("JUMP OKSubStr\n");
+    printf("LABEL NOOKSubStr$\n");
+    printf("PUSHS TF@_length\n");
+    printf("PUSHS TF@_i\n");
+    printf("GTS\n");
+    printf("PUSHS bool@false\n");
+    printf("JUMPIFEQS SubStrEnd$\n");
+    printf("GETCHAR TF@_char TF@_s TF@_i\n");
+    printf("CONCAT LF@_returnValue LF@_returnValue TF@_char\n");
+    printf("ADD TF@_i TF@_i int@1\n");
+    printf("JUMP NOOKSubStr$\n");
+    printf("LABEL SubStrEnd$\n");
+    printf("RETURN\n");
+}
+
+/**
+ * Generovani vestavene funkce pro prevedeni hodnoty na znak.
+ */
+void inBuiltChr() {
+    printf("LABEL Chr\n");
+    printf("CREATEFRAME\n");
+    printf("DEFVAR TF@_i\n");
+    printf("POPS TF@_i\n");
+    printf("INT2CHAR LF@_returnValue TF@_i\n");
+    printf("RETURN\n");
+}
+
+/**
+ * Generovani vestavene funkce pro ziskani ordinalni hodnoty znaku.
+ */
+void inBuiltAsc() {
+    printf("LABEL Asc\n");
+    printf("CREATEFRAME\n");
+    printf("DEFVAR TF@_s\n");
+    printf("POPS TF@_s\n");
+    printf("DEFVAR TF@_i\n");
+    printf("POPS TF@_i\n");
+    printf("DEFVAR TF@_char\n");
+    printf("DEFVAR TF@_length\n");
+    functionFramePreparation();
+    printf("PUSHS LF@_s\n");
+    printf("CALL Length\n");
+    printf("POPFRAME\n");
+    printf("PUSHS TF@_returnValue\n");
+    printf("PUSHS TF@_i\n");
+    printf("LTS\n");
+    printf("PUSHS TF@_returnValue\n");
+    printf("PUSHS TF@_i\n");
+    printf("EQS\n");
+    printf("ORS\n");
+    printf("PUSHS bool@true\n");
+    printf("JUMPIFNEQS Asc$\n");
+    printf("MOVE LF@_returnValue int@0\n");
+    printf("RETURN\n");
+    printf("LABEL Asc$\n");
+    printf("STRI2INT LF@_returnValue TF@_s TF@_i\n");
+    printf("RETURN\n");
+}
+
 //================================================================================
 // Generovani pomocnych konstrukci
 //================================================================================
@@ -485,4 +623,3 @@ void input(char *variableName, TokType type) {
 void scopeLabel() {
     printf("LABEL scope\n");
 }
-
