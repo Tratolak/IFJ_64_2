@@ -1,5 +1,5 @@
 #ifndef IFJ_64_2_CODE_GEN_H
-#define IFJ_64_2_CODE_GEN_HT
+#define IFJ_64_2_CODE_GEN_H
 
 #include "scanner.h"
 #include "stack_operations.h"
