@@ -567,6 +567,10 @@ int S_Input(Token *act){
         return SYN_ERROR;
     }
 
+    TokType type;
+    Search_Var(FUNC, act->val, &type);
+    input(act->val, type);
+
     return SYN_OK;
 }
 
