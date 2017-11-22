@@ -100,6 +100,113 @@ void myStrCpy(char **to, char *from)
     strcpy(*to, from);
 }
 
+int CheckRule(Token *op1, Token *oper, Token* op2, Token** res, TokType *typ1, TokType *typ2)
+{
+    (*res) = malloc(sizeof(Token));
+    if(res == NULL){
+        return S_MEMORY_ERROR;
+    }
+
+    TokType type1,type2;
+    if(op1->type == ID){
+        if(!Search_Var(FUNC, op1->val, &type1))
+            return BIN_OP_INCOMPAT;
+    }
+    else if(op1->type == INTEGER){
+        type1 = INTEGER;
+    }
+    else if(op1->type == DOUBLE){
+        type1 = DOUBLE;
+    }
+    else if(op1->type == STRING){
+        type1 = STRING;
+    }
+    else{
+        return BIN_OP_INCOMPAT;
+    }
+
+    if(op2->type == ID){
+        if(!Search_Var(FUNC, op2->val, &type2))
+            return BIN_OP_INCOMPAT;
+    }
+    else if(op2->type == INTEGER){
+        type2 = INTEGER;
+    }
+    else if(op2->type == DOUBLE){
+        type2 = DOUBLE;
+    }
+    else if(op2->type == STRING){
+        type2 = STRING;
+    }
+    else{
+        return BIN_OP_INCOMPAT;
+    }
+
+    if(type1 == STRING && type2 == STRING){
+        *typ1 = STRING;
+        *typ2 = STRING;
+        (*res)->type = STRING;
+        return SEM_OK;
+    }
+    else if((type1 == DOUBLE || type2 == DOUBLE) && (type1 != STRING && type2 != STRING)){
+        *typ1 = DOUBLE;
+        *typ2 = DOUBLE;
+        (*res)->type = DOUBLE;
+        return SEM_OK;
+    }
+    else if(type1 == INTEGER && type2 == INTEGER){
+        *typ1 = INTEGER;
+        *typ2 = INTEGER;
+        (*res)->type = INTEGER;
+        return SEM_OK;
+    }
+    else{
+        return BIN_OP_INCOMPAT;
+    }
+
+    switch(oper->type){
+    case ADD:
+        return SEM_OK;
+        break;
+    case SUB:
+        return (*res)->type != STRING ? SEM_OK : BIN_OP_INCOMPAT ;
+        break;
+    case MUL:
+        return (*res)->type != STRING ? SEM_OK : BIN_OP_INCOMPAT ;
+        break;
+    case DIV:
+        if((*res)->type != STRING ){
+            (*res)->type = DOUBLE;
+            return SEM_OK;
+        }
+        else{
+            return BIN_OP_INCOMPAT;
+        }
+        break;
+    case IDIV:
+        if((*res)->type != STRING){
+            *typ1 = INTEGER;
+            *typ2 = INTEGER;
+            (*res)->type = INTEGER;
+            return SEM_OK;
+        }
+        else{
+            return BIN_OP_INCOMPAT;
+        }
+    default:
+        break;
+    }
+
+    (*res)->type = BOOL;
+
+    if((type1 == INTEGER && type2 == DOUBLE) || (type1 == DOUBLE && type2 == INTEGER)){
+        type1 = DOUBLE;
+        type2 = DOUBLE;
+    }
+
+    return SEM_OK;
+}
+
 /*******
  *
  * Shora dolu
