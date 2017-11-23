@@ -624,9 +624,9 @@ int S_Print(Token *act){
             break;
 
         PreAnalyzer(act, &back, &type);
+        write();
     }while(back->type == SEMICOLON);
 
-    write();
 
     if(back->type != EOL && act->type != EOL)
         return SYN_ERROR;
