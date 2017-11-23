@@ -272,6 +272,9 @@ int SyntaxAnalyzer(){
     Token *act,*back;
     bool scope = false;
 
+    //Code Gen - Init
+    header();
+
     while(1){
         GET_TOKEN(act);
         if (act->type==KEYWORD){
@@ -379,6 +382,10 @@ int S_FuncHeader(bool declare, Token *act){
         return SYN_ERROR;
     }
 
+    //Code Gen - Definition
+    if(definition)
+        functionDefinition(FUNC);
+
     //Function Arguments
     char *id = NULL;
     int i = 0;
@@ -403,6 +410,10 @@ int S_FuncHeader(bool declare, Token *act){
             free(id);
             return SEM_ERROR;
         }
+
+        //Code Gen - parameter
+        if(definition)
+            functionParamLoad(*act);
 
         GET_TOKEN(act);
         if(act->type != KEYWORD || strcmp(act->val, "as") != 0){
@@ -433,7 +444,6 @@ int S_FuncHeader(bool declare, Token *act){
         }
         i++;
     }
-    free(id);
 
     //Function Type
     GET_TOKEN(act);
@@ -665,6 +675,9 @@ int S_Assig(Token *act){
     if(act->type == ID){
         //if func - params else preanalyzer
         if(Search_Func(act->val, NULL)){
+            //Code Gen - f. call init
+            functionFramePreparation();
+
             char *id;
             myStrCpy(&id, act->val);
 
@@ -709,6 +722,9 @@ int S_Assig(Token *act){
                     return SYN_ERROR;
                 }
 
+                //Code Gen - Load parameter
+                callParamLoad(*act);
+
                 GET_TOKEN(act);
 
                 if(act->type != COMMA && act->type != RBRACKET){
@@ -717,6 +733,12 @@ int S_Assig(Token *act){
                 }
                 i++;
             }
+            //Code Gen
+            callParamsPush();
+
+            //Code Gen - actual function call
+            callInstruction(id);
+
             free(id);
         }
         else{
