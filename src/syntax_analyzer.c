@@ -592,7 +592,7 @@ int S_StatList(Token *act, Token **back, bool isScope){
 }
 
 int S_Dim(Token *act){
-    char *id;
+    char *id=NULL;
     TokType type;
 
     GET_TOKEN(act);
