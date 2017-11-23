@@ -133,7 +133,11 @@ bool Dec_Func(char *funcname, bool define) {
   if (item == NULL)
     return false;
 
-  item->name = funcname;
+  item->name = malloc(sizeof(char)* (strlen(funcname)+1));
+  if(item->name == NULL)
+    return false;
+  strcpy(item->name, funcname);
+
   item->isdef = define;
   item->type = EOL;
   item->arg = (Table *) malloc(sizeof(Table));
