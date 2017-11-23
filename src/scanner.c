@@ -455,11 +455,13 @@ int GetToken(Token **token) {
           sym = 0;
         }
         else if (c <= 32 || c == 35 || c == 92) {
-          char esc[3];
+          char *esc = malloc(3*sizeof(char));
           sprintf(esc, "%03d", c);
           if (!BufferInsert(&str, '\\') || !BufferInsert(&str, esc[0]) ||
               !BufferInsert(&str, esc[1]) || !BufferInsert(&str, esc[2]))
             return S_MEMORY_ERROR;
+
+            free(esc);
         }
         else
           if (!BufferInsert(&str, c))
