@@ -283,6 +283,8 @@ int SyntaxAnalyzer(){
                     return SYN_ERROR;
                 }
 
+                scopeLabel();
+
                 GET_TOKEN(act);
                 if(act->type == EOL)
                 {
