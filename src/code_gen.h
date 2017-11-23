@@ -16,20 +16,37 @@ void convertInstructionSelect(TokType original, TokType new, char *string);
 
 void operationSelect(char operation, bool convert, TokType type);
 
-void boolOperationSelect(char operation, bool convert, TokType type);
+void boolOperationSelect(char operation, TokType var1, TokType var2);
 
-bool getOperand(Token *t, bool isVariable, TokType type);
+void boolOperationConvert(TokType var1, TokType var2);
+
+bool getOperand(Token *t);
 
 void TFCreation();
 
-void getResult(char *variableName);
+void getResult(char *variableName, bool isFunction);
 
+void functionFramePreparation();
 
-void functionBegin(char *functionName);
+void callParamLoad(Token t);
 
-void functionEnd(bool fReturn, char *variableName);
+void callParamsPush();
 
-void functionCall(char *functionName);
+void callInstruction(char *functionName);
+
+void functionDefinition(char *functionName);
+
+void functionParamLoad(Token t);
+
+void functionReturn(bool fReturn);
+
+void inBuiltLength();
+
+void inBuiltSubStr();
+
+void inBuiltChr();
+
+void inBuiltAsc();
 
 bool whileIfBegin(labelType type);
 
@@ -37,7 +54,7 @@ void whileIfElseEnd(labelType type);
 
 void variableDeclaration(char *name);
 
-void write(char *string, bool isVariable);
+void write();
 
 void input(char *variableName, TokType type);
 

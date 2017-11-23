@@ -19,12 +19,17 @@ void TInit(Table* t) {
 }
 
 
-bool TSearch (Table* t, char* name) {
+bool TSearch (Table* t, char* name, bool *isdef, bool define) {
   int hash = DJBHash(name);
   tItem* ptr = (*t)[hash];
   while (ptr != NULL) {
-    if (!strcmp(ptr->name, name))
-      return true;
+    if (!strcmp(ptr->name, name)){
+        if(isdef != NULL)
+            *isdef = ptr->isdef;
+        if(define)
+            ptr->isdef = true;
+        return true;
+    }
     else
       ptr = ptr->next;
   }
@@ -85,6 +90,7 @@ void TClearAll (Table* t) {
     ptr = (*t)[i];
     while (ptr != NULL) {
       nextptr = ptr->next;
+      free(ptr->name);
       free(ptr);
       ptr = nextptr;
     }
@@ -122,12 +128,13 @@ void Symtable_Destroy() {
 }
 
 
-bool Dec_Func(char *funcname) {
+bool Dec_Func(char *funcname, bool define) {
   tItem *item = (tItem *) malloc(sizeof(tItem));
   if (item == NULL)
     return false;
 
   item->name = funcname;
+  item->isdef = define;
   item->type = EOL;
   item->arg = (Table *) malloc(sizeof(Table));
   item->var = (Table *) malloc(sizeof(Table));
@@ -187,8 +194,12 @@ bool Add_Var(char *funcname, char *varname, TokType vartype) {
   return true;
 }
 
-bool Search_Func(char *funcname) {
-  return TSearch(Func, funcname);
+bool Define_Func(char *funcname) {
+  return TSearch(Func, funcname, NULL, true);
+}
+
+bool Search_Func(char *funcname, bool *isdef) {
+  return TSearch(Func, funcname, isdef, false);
 }
 
 bool Ret_Func_Type(char *funcname, TokType rettype) {
@@ -219,7 +230,7 @@ bool Nth_Func_ArgType(char *funcname, int n, TokType argtype) {
     return false;
 }
 
-bool Search_Var(char *funcname, char *varname, TokType vartype) {
+bool Search_Var(char *funcname, char *varname, TokType *vartype) {
   tItem *item = TRead(Func, funcname);
   if (item == NULL)
     return false;
@@ -228,8 +239,8 @@ bool Search_Var(char *funcname, char *varname, TokType vartype) {
   if (item == NULL)
     return false;
 
-  if (item->type == vartype)
+  if (vartype != NULL)
+    *vartype = item->type;
+
     return true;
-  else
-    return false;
 }

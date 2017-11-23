@@ -49,6 +49,7 @@ char ArtPreTB [15][15] = {
 Table sym_table;
 
 int RET_VAL;
+char *FUNC;
 
 #define GET_TOKEN(A)\
 RET_VAL = GetToken(&(A));\
@@ -70,31 +71,175 @@ FreeToken(&(partrule->First->rptr->act));\
 FreeToken(&(partrule->First->rptr->rptr->act));\
 
 #define SYN_OK 0
-#define SYN_ERROR -1
-#define ID_NOT_DEFINED -2
-#define ID_ALREADY_DEFINED -3
-#define BIN_OP_INCOMPAT -4
+#define SEM_OK 0
+#define SYN_ERROR 2
+#define SEM_ERROR 3
+#define BIN_OP_INCOMPAT 4
 
 
 //Semantic
 
-//register new function with ID into sym table
-int SEM_regFunc(char* name)
-{
-    return true;
-}
-
-//register new variable ID into sym table
-int SEM_regId(char* name)
-{
-    return true;
-}
-
 //check if sym table contains ID
 int SEM_existId(char* name)
 {
+    if(!Search_Func(name, NULL))
+        if(!Search_Var(FUNC, name, NULL))
+            return false;
+
     return true;
 }
+
+void setCurrFunc(char* name)
+{
+    free(FUNC);
+    FUNC = malloc((strlen(name)+1) * sizeof(char));
+    strcpy(FUNC, name);
+}
+
+void myStrCpy(char **to, char *from)
+{
+    free(*to);
+    *to = malloc((strlen(from)+1) * sizeof(char));
+    strcpy(*to, from);
+}
+
+int CheckRule(Token *op1, Token *oper, Token* op2, Token** res, TokType *typ1, TokType *typ2)
+{
+    (*res) = malloc(sizeof(Token));
+    if(res == NULL){
+        return S_MEMORY_ERROR;
+    }
+
+    TokType type1,type2;
+    if(op1->type == ID){
+        if(!Search_Var(FUNC, op1->val, &type1))
+            return BIN_OP_INCOMPAT;
+    }
+    else if(op1->type == INTEGER){
+        type1 = INTEGER;
+    }
+    else if(op1->type == DOUBLE){
+        type1 = DOUBLE;
+    }
+    else if(op1->type == STRING){
+        type1 = STRING;
+    }
+    else{
+        return BIN_OP_INCOMPAT;
+    }
+
+    if(op2->type == ID){
+        if(!Search_Var(FUNC, op2->val, &type2))
+            return BIN_OP_INCOMPAT;
+    }
+    else if(op2->type == INTEGER){
+        type2 = INTEGER;
+    }
+    else if(op2->type == DOUBLE){
+        type2 = DOUBLE;
+    }
+    else if(op2->type == STRING){
+        type2 = STRING;
+    }
+    else{
+        return BIN_OP_INCOMPAT;
+    }
+
+    if(type1 == STRING && type2 == STRING){
+        *typ1 = STRING;
+        *typ2 = STRING;
+        (*res)->type = STRING;
+        return SEM_OK;
+    }
+    else if((type1 == DOUBLE || type2 == DOUBLE) && (type1 != STRING && type2 != STRING)){
+        *typ1 = DOUBLE;
+        *typ2 = DOUBLE;
+        (*res)->type = DOUBLE;
+        return SEM_OK;
+    }
+    else if(type1 == INTEGER && type2 == INTEGER){
+        *typ1 = INTEGER;
+        *typ2 = INTEGER;
+        (*res)->type = INTEGER;
+        return SEM_OK;
+    }
+    else{
+        return BIN_OP_INCOMPAT;
+    }
+
+    switch(oper->type){
+    case ADD:
+        return SEM_OK;
+        break;
+    case SUB:
+        return (*res)->type != STRING ? SEM_OK : BIN_OP_INCOMPAT ;
+        break;
+    case MUL:
+        return (*res)->type != STRING ? SEM_OK : BIN_OP_INCOMPAT ;
+        break;
+    case DIV:
+        if((*res)->type != STRING ){
+            (*res)->type = DOUBLE;
+            return SEM_OK;
+        }
+        else{
+            return BIN_OP_INCOMPAT;
+        }
+        break;
+    case IDIV:
+        if((*res)->type != STRING){
+            *typ1 = INTEGER;
+            *typ2 = INTEGER;
+            (*res)->type = INTEGER;
+            return SEM_OK;
+        }
+        else{
+            return BIN_OP_INCOMPAT;
+        }
+    default:
+        break;
+    }
+
+    (*res)->type = BOOL;
+
+    if((type1 == INTEGER && type2 == DOUBLE) || (type1 == DOUBLE && type2 == INTEGER)){
+        type1 = DOUBLE;
+        type2 = DOUBLE;
+    }
+
+    return SEM_OK;
+}
+
+int Checkid(Token *in, Token **out)
+{
+    TokType type;
+    *out = malloc(sizeof(Token));
+    if(out == NULL)
+        return S_MEMORY_ERROR;
+
+    if(in->type == ID){
+        if(!Search_Var(FUNC, in->val, &type)){
+            return SEM_ERROR;
+        }
+    }
+    else if(in->type == INTEGER){
+        type = INTEGER;
+    }
+    else if(in->type == DOUBLE){
+        type = DOUBLE;
+    }
+    else if(in->type == STRING){
+        type = STRING;
+    }
+    else{
+        return SEM_ERROR;
+    }
+
+    (*out)->type = type;
+
+    return SEM_OK;
+}
+
 
 /*******
  *
@@ -102,18 +247,24 @@ int SEM_existId(char* name)
  *
  ****************/
 
-bool isType(Token *tok)
+bool isType(Token *tok, TokType *type)
 {
     if(tok->type != KEYWORD)
         return false;
 
     if(strcmp(tok->val, "integer") == 0){
+        if(type != NULL)
+            *type = INTEGER;
         return true;
     }
     else if(strcmp(tok->val, "double") == 0){
+        if(type != NULL)
+            *type = DOUBLE;
         return true;
     }
     else if(strcmp(tok->val, "string") == 0){
+        if(type != NULL)
+            *type = STRING;
         return true;
     }
 
@@ -124,6 +275,9 @@ int SyntaxAnalyzer(){
     Token *act,*back;
     bool scope = false;
 
+    //Code Gen - Init
+    header();
+
     while(1){
         GET_TOKEN(act);
         if (act->type==KEYWORD){
@@ -132,12 +286,14 @@ int SyntaxAnalyzer(){
                     return SYN_ERROR;
                 }
 
+                scopeLabel();
+                Dec_Func("scope", true);
+                setCurrFunc("scope");
+
                 GET_TOKEN(act);
                 if(act->type == EOL)
                 {
                     scope = true;
-                    //retVal = S_StatList(true);
-
                     SYN_EXPAND(S_StatList,act,&back,true);
 
                     if(back->type != KEYWORD || strcmp(back->val, "end") != 0){
@@ -186,6 +342,8 @@ int SyntaxAnalyzer(){
                     GET_TOKEN(act);
                     if(act->type != EOL)
                         return SYN_ERROR;
+
+                    functionReturn(false);
             }
         }
         else if(act->type == EOL){
@@ -201,23 +359,46 @@ int SyntaxAnalyzer(){
 }
 
 int S_FuncHeader(bool declare, Token *act){
+
+    bool definition = !declare;
+    bool temp;
     //Function ID
     GET_TOKEN(act);
-    if(act->type == ID){
-        //TBD function arguments in sym table
-        if(declare){
 
+    if(act->type == ID){
+        setCurrFunc(act->val);
+
+        if(declare){
+            if(Search_Func(FUNC, NULL))
+                return SEM_ERROR;
+
+            Dec_Func(FUNC, false);
         }
         else{
+            if(!Search_Func(FUNC, &temp)){
+                declare = true;
+                Dec_Func(FUNC, true);
+            }
+            else{
+                if(temp != false)
+                    return SEM_ERROR;
 
+                Define_Func(FUNC);
+            }
         }
     }
     else{
         return SYN_ERROR;
     }
 
+    //Code Gen - Definition
+    if(definition)
+        functionDefinition(FUNC);
+
     //Function Arguments
-    char *id;
+    char *id = NULL;
+    int i = 0;
+    TokType type;
 
     GET_TOKEN(act);
     if(act->type != LBRACKET)
@@ -227,32 +408,50 @@ int S_FuncHeader(bool declare, Token *act){
         GET_TOKEN(act);
 
         if(act->type == ID){
-            id = act->val;
+            myStrCpy(&id, act->val);
         }
         else{
+            free(id);
+            return SYN_ERROR;
+        }
+
+        if(SEM_existId(id)){
+            free(id);
+            return SEM_ERROR;
+        }
+
+        //Code Gen - parameter
+        if(definition)
+            functionParamLoad(*act);
+
+        GET_TOKEN(act);
+        if(act->type != KEYWORD || strcmp(act->val, "as") != 0){
+            free(id);
             return SYN_ERROR;
         }
 
         GET_TOKEN(act);
-        if(act->type != KEYWORD || strcmp(act->val, "as") != 0)
-               return SYN_ERROR;
-
-        GET_TOKEN(act);
-        if(!isType(act))
+        if(!isType(act, &type)){
+            free(id);
             return SYN_ERROR;
+        }
 
-        //TBD function arguments in sym table
-        if(declare){
-
+        if(declare)
+            Dec_Func_AddArgument(FUNC, i, type);
+        if(definition){
+            Add_Var(FUNC, id, type);
         }
         else{
-
+            free(id);
         }
 
         GET_TOKEN(act);
 
-        if(act->type != COMMA && act->type != RBRACKET)
+        if(act->type != COMMA && act->type != RBRACKET){
+            free(id);
             return SYN_ERROR;
+        }
+        i++;
     }
 
     //Function Type
@@ -261,16 +460,10 @@ int S_FuncHeader(bool declare, Token *act){
            return SYN_ERROR;
 
     GET_TOKEN(act);
-    if(!isType(act))
+    if(!isType(act, &type))
         return SYN_ERROR;
 
-    //TBD function return type in sym table
-    if(declare){
-
-    }
-    else{
-
-    }
+    Dec_Func_Set_Type(FUNC, type);
 
     GET_TOKEN(act);
     if(act->type != EOL)
@@ -323,13 +516,24 @@ int S_StatList(Token *act, Token **back, bool isScope){
                 return SYN_ERROR;
         }
         else if(act->type == ID){
+            char *id = NULL;
+            myStrCpy(&id, act->val);
+            if(!SEM_existId(act->val)){
+                free(id);
+                return SEM_ERROR;
+            }
+
             GET_TOKEN(act);
             if(act->type == EQL){
                 SYN_EXPAND(S_Assig, act);
             }
             else{
+                free(id);
                 return SYN_ERROR;
             }
+
+            getResult(id, false);
+            free(id);
         }
         else if(act->type == EOL){
             continue;
@@ -345,10 +549,11 @@ int S_StatList(Token *act, Token **back, bool isScope){
 
 int S_Dim(Token *act){
     char *id;
+    TokType type;
 
     GET_TOKEN(act);
     if(act->type == ID){
-        id = act->val;
+        myStrCpy(&id, act->val);
     }
     else{
         return SYN_ERROR;
@@ -359,10 +564,16 @@ int S_Dim(Token *act){
            return SYN_ERROR;
 
     GET_TOKEN(act);
-    if(!isType(act))
+    if(!isType(act, &type))
         return SYN_ERROR;
 
-    //TBD - Semantic check
+    if(SEM_existId(id)){
+        free(id);
+        return SEM_ERROR;
+    }
+
+    Add_Var(FUNC, id, type);
+    variableDeclaration(id);
 
     return SYN_OK;
 }
@@ -370,11 +581,16 @@ int S_Dim(Token *act){
 int S_Input(Token *act){
     GET_TOKEN(act);
     if(act->type == ID){
-        //TBD - Semantic check
+        if(!Search_Var(FUNC, act->val, NULL))
+            return SEM_ERROR;
     }
     else{
         return SYN_ERROR;
     }
+
+    TokType type;
+    Search_Var(FUNC, act->val, &type);
+    input(act->val, type);
 
     return SYN_OK;
 }
@@ -384,10 +600,16 @@ int S_Print(Token *act){
 
     do{
         GET_TOKEN(act);
+
+        if(act->type == EOL)
+            break;
+
         PreAnalyzer(act, &back);
     }while(back->type == SEMICOLON);
 
-    if(back->type != EOL)
+    write();
+
+    if(back->type != EOL && act->type != EOL)
         return SYN_ERROR;
 
     return SYN_OK;
@@ -395,6 +617,8 @@ int S_Print(Token *act){
 
 int S_If(Token *act, bool isScope){
     Token *back;
+
+    whileIfBegin(IF);
 
     GET_TOKEN(act);
     PreAnalyzer(act, &back);
@@ -415,6 +639,8 @@ int S_If(Token *act, bool isScope){
     if(act->type != EOL)
            return SYN_ERROR;
 
+    whileIfElseEnd(ELSE);
+
     SYN_EXPAND(S_StatList, act, &back, isScope);
 
     if(back->type != KEYWORD || strcmp(back->val, "end") != 0)
@@ -424,11 +650,15 @@ int S_If(Token *act, bool isScope){
     if(act->type != KEYWORD || strcmp(act->val, "if") != 0)
            return SYN_ERROR;
 
+    whileIfElseEnd(IF);
+
     return SYN_OK;
 }
 
 int S_While(Token *act, bool isScope){
     Token *back;
+
+    whileIfBegin(WHILE);
 
     GET_TOKEN(act);
     PreAnalyzer(act, &back);
@@ -442,6 +672,8 @@ int S_While(Token *act, bool isScope){
     if(back->type != KEYWORD || strcmp(back->val, "loop") != 0){
        return SYN_ERROR;
     }
+
+    whileIfElseEnd(WHILE);
 
     return SYN_OK;
 }
@@ -460,11 +692,83 @@ int S_Ret(Token *act){
 
 int S_Assig(Token *act){
     Token *back;
+    TokType type;
 
     GET_TOKEN(act);
     if(act->type == ID){
-        //TBD SEM check for function call
         //if func - params else preanalyzer
+        if(Search_Func(act->val, NULL)){
+            //Code Gen - f. call init
+            functionFramePreparation();
+
+            char *id;
+            myStrCpy(&id, act->val);
+
+            GET_TOKEN(act);
+            if(act->type != LBRACKET)
+                return SYN_ERROR;
+
+            int i = 0;
+            while(act->type!=RBRACKET){
+                GET_TOKEN(act);
+
+                if(act->type == ID){
+                    if(!Search_Var(FUNC, act->val, &type)){
+                        free(id);
+                        return SEM_ERROR;
+                    }
+                    if(!Nth_Func_ArgType(id, i, type)){
+                        free(id);
+                        return SEM_ERROR;
+                    }
+                }
+                else if(act->type == INTEGER){
+                    if(!Nth_Func_ArgType(id, i, INTEGER)){
+                        free(id);
+                        return SEM_ERROR;
+                    }
+                }
+                else if(act->type == DOUBLE){
+                    if(!Nth_Func_ArgType(id, i, DOUBLE)){
+                        free(id);
+                        return SEM_ERROR;
+                    }
+                }
+                else if(act->type == STRING){
+                    if(!Nth_Func_ArgType(id, i, STRING)){
+                        free(id);
+                        return SEM_ERROR;
+                    }
+                }
+                else{
+                    free(id);
+                    return SYN_ERROR;
+                }
+
+                //Code Gen - Load parameter
+                callParamLoad(*act);
+
+                GET_TOKEN(act);
+
+                if(act->type != COMMA && act->type != RBRACKET){
+                    free(id);
+                    return SYN_ERROR;
+                }
+                i++;
+            }
+            //Code Gen
+            callParamsPush();
+
+            //Code Gen - actual function call
+            callInstruction(id);
+
+            free(id);
+        }
+        else{
+            PreAnalyzer(act, &back);
+            if(back->type != EOL)
+                return SYN_ERROR;
+        }
     }
     else{
         PreAnalyzer(act, &back);
@@ -541,8 +845,9 @@ int DLListInitForParser(tDLList **local,tDLList **rule,tDLList **partrule){
 int PreExe(char c, Token* act, tDLList* local,tDLList* partrule,tDLList* rule){
     char *top;
     int ret=0;
+    bool changed;
     Token *vys;
-    TokType op1, op2;
+    TokType type1, type2;
 
     top = (char*)malloc(sizeof(char));
     if (top==NULL){
@@ -574,8 +879,17 @@ int PreExe(char c, Token* act, tDLList* local,tDLList* partrule,tDLList* rule){
                 DLInsertLast(rule, '+', NULL);
                 DLInsertLast(rule, 'E', NULL);
                 if(DLCompare(partrule, rule)==0){
-                    //martinova fce(partrule->First->act, partrule->First->rptr->act, partrule->First->rptr->rptr->act, &(vys) )
+                    //printf("pravidlo pro uplatneni +\n");
+                    CheckRule(partrule->First->act, partrule->First->rptr->act, partrule->First->rptr->rptr->act, &(vys), &type1, &type2);
 
+                    if((partrule->First->act->type != type1) || (partrule->First->rptr->rptr->act->type != type2)){
+                        changed = true;
+                    }
+                    else{
+                        changed = false;
+                    }
+
+                    operationSelect('+', changed, vys->type);
                     // PROSIM UPRAVTE ZDE PARAMETRY VKLADANE DO FCE A ODKOMENTUJTE operationSelect('+',BOOL,TOKTYPE);
                     DLInsertLast(local,'E',vys);
                     FREEPARTRULE();
@@ -586,9 +900,17 @@ int PreExe(char c, Token* act, tDLList* local,tDLList* partrule,tDLList* rule){
                 DLInsertLast(rule, '*',NULL);
                 DLInsertLast(rule, 'E',NULL);
                 if(DLCompare(partrule, rule)==0){
+                    //printf("pravidlo pro uplatneni *\n");
+                    CheckRule(partrule->First->act, partrule->First->rptr->act, partrule->First->rptr->rptr->act, &(vys), &type1, &type2);
 
-                    //martinova fce(partrule->First->act, partrule->First->rptr->act, partrule->First->rptr->rptr->act, &(vys) )
+                    if((partrule->First->act->type != type1) || (partrule->First->rptr->rptr->act->type != type2)){
+                        changed = true;
+                    }
+                    else{
+                        changed = false;
+                    }
 
+                    operationSelect('*', changed, vys->type);
                     // PROSIM UPRAVTE ZDE PARAMETRY VKLADANE DO FCE A ODKOMENTUJTE operationSelect('*',BOOL,TOKTYPE);
                     DLInsertLast(local,'E',vys);
                     FREEPARTRULE();
@@ -599,9 +921,17 @@ int PreExe(char c, Token* act, tDLList* local,tDLList* partrule,tDLList* rule){
                 DLInsertLast(rule, '-',NULL);
                 DLInsertLast(rule, 'E',NULL);
                 if(DLCompare(partrule, rule)==0){
+                    //printf("pravidlo pro uplatneni -\n");
+                    CheckRule(partrule->First->act, partrule->First->rptr->act, partrule->First->rptr->rptr->act, &(vys), &type1, &type2);
 
-                    //martinova fce(partrule->First->act, partrule->First->rptr->act, partrule->First->rptr->rptr->act, &(vys) )
+                    if((partrule->First->act->type != type1) || (partrule->First->rptr->rptr->act->type != type2)){
+                        changed = true;
+                    }
+                    else{
+                        changed = false;
+                    }
 
+                    operationSelect('-', changed, vys->type);
                     // PROSIM UPRAVTE ZDE PARAMETRY VKLADANE DO FCE A ODKOMENTUJTE operationSelect('-',BOOL,TOKTYPE);
                     DLInsertLast(local,'E',vys);
                     FREEPARTRULE();
@@ -612,9 +942,17 @@ int PreExe(char c, Token* act, tDLList* local,tDLList* partrule,tDLList* rule){
                 DLInsertLast(rule, '/',NULL);
                 DLInsertLast(rule, 'E',NULL);
                 if(DLCompare(partrule, rule)==0){
+                    //printf("pravidlo pro uplatneni /\n");
+                    CheckRule(partrule->First->act, partrule->First->rptr->act, partrule->First->rptr->rptr->act, &(vys), &type1, &type2);
 
-                    //martinova fce(partrule->First->act, partrule->First->rptr->act, partrule->First->rptr->rptr->act, &(vys) )
+                    if((partrule->First->act->type != type1) || (partrule->First->rptr->rptr->act->type != type2)){
+                        changed = true;
+                    }
+                    else{
+                        changed = false;
+                    }
 
+                    operationSelect('/', changed, vys->type);
                     // PROSIM UPRAVTE ZDE PARAMETRY VKLADANE DO FCE A ODKOMENTUJTE operationSelect('/',BOOL,TOKTYPE);
                     DLInsertLast(local,'E',vys);
                     FREEPARTRULE();
@@ -625,8 +963,17 @@ int PreExe(char c, Token* act, tDLList* local,tDLList* partrule,tDLList* rule){
                 DLInsertLast(rule, '\\',NULL);
                 DLInsertLast(rule, 'E',NULL);
                 if(DLCompare(partrule, rule)==0){
+                    //printf("pravidlo pro uplatneni \\ \n");
+                    CheckRule(partrule->First->act, partrule->First->rptr->act, partrule->First->rptr->rptr->act, &(vys), &type1, &type2);
 
-                    //martinova fce(partrule->First->act, partrule->First->rptr->act, partrule->First->rptr->rptr->act, &(vys) )
+                    if((partrule->First->act->type != type1) || (partrule->First->rptr->rptr->act->type != type2)){
+                        changed = true;
+                    }
+                    else{
+                        changed = false;
+                    }
+
+                    operationSelect('//', changed, vys->type);
                     // PROSIM UPRAVTE ZDE PARAMETRY VKLADANE DO FCE A ODKOMENTUJTE operationSelect('\\',BOOL,TOKTYPE);
                     DLInsertLast(local,'E',vys);
                     FREEPARTRULE();
@@ -637,8 +984,10 @@ int PreExe(char c, Token* act, tDLList* local,tDLList* partrule,tDLList* rule){
                 DLInsertLast(rule, '=',NULL);
                 DLInsertLast(rule, 'E',NULL);
                 if(DLCompare(partrule, rule)==0){
+                    //printf("pravidlo pro uplatneni =\n");
+                    CheckRule(partrule->First->act, partrule->First->rptr->act, partrule->First->rptr->rptr->act, &(vys), &type1, &type2);
 
-                    //martinova fce(partrule->First->act, partrule->First->rptr->act, partrule->First->rptr->rptr->act, &(vys) )
+                    boolOperationSelect('=', type1, type2);
                     //gen
                     DLInsertLast(local,'E',vys);
                     FREEPARTRULE();
@@ -649,9 +998,11 @@ int PreExe(char c, Token* act, tDLList* local,tDLList* partrule,tDLList* rule){
                 DLInsertLast(rule, '?',NULL);//<
                 DLInsertLast(rule, 'E',NULL);
                 if(DLCompare(partrule, rule)==0){
-                    err=CheckRule(partrule->First->act, partrule->First->rptr->act, partrule->First->rptr->rptr->act, &(vys), &(op1), &(op2));
+                    //printf("pravidlo pro uplatneni <\n");
+                    CheckRule(partrule->First->act, partrule->First->rptr->act, partrule->First->rptr->rptr->act, &(vys), &type1, &type2);
 
-                    //gen
+                    boolOperationSelect('<', type1, type2);
+
                     DLInsertLast(local,'E',vys);
                     FREEPARTRULE();
                     continue;
@@ -661,8 +1012,10 @@ int PreExe(char c, Token* act, tDLList* local,tDLList* partrule,tDLList* rule){
                 DLInsertLast(rule, ':',NULL); //>
                 DLInsertLast(rule, 'E',NULL);
                 if(DLCompare(partrule, rule)==0){
+                    //printf("pravidlo pro uplatneni >\n");
+                    CheckRule(partrule->First->act, partrule->First->rptr->act, partrule->First->rptr->rptr->act, &(vys), &type1, &type2);
 
-                    //martinova fce(partrule->First->act, partrule->First->rptr->act, partrule->First->rptr->rptr->act, &(vys) )
+                    boolOperationSelect('>', type1, type2);
 
                     //gen
 
@@ -675,8 +1028,11 @@ int PreExe(char c, Token* act, tDLList* local,tDLList* partrule,tDLList* rule){
                 DLInsertLast(rule, ',',NULL); //<=
                 DLInsertLast(rule, 'E',NULL);
                 if(DLCompare(partrule, rule)==0){
+                    //printf("pravidlo pro uplatneni <=\n");
+                    CheckRule(partrule->First->act, partrule->First->rptr->act, partrule->First->rptr->rptr->act, &(vys), &type1, &type2);
 
-                    //martinova fce(partrule->First->act, partrule->First->rptr->act, partrule->First->rptr->rptr->act, &(vys) )
+                    boolOperationSelect(',', type1, type2);
+
                     //gen
                     DLInsertLast(local,'E',vys);
                     FREEPARTRULE();
@@ -686,9 +1042,10 @@ int PreExe(char c, Token* act, tDLList* local,tDLList* partrule,tDLList* rule){
                 DLInsertLast(rule, '.',NULL); //>=
                 DLInsertLast(rule, 'E',NULL);
                 if(DLCompare(partrule, rule)==0){
+                    //printf("pravidlo pro uplatneni >=\n");
+                    CheckRule(partrule->First->act, partrule->First->rptr->act, partrule->First->rptr->rptr->act, &(vys), &type1, &type2)
 
-                    //martinova fce(partrule->First->act, partrule->First->rptr->act, partrule->First->rptr->rptr->act, &(vys) )
-
+                    boolOperationSelect('.', type1, type2);
                     //gen
                     DLInsertLast(local,'E',vys);
                     FREEPARTRULE();
@@ -699,9 +1056,10 @@ int PreExe(char c, Token* act, tDLList* local,tDLList* partrule,tDLList* rule){
                 DLInsertLast(rule, '#',NULL);
                 DLInsertLast(rule, 'E',NULL);
                 if(DLCompare(partrule, rule)==0){
+                    //printf("pravidlo pro uplatneni #\n");
+                    CheckRule(partrule->First->act, partrule->First->rptr->act, partrule->First->rptr->rptr->act, &(vys), &type1, &type2);
 
-                    //martinova fce(partrule->First->act, partrule->First->rptr->act, partrule->First->rptr->rptr->act, &(vys) )
-
+                    boolOperationSelect('#', type1, type2);
                     //gen
                     DLInsertLast(local,'E',vys);
                     FREEPARTRULE();
@@ -712,7 +1070,7 @@ int PreExe(char c, Token* act, tDLList* local,tDLList* partrule,tDLList* rule){
                 DLInsertLast(rule, 'E',NULL);
                 DLInsertLast(rule, ')',NULL);
                 if(DLCompare(partrule, rule)==0){
-                    //tady Martin nebude
+                    CheckRule(partrule->First->act, partrule->First->rptr->act, partrule->First->rptr->rptr->act, &(vys), &type1, &type2);
 
                     DLInsertLast(local,'E',vys);
                     FREEPARTRULE();
@@ -721,11 +1079,11 @@ int PreExe(char c, Token* act, tDLList* local,tDLList* partrule,tDLList* rule){
                 DLDisposeList(rule);
                 DLInsertLast(rule, 'i',NULL);
                 if(DLCompare(partrule, rule)==0){
-                    //checkid(partrule->First->act, &(vys) );
+                    Checkid(partrule->First->act,&vys);
 
-                    //getOperand(partrule->First->act, isVariable, type);
+                    getOperand(partrule->First->act);
                     DLInsertLast(local,'E',vys);
-                    FreeToken(partrule->First->act);
+                    //printf("uplatneni i->E \n");
                     continue;
                 }
                 // sem dojde pokud se zadne pravidlo neuplatni
@@ -767,7 +1125,7 @@ int PreTokenAnalyzer(Token *act, char * c){
         case SUB:
             *c='-';
             break;
-        case MOD:
+        case IDIV:
             *c='\\';
             break;
         case EQL:
@@ -842,6 +1200,8 @@ int PreNextTok(Token* act, tDLList* local,tDLList* partrule,tDLList* rule, Token
 }
 
  int PreAnalyzer(Token *act, Token**back, TokType* res){
+     //printf("vytejete v precedencni analyze \n");
+     TFCreation();
      tDLList *local, *partrule, *rule;
      Token* vys;
      int err;

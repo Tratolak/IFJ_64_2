@@ -1,10 +1,10 @@
 #include <stdio.h>
 #include "code_gen.h"
-#include "stack_operations.h"
 
 //Pocitani poctu navesti daneho typu
 int whileLabelQuantity = 0;
 int ifLabelQuantity = 0;
+int variableQuantity;
 
 //================================================================================
 //
@@ -17,7 +17,12 @@ int ifLabelQuantity = 0;
 void header() {
     printf(".IFJcode17\n");
     labelStackInit(&labelStack);
-    printf("JMP scope\n");
+    printf("CREATEFRAME\n");
+    printf("JUMP scope\n");
+    inBuiltLength();
+    inBuiltSubStr();
+    inBuiltAsc();
+    inBuiltChr();
 }
 
 //================================================================================
@@ -125,14 +130,44 @@ void operationSelect(char operand, bool convert, TokType type) {
 }
 
 /**
+ * Generovani instrukci pro provedeni konverze.
+ *
+ * @param var1 - typ prvni promenne (TokType)
+ * @param var2 - typ druhe promenne (TokType)
+ */
+void boolOperationConvert(TokType var1, TokType var2) {
+    printf("POPS TF@_exprOperand1\n"); //exprOperand1 == var2
+    printf("POPS TF@_exprOperand2\n"); //exprOperand2 == var1
+
+    TokType first, second;
+    typeStackPop(&typeStack, &first);
+    typeStackPop(&typeStack, &second);
+    if (var1 != var2) {
+        if (var1 == STRING || var2 == STRING) {
+            if (var2 != STRING) {
+                convertInstructionSelect(var2, STRING, "TF@_exprOperand1");
+            } else if (var1 != STRING) {
+                convertInstructionSelect(var1, STRING, "TF@_exprOperand2");
+            }
+        } else if (var1 == DOUBLE || var2 == DOUBLE) {
+            if (var2 != DOUBLE) {
+                convertInstructionSelect(var2, DOUBLE, "TF@_exprOperand1");
+            } else if (var1 != DOUBLE) {
+                convertInstructionSelect(var1, DOUBLE, "TF@_exprOperand2");
+            }
+        }
+    }
+}
+
+/**
  * Generovani vyrazu pro konstrukce IF,IF ELSE a WHILE.
  *
  * @param operation - provadena operace (char)
  * @param convert   - true = je treba pretypovat | false = neni treba pretypovat (bool)
  * @param type      - typ do ktereho se provede pripadne pretypovani (TokType)
  */
-void boolOperationSelect(char operand, bool convert, TokType type) {
-    typeConvert(convert, type);
+void boolOperationSelect(char operand, TokType var1, TokType var2) {
+    boolOperationConvert(var1, var2);
     labelType lType;
     int quantity;
 
@@ -231,13 +266,9 @@ void boolOperationSelect(char operand, bool convert, TokType type) {
  * @param type       - typ promenne (TokType)
  * @return mallocOk - true = ok | false = error (bool)
  */
-bool getOperand(Token *t, bool isVariable, TokType type) {
+bool getOperand(Token *t) {
     bool mallocOk = true;
-    if (isVariable) {
-        //Timto si nejsem uplne jisty. Sem se program dostane, kdyz je ve vyrazu promenna.
-        printf("PUSHS TF@_%s\n", t->val);
-        mallocOk = typeStackPush(&typeStack, type);
-    } else if (t->type == INTEGER) {
+    if (t->type == INTEGER) {
         printf("PUSHS int@%s\n", t->val);
         mallocOk = typeStackPush(&typeStack, t->type);
     } else if (t->type == DOUBLE) {
@@ -247,7 +278,7 @@ bool getOperand(Token *t, bool isVariable, TokType type) {
         printf("PUSHS string@%s\n", t->val);
         mallocOk = typeStackPush(&typeStack, t->type);
     } else if (t->type == ID) {
-        printf("PUSHS %s\n", t->val);
+        printf("PUSHS LF@_%s\n", t->val);
         mallocOk = typeStackPush(&typeStack, t->type);
     }
     return mallocOk;
@@ -260,12 +291,16 @@ bool getOperand(Token *t, bool isVariable, TokType type) {
  *
  * @param variableName - nazev promenne, do ktere bude vysledek prirazen (char*)
  */
-void getResult(char *variableName) {
-    printf("POPS TF@_exprResult\n");
-    printf("MOVE LF@_%s TF@_expResult\n", variableName);
-    printf("CLEARS\n");
-    printf("POPFRAME\n");
-    typeStackDispose(&typeStack);
+void getResult(char *variableName, bool isFunction) {
+    if (!isFunction) {
+        printf("POPS TF@_exprResult\n");
+        printf("MOVE LF@_%s TF@_exprResult\n", variableName);
+        printf("CLEARS\n");
+        printf("POPFRAME\n");
+        typeStackDispose(&typeStack);
+    } else {
+        printf("MOVE TF@_%s TF@_returnValue\n", variableName);
+    }
 }
 
 //================================================================================
@@ -273,63 +308,220 @@ void getResult(char *variableName) {
 //================================================================================
 
 /**
- * Generovani instrukci navesti funkce, ulozeni TF na zasobnik a utvoreni noveho TF.
- *
- * @param functionName - jmeno funkce (char*)
+ * Generovani instrukci pro pripravu ramce pred volanim funkce.
  */
-void functionBegin(char *functionName) {
-    printf("LABEL %s\n", functionName);
-}
-
-/**
- *Presouvani prome
- *
- * @param paramName
- */
-/*void functionParams(char *paramName){
-    variableDeclaration(paramName);
-    printf("MOVE TF@_%s LF@_%s\n",paramName,paramName);
-}*/
-
-/**
- * Generovani instrukce pro ulozeni navratove hodnoty z LF do TF. Pokud fce nic nevraci jsou oba
- * predane parametry nastaveny na "".
- *
- * @param LFVariable - copy to (char*)
- * @param TFVariable - copy from (char*)
- */
-void functionEnd(bool fReturn, char *variableName) {
-    if (fReturn == true) {
-        printf("PUSH TF@_%s\n",variableName);
-    }
-    printf("RETURN\n");
-}
-
-/**
- *
- */
-/*void functionTFPreparation(){
+void functionFramePreparation() {
     printf("PUSHFRAME\n");
     printf("CREATEFRAME\n");
-}*/
+    printf("DEFVAR LF@_returnValue\n");
+    variableQuantity = 0;
+}
 
 /**
- * Generovani instrukci pro volani fce a odstraneni TF utvoreneho ve fci.
+ * Generovani instrukce na vytvoreni nove promenne a ulozeni hodnoty do teto promenne.
  *
- * @param functionName - jmeno navesti zacatku funkce (char*)
+ * @param t - token (Token)
  */
-void functionCall(char *functionName) {
+void callParamLoad(Token t) {
+    printf("DEFVAR TF@_%d\n", variableQuantity);
+    if (t.type == ID) {
+        printf("MOVE TF@_%d LF@_%s\n", variableQuantity, t.val);
+    } else if (t.type == INTEGER) {
+        printf("MOVE TF@_%d int@%s\n", variableQuantity, t.val);
+    } else if (t.type == DOUBLE) {
+        printf("MOVE TF@_%d float@%s\n", variableQuantity, t.val);
+    } else if (t.type == STRING) {
+        printf("MOVE TF@_%d string@%s\n", variableQuantity, t.val);
+    }
+    variableQuantity++;
+}
+
+/**
+ * Generovani instrukci pro ulozeni parametu fce na zasobnik.
+ */
+void callParamsPush() {
+    while (variableQuantity > 0) {
+        variableQuantity--;
+        printf("PUSHS TF@_%d\n", variableQuantity);
+    }
+}
+
+/**
+ * Generovani instrukce na zavolani fce (prechod na navesti)
+ *
+ * @param functionName - jmeno navesti (char*)
+ */
+void callInstruction(char *functionName) {
     printf("CALL %s\n", functionName);
     printf("POPFRAME\n");
 }
 
 /**
+ * Generovani navesti pro funkci
  *
- * @param variableName
+ * @param functionName -jmeno funkce (char*)
  */
-/*void functionReturn(char *variableName){
-    printf("POPS LF@_%s\n",variableName);
-}*/
+void functionDefinition(char *functionName) {
+    printf("LABEL %s\n", functionName);
+    printf("CREATEFRAME\n");
+}
+
+/**
+ * Generovani instrukci pro ziskani hodnoty promenne se zasobniku
+ *
+ * @param t - token
+ */
+void functionParamLoad(Token t) {
+    printf("DEFVAR TF@_%s\n", t.val);
+    printf("POPS TF@_%s\n", t.val);
+}
+
+/**
+ * Generovani instrukce pro ulozeni navratove hodnoty na zasobnik.
+ *
+ * @param LFVariable - copy to (char*)
+ * @param TFVariable - copy from (char*)
+ */
+void functionReturn(bool fReturn) {
+    if (fReturn == true) {
+        printf("POPS LF@_returnValue\n");
+    }
+    printf("RETURN\n");
+}
+
+//================================================================================
+// Vestavene funkce
+//================================================================================
+
+/**
+ * Generovani vestavene funkce pro zjisteni delky retezce.
+ */
+void inBuiltLength() {
+    printf("LABEL Length\n");
+    printf("CREATEFRAME\n");
+    printf("DEFVAR TF@_s\n");
+    printf("POPS TF@_s\n");
+    printf("DEFVAR TF@_Length\n");
+    printf("STRLEN TF@_Length TF@_s\n");
+    printf("MOVE LF@_returnValue TF@_Length\n");
+    printf("RETURN\n");
+}
+
+/**
+ * Generovani vestavene funkce pro ziskani podretezce od i do n.
+ */
+void inBuiltSubStr() {
+    printf("LABEL SubStr\n");
+    printf("CREATEFRAME\n");
+    printf("MOVE LF@_returnValue string@\n");
+    printf("DEFVAR TF@_s\n");
+    printf("POPS TF@_s\n");
+    printf("DEFVAR TF@_i\n");
+    printf("POPS TF@_i\n");
+    printf("DEFVAR TF@_n\n");
+    printf("POPS TF@_n\n");
+
+    printf("PUSHS TF@_s\n");
+    printf("PUSHS string@\n");
+    printf("EQS\n");
+    printf("PUSHS TF@_i\n");
+    printf("PUSHS int@0\n");
+    printf("EQS\n");
+    printf("PUSHS TF@_i\n");
+    printf("PUSHS int@0\n");
+    printf("LTS\n");
+    printf("ORS\n");
+    printf("ORS\n");
+    printf("PUSHS bool@true\n");
+    printf("JUMPIFNEQS SubStr$\n");
+    printf("RETURN\n");
+    printf("LABEL SubStr$\n");
+    printf("PUSHS TF@_n\n");
+    printf("PUSHS int@0\n");
+    printf("LTS\n");
+    printf("DEFVAR TF@_length\n");
+    functionFramePreparation();
+    printf("PUSHS LF@_s\n");
+    callInstruction("Length");
+    printf("MOVE TF@_length TF@_returnValue\n");
+    printf("PUSHS TF@_length\n");
+    printf("PUSHS TF@_i\n");
+    printf("SUBS\n");
+    printf("PUSHS TF@_n\n");
+    printf("LTS\n");
+    printf("ORS\n");
+    printf("PUSHS bool@true\n");
+    printf("DEFVAR TF@_char\n");
+    printf("JUMPIFEQS NOOKSubStr$\n");
+    printf("LABEL OKSubStr\n");
+    printf("PUSHS TF@_n\n");
+    printf("PUSHS int@0\n");
+    printf("GTS\n");
+    printf("PUSHS bool@false\n");
+    printf("JUMPIFEQS SubStrEnd$\n");
+    printf("GETCHAR TF@_char TF@_s TF@_i\n");
+    printf("CONCAT LF@_returnValue LF@_returnValue TF@_char\n");
+    printf("SUB TF@_n TF@_n int@1\n");
+    printf("ADD TF@_i TF@_i int@1\n");
+    printf("JUMP OKSubStr\n");
+    printf("LABEL NOOKSubStr$\n");
+    printf("PUSHS TF@_length\n");
+    printf("PUSHS TF@_i\n");
+    printf("GTS\n");
+    printf("PUSHS bool@false\n");
+    printf("JUMPIFEQS SubStrEnd$\n");
+    printf("GETCHAR TF@_char TF@_s TF@_i\n");
+    printf("CONCAT LF@_returnValue LF@_returnValue TF@_char\n");
+    printf("ADD TF@_i TF@_i int@1\n");
+    printf("JUMP NOOKSubStr$\n");
+    printf("LABEL SubStrEnd$\n");
+    printf("RETURN\n");
+}
+
+/**
+ * Generovani vestavene funkce pro prevedeni hodnoty na znak.
+ */
+void inBuiltChr() {
+    printf("LABEL Chr\n");
+    printf("CREATEFRAME\n");
+    printf("DEFVAR TF@_i\n");
+    printf("POPS TF@_i\n");
+    printf("INT2CHAR LF@_returnValue TF@_i\n");
+    printf("RETURN\n");
+}
+
+/**
+ * Generovani vestavene funkce pro ziskani ordinalni hodnoty znaku.
+ */
+void inBuiltAsc() {
+    printf("LABEL Asc\n");
+    printf("CREATEFRAME\n");
+    printf("DEFVAR TF@_s\n");
+    printf("POPS TF@_s\n");
+    printf("DEFVAR TF@_i\n");
+    printf("POPS TF@_i\n");
+    printf("DEFVAR TF@_char\n");
+    printf("DEFVAR TF@_length\n");
+    functionFramePreparation();
+    printf("PUSHS LF@_s\n");
+    printf("CALL Length\n");
+    printf("POPFRAME\n");
+    printf("PUSHS TF@_returnValue\n");
+    printf("PUSHS TF@_i\n");
+    printf("LTS\n");
+    printf("PUSHS TF@_returnValue\n");
+    printf("PUSHS TF@_i\n");
+    printf("EQS\n");
+    printf("ORS\n");
+    printf("PUSHS bool@true\n");
+    printf("JUMPIFNEQS Asc$\n");
+    printf("MOVE LF@_returnValue int@0\n");
+    printf("RETURN\n");
+    printf("LABEL Asc$\n");
+    printf("STRI2INT LF@_returnValue TF@_s TF@_i\n");
+    printf("RETURN\n");
+}
+
 //================================================================================
 // Generovani pomocnych konstrukci
 //================================================================================
@@ -396,12 +588,10 @@ void variableDeclaration(char *name) {
  * @param string      - vypisovany retezec/ jmeno promenne (char *)
  * @param isVariable  - TRUE pokud je retezec promenna (bool)
  */
-void write(char *string, bool isVariable){
-    if(isVariable){
-        printf("WRITE TF@_%s\n", string);
-    }else{
-        printf("WRITE %s\n", string);
-    }
+void write() {
+    printf("POPS TF@_exprResult\n");
+    printf("WRITE TF@_exprResult\n");
+    printf("POPFRAME\n");
 }
 
 /**
@@ -411,27 +601,24 @@ void write(char *string, bool isVariable){
  * @param type     - typ promenne (TokType)
  */
 void input(char *variableName, TokType type) {
-    char *inputType = "";
     switch (type) {
         case INTEGER:
-            inputType = "int";
+            printf("READ TF@_%s int\n", variableName);
             break;
         case DOUBLE:
-            inputType = "float";
+            printf("READ TF@_%s float\n", variableName);
             break;
         case STRING:
-            inputType = "string";
+            printf("READ TF@_%s string\n", variableName);
             break;
         default:
             break;
     }
-    printf("READ TF@_%s %s\n", variableName, inputType);
 }
 
 /**
  * Generovani navesti hlavniho tela programu.
  */
-void scopeLabel(){
+void scopeLabel() {
     printf("LABEL scope\n");
 }
-
