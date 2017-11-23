@@ -71,9 +71,9 @@ FreeToken(&(partrule->First->rptr->act));\
 FreeToken(&(partrule->First->rptr->rptr->act));\
 
 #define CHECKRULE()\
-RET_VAL=CheckRule(partrule->First->act, partrule->First->rptr->act, partrule->First->rptr->rptr->act, &(vys), &type1, &type2);\
-if (RET_VAL!=0){\
-return RET_VAL;\
+retid=CheckRule(partrule->First->act, partrule->First->rptr->act, partrule->First->rptr->rptr->act, &(vys), &type1, &type2);\
+if (retid != 0){\
+return retid;\
 }\
 if((partrule->First->act->type != type1) || (partrule->First->rptr->rptr->act->type != type2)){\
 changed = true;\
@@ -83,9 +83,9 @@ changed = false;\
 }\
 
 #define  CHECKBOOL()\
-RET_VAL=CheckRule(partrule->First->act, partrule->First->rptr->act, partrule->First->rptr->rptr->act, &(vys), &type1, &type2);\
-if (RET_VAL!=0){\
-return RET_VAL;\
+retid=CheckRule(partrule->First->act, partrule->First->rptr->act, partrule->First->rptr->rptr->act, &(vys), &type1, &type2);\
+if (retid!=0){\
+return retid;\
 }\
 
 #define SYN_OK 0
