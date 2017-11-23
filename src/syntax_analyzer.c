@@ -215,7 +215,9 @@ int Checkid(Token *in, Token **out)
         return S_MEMORY_ERROR;
 
     if(in->type == ID){
-        Search_Var(FUNC, in->val, &type);
+        if(!Search_Var(FUNC, in->val, &type)){
+            return SEM_ERROR;
+        }
     }
     else if(in->type == INTEGER){
         type = INTEGER;
