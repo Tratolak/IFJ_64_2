@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include "scanner.h"
 #include "syntax_analyzer.h"
+#include "symtable.h"
 
 int main()
 {
