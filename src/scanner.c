@@ -72,6 +72,7 @@ int GetToken(Token **token) {
   int c, count, sym;
   bool t = false;
   DynamicBuffer str;
+  str.buffer = NULL;
   state = START;
 
   while ((c = getchar()) != EOF) {
@@ -550,6 +551,17 @@ int GetToken(Token **token) {
     }
   }
 
+    if(str.buffer != NULL){
+        if (!BufferInsert(&str, '\0'))
+                return S_MEMORY_ERROR;
+        if (IsReserved(str.buffer)){
+            *token = FormToken(KEYWORD, str.buffer);
+            if (*token == NULL)
+                return S_MEMORY_ERROR;
+            else
+                return S_TOKEN_OK;
+        }
+    }
   // end of input file
   return S_END_OF_FILE;
 }
