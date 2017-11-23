@@ -544,7 +544,7 @@ void inBuiltAsc() {
     printf("DEFVAR TF@_length\n");
     functionFramePreparation();
     printf("PUSHS LF@_s\n");
-    printf("CALL Length\n");
+    printf("CALL length\n");
     printf("POPFRAME\n");
     printf("PUSHS TF@_returnValue\n");
     printf("PUSHS TF@_i\n");
