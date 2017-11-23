@@ -570,7 +570,7 @@ int S_StatList(Token *act, Token **back, bool isScope){
 }
 
 int S_Dim(Token *act){
-    char *id;
+    char *id = NULL;
     TokType type;
 
     GET_TOKEN(act);
@@ -1223,7 +1223,6 @@ int PreNextTok(Token* act, tDLList* local,tDLList* partrule,tDLList* rule, Token
  */
  int PreAnalyzer(Token *act, Token**back, TokType* res){
 
-     TFCreation();
      tDLList *local, *partrule, *rule;
      Token* vys;
      int err;

@@ -328,7 +328,7 @@ void getResult(char *variableName, bool isFunction) {
 void functionFramePreparation() {
     printf("PUSHFRAME\n");
     printf("CREATEFRAME\n");
-    printf("DEFVAR LF@_returnValue\n");
+    //printf("DEFVAR LF@_returnValue\n");
     variableQuantity = 0;
 }
 
@@ -379,6 +379,7 @@ void callInstruction(char *functionName) {
 void functionDefinition(char *functionName) {
     printf("LABEL %s\n", functionName);
     printf("CREATEFRAME\n");
+    printf("DEFVAR TF@_returnValue\n");
 }
 
 /**
@@ -432,8 +433,9 @@ void functionReturn0(TokType type){
  * Generovani vestavene funkce pro zjisteni delky retezce.
  */
 void inBuiltLength() {
-    printf("LABEL Length\n");
+    printf("LABEL length\n");
     printf("CREATEFRAME\n");
+    printf("DEFVAR TF@_returnValue\n");
     printf("DEFVAR TF@_s\n");
     printf("POPS TF@_s\n");
     printf("DEFVAR TF@_Length\n");
@@ -446,8 +448,9 @@ void inBuiltLength() {
  * Generovani vestavene funkce pro ziskani podretezce od i do n.
  */
 void inBuiltSubStr() {
-    printf("LABEL SubStr\n");
+    printf("LABEL substr\n");
     printf("CREATEFRAME\n");
+    printf("DEFVAR TF@_returnValue\n");
     printf("MOVE LF@_returnValue string@\n");
     printf("DEFVAR TF@_s\n");
     printf("POPS TF@_s\n");
@@ -477,7 +480,7 @@ void inBuiltSubStr() {
     printf("DEFVAR TF@_length\n");
     functionFramePreparation();
     printf("PUSHS LF@_s\n");
-    callInstruction("Length");
+    callInstruction("length");
     printf("MOVE TF@_length TF@_returnValue\n");
     printf("PUSHS TF@_length\n");
     printf("PUSHS TF@_i\n");
@@ -517,8 +520,9 @@ void inBuiltSubStr() {
  * Generovani vestavene funkce pro prevedeni hodnoty na znak.
  */
 void inBuiltChr() {
-    printf("LABEL Chr\n");
+    printf("LABEL chr\n");
     printf("CREATEFRAME\n");
+    printf("DEFVAR TF@_returnValue\n");
     printf("DEFVAR TF@_i\n");
     printf("POPS TF@_i\n");
     printf("INT2CHAR LF@_returnValue TF@_i\n");
@@ -529,8 +533,9 @@ void inBuiltChr() {
  * Generovani vestavene funkce pro ziskani ordinalni hodnoty znaku.
  */
 void inBuiltAsc() {
-    printf("LABEL Asc\n");
+    printf("LABEL asc\n");
     printf("CREATEFRAME\n");
+    printf("DEFVAR TF@_returnValue\n");
     printf("DEFVAR TF@_s\n");
     printf("POPS TF@_s\n");
     printf("DEFVAR TF@_i\n");
@@ -659,4 +664,5 @@ void input(char *variableName, TokType type) {
  */
 void scopeLabel() {
     printf("LABEL scope\n");
+    printf("DEFVAR TF@_returnValue\n");
 }
