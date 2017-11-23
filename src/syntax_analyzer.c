@@ -293,17 +293,41 @@ int SyntaxAnalyzer(){
     Token *act,*back;
     bool scope = false;
 
+
+    Dec_Func("length", true);
+    Dec_Func("substr", true);
+    Dec_Func("asc", true);
+    Dec_Func("chr", true);
+
+    Dec_Func_AddArgument("length", 0, STRING);
+
+    Dec_Func_AddArgument("substr", 0, STRING);
+    Dec_Func_AddArgument("substr", 1, INTEGER);
+    Dec_Func_AddArgument("substr", 2, INTEGER);
+
+    Dec_Func_AddArgument("asc", 0, STRING);
+    Dec_Func_AddArgument("asc", 1, INTEGER);
+
+    Dec_Func_AddArgument("chr", 0, INTEGER);
+
+    Dec_Func_Set_Type("length", INTEGER);
+    Dec_Func_Set_Type("substr", STRING);
+    Dec_Func_Set_Type("asc", INTEGER);
+    Dec_Func_Set_Type("chr", STRING);
+
     //Code Gen - Init
     header();
 
     while(1){
         GET_TOKEN(act);
-        if (act->type==KEYWORD){
+
+        if (act->type==KEYWORD && !scope){
             if(strcmp(act->val,"scope")==0){
                 if(scope){
                     return SYN_ERROR;
                 }
 
+                free(FUNC);
                 scopeLabel();
                 Dec_Func("scope", true);
                 setCurrFunc("scope");
@@ -380,7 +404,6 @@ int S_FuncHeader(bool declare, Token *act){
 
     bool definition = !declare;
     bool temp;
-    char *id2;
     //Function ID
     GET_TOKEN(act);
 
@@ -391,14 +414,13 @@ int S_FuncHeader(bool declare, Token *act){
             if(Search_Func(FUNC, NULL))
                 return SEM_ERROR;
 
-            myStrCpy(&id2, FUNC);
-            Dec_Func(id2, false);
+            Dec_Func(FUNC, false);
         }
         else{
             if(!Search_Func(FUNC, &temp)){
                 declare = true;
-                myStrCpy(&id2, FUNC);
-                Dec_Func(id2, true);
+
+                Dec_Func(FUNC, true);
             }
             else{
                 if(temp)
@@ -723,7 +745,7 @@ int S_Assig(Token *act, bool *function){
     TokType type;
 
     GET_TOKEN(act);
-    if(act->type == ID){
+    if(act->type == ID || act->type == KEYWORD){
         //if func - params else preanalyzer
         if(Search_Func(act->val, NULL)){
             //Code Gen - f. call init
