@@ -71,9 +71,9 @@ FreeToken(&(partrule->First->rptr->act));\
 FreeToken(&(partrule->First->rptr->rptr->act));\
 
 #define CHECKRULE()\
-ret=CheckRule(partrule->First->act, partrule->First->rptr->act, partrule->First->rptr->rptr->act, &(vys), &type1, &type2);\
-if (ret!=0){\
-return ret;\
+RET_VAL=CheckRule(partrule->First->act, partrule->First->rptr->act, partrule->First->rptr->rptr->act, &(vys), &type1, &type2);\
+if (RET_VAL!=0){\
+return RET_VAL;\
 }\
 if((partrule->First->act->type != type1) || (partrule->First->rptr->rptr->act->type != type2)){\
 changed = true;\
@@ -83,9 +83,9 @@ changed = false;\
 }\
 
 #define  CHECKBOOL()\
-ret=CheckRule(partrule->First->act, partrule->First->rptr->act, partrule->First->rptr->rptr->act, &(vys), &type1, &type2);\
-if (ret!=0){\
-return ret;\
+RET_VAL=CheckRule(partrule->First->act, partrule->First->rptr->act, partrule->First->rptr->rptr->act, &(vys), &type1, &type2);\
+if (RET_VAL!=0){\
+return RET_VAL;\
 }\
 
 #define SYN_OK 0
@@ -624,9 +624,9 @@ int S_Print(Token *act){
             break;
 
         PreAnalyzer(act, &back, &type);
+        write();
     }while(back->type == SEMICOLON);
 
-    write();
 
     if(back->type != EOL && act->type != EOL)
         return SYN_ERROR;
@@ -874,7 +874,7 @@ int DLListInitForParser(tDLList **local,tDLList **rule,tDLList **partrule){
  */
 int PreExe(char c, Token* act, tDLList* local,tDLList* partrule,tDLList* rule){
     char *top;
-    int ret=0;
+    int ret=0, retid=0;
     bool changed;
     Token *vys;
     TokType type1, type2;
@@ -1010,7 +1010,7 @@ int PreExe(char c, Token* act, tDLList* local,tDLList* partrule,tDLList* rule){
 
                     boolOperationSelect(':', type1, type2);
 
-                    //gen
+
 
                     DLInsertLast(local,'E',vys);
                     FREEPARTRULE();
@@ -1070,10 +1070,10 @@ int PreExe(char c, Token* act, tDLList* local,tDLList* partrule,tDLList* rule){
                 DLDisposeList(rule);
                 DLInsertLast(rule, 'i',NULL);
                 if(DLCompare(partrule, rule)==0){
-                    ret=Checkid(partrule->First->act,&vys);
-                    if(ret != 0)
+                    retid=Checkid(partrule->First->act,&vys);
+                    if(retid != 0)
                     {
-                        return ret;
+                        return retid;
                     }
 
                     getOperand(partrule->First->act);
