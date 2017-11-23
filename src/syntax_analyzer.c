@@ -284,6 +284,8 @@ int SyntaxAnalyzer(){
                 }
 
                 scopeLabel();
+                Dec_Func("scope", true);
+                setCurrFunc("scope");
 
                 GET_TOKEN(act);
                 if(act->type == EOL)
@@ -337,6 +339,8 @@ int SyntaxAnalyzer(){
                     GET_TOKEN(act);
                     if(act->type != EOL)
                         return SYN_ERROR;
+
+                    functionReturn(false);
             }
         }
         else if(act->type == EOL){
