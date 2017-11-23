@@ -185,10 +185,10 @@ void boolOperationSelect(char operand, TokType var1, TokType var2) {
             labelStackTop(&labelStack, &lType, &quantity);
             if (lType == WHILE) {
                 printf("POPFRAME\n");
-                printf("JUMPIFNEQS while%dEnd\n", quantity); //while%dEnd - navesti konce cyklu
+                printf("JUMPIFNEQS $$while%dEnd\n", quantity); //while%dEnd - navesti konce cyklu
             } else if (lType == IF) {
                 printf("POPFRAME\n");
-                printf("JUMPIFNEQS else%d\n", quantity); //if%dFalse - zacatek false vetve podminky
+                printf("JUMPIFNEQS $$else%d\n", quantity); //if%dFalse - zacatek false vetve podminky
             }
             break;
         case '#':  //!=
@@ -199,10 +199,10 @@ void boolOperationSelect(char operand, TokType var1, TokType var2) {
             labelStackTop(&labelStack, &lType, &quantity);
             if (lType == WHILE) {
                 printf("POPFRAME\n");
-                printf("JUMPIFNEQS while%dEnd\n", quantity); //while%dEnd - navesti konce cyklu
+                printf("JUMPIFNEQS $$while%dEnd\n", quantity); //while%dEnd - navesti konce cyklu
             } else if (lType == IF) {
                 printf("POPFRAME\n");
-                printf("JUMPIFNEQS else%d\n", quantity); //if%dFalse - zacatek false vetve podminky
+                printf("JUMPIFNEQS $$else%d\n", quantity); //if%dFalse - zacatek false vetve podminky
             }
             break;
         case ',': //<=
@@ -217,10 +217,10 @@ void boolOperationSelect(char operand, TokType var1, TokType var2) {
             labelStackTop(&labelStack, &lType, &quantity);
             if (lType == WHILE) {
                 printf("POPFRAME\n");
-                printf("JUMPIFNEQS while%dEnd\n", quantity); //while%dEnd - navesti konce cyklu
+                printf("JUMPIFNEQS $$while%dEnd\n", quantity); //while%dEnd - navesti konce cyklu
             } else if (lType == IF) {
                 printf("POPFRAME\n");
-                printf("JUMPIFNEQS else%d\n", quantity); //if%dFalse - zacatek false vetve podminky
+                printf("JUMPIFNEQS $$else%d\n", quantity); //if%dFalse - zacatek false vetve podminky
             }
             break;
         case '.': //>=
@@ -235,10 +235,10 @@ void boolOperationSelect(char operand, TokType var1, TokType var2) {
             labelStackTop(&labelStack, &lType, &quantity);
             if (lType == WHILE) {
                 printf("POPFRAME\n");
-                printf("JUMPIFNEQS while%dEnd\n", quantity); //while%dEnd - navesti konce cyklu
+                printf("JUMPIFNEQS $$while%dEnd\n", quantity); //while%dEnd - navesti konce cyklu
             } else if (lType == IF) {
                 printf("POPFRAME\n");
-                printf("JUMPIFNEQS else%d\n", quantity); //if%dFalse - zacatek false vetve podminky
+                printf("JUMPIFNEQS $$else%d\n", quantity); //if%dFalse - zacatek false vetve podminky
             }
             break;
         case '?': // <
@@ -249,10 +249,10 @@ void boolOperationSelect(char operand, TokType var1, TokType var2) {
             labelStackTop(&labelStack, &lType, &quantity);
             if (lType == WHILE) {
                 printf("POPFRAME\n");
-                printf("JUMPIFNEQS while%dEnd\n", quantity); //while%dEnd - navesti konce cyklu
+                printf("JUMPIFNEQS $$while%dEnd\n", quantity); //while%dEnd - navesti konce cyklu
             } else if (lType == IF) {
                 printf("POPFRAME\n");
-                printf("JUMPIFNEQS else%d\n", quantity); //if%dFalse - zacatek false vetve podminky
+                printf("JUMPIFNEQS $$else%d\n", quantity); //if%dFalse - zacatek false vetve podminky
             }
             break;
         case ':': //>
@@ -263,10 +263,10 @@ void boolOperationSelect(char operand, TokType var1, TokType var2) {
             labelStackTop(&labelStack, &lType, &quantity);
             if (lType == WHILE) {
                 printf("POPFRAME\n");
-                printf("JUMPIFNEQS while%dEnd\n", quantity); //while%dEnd - navesti konce cyklu
+                printf("JUMPIFNEQS $$while%dEnd\n", quantity); //while%dEnd - navesti konce cyklu
             } else if (lType == IF) {
                 printf("POPFRAME\n");
-                printf("JUMPIFNEQS else%d\n", quantity); //if%dFalse - zacatek false vetve podminky
+                printf("JUMPIFNEQS $$else%d\n", quantity); //if%dFalse - zacatek false vetve podminky
             }
         default:
             break;
@@ -571,11 +571,11 @@ int whileIfBegin(labelType type) {
     int status = STATUS_OK;
     if (type == WHILE) {
         status = labelStackPush(&labelStack, type, whileLabelQuantity, false);
-        printf("LABEL while%d\n", whileLabelQuantity);
+        printf("LABEL $$while%d\n", whileLabelQuantity);
         whileLabelQuantity++;
     } else if (type == IF) {
         status = labelStackPush(&labelStack, type, ifLabelQuantity, false);
-        printf("LABEL if%d\n", ifLabelQuantity);
+        printf("LABEL $$if%d\n", ifLabelQuantity);
         ifLabelQuantity++;
     }
     return status;
@@ -595,18 +595,18 @@ int whileIfElseEnd(labelType type) {
     labelStackPop(&labelStack, &lType, &quantity, &ifElse);
 
     if (type == WHILE) {
-        printf("JUMP while%d\n", quantity);
-        printf("LABEL while%dEnd\n", quantity);
+        printf("JUMP $$while%d\n", quantity);
+        printf("LABEL $$while%dEnd\n", quantity);
     } else if (type == IF) {
         //Pokud nebyl vygenerovano ELSE
         if (!ifElse) {
-            printf("LABEL else%d\n", quantity);
+            printf("LABEL $$else%d\n", quantity);
         }
-        printf("LABEL if%dEnd\n", quantity);
+        printf("LABEL $$if%dEnd\n", quantity);
     } else if (type == ELSE) {
-        printf("JUMP if%dEnd\n", quantity);
-        printf("LABEL else%d\n", quantity);
-        status = labelStackPush(&labelStack, type, ifLabelQuantity-1, true);
+        printf("JUMP $$if%dEnd\n", quantity);
+        printf("LABEL $$else%d\n", quantity);
+        status = labelStackPush(&labelStack, type, quantity, true);
     }
     return status;
 }
