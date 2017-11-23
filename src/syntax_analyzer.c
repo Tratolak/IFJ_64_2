@@ -611,6 +611,8 @@ int S_Print(Token *act){
 int S_If(Token *act, bool isScope){
     Token *back;
 
+    whileIfBegin(IF);
+
     GET_TOKEN(act);
     PreAnalyzer(act, &back);
 
@@ -630,6 +632,8 @@ int S_If(Token *act, bool isScope){
     if(act->type != EOL)
            return SYN_ERROR;
 
+    whileIfElseEnd(ELSE);
+
     SYN_EXPAND(S_StatList, act, &back, isScope);
 
     if(back->type != KEYWORD || strcmp(back->val, "end") != 0)
@@ -639,11 +643,15 @@ int S_If(Token *act, bool isScope){
     if(act->type != KEYWORD || strcmp(act->val, "if") != 0)
            return SYN_ERROR;
 
+    whileIfElseEnd(IF);
+
     return SYN_OK;
 }
 
 int S_While(Token *act, bool isScope){
     Token *back;
+
+    whileIfBegin(WHILE);
 
     GET_TOKEN(act);
     PreAnalyzer(act, &back);
@@ -657,6 +665,8 @@ int S_While(Token *act, bool isScope){
     if(back->type != KEYWORD || strcmp(back->val, "loop") != 0){
        return SYN_ERROR;
     }
+
+    whileIfElseEnd(WHILE);
 
     return SYN_OK;
 }
