@@ -846,7 +846,7 @@ int DLListInitForParser(tDLList **local,tDLList **rule,tDLList **partrule){
     return true;
 }
 /**
- * @brief funkce vykonavajici precedencni analyzu 
+ * @brief funkce vykonavajici precedencni analyzu
  * @param c
  * @param act
  * @param local
@@ -1237,6 +1237,7 @@ int PreNextTok(Token* act, tDLList* local,tDLList* partrule,tDLList* rule, Token
 
      err=PreNextTok(act, local, partrule, rule, &(vys)); // hlavni funkce ridici precedencni analyzu
      *res=local->First->rptr->act->type;
+     *back=vys;
 
      DLDisposeList(local);  //cisteni
      DLDisposeList(partrule);
