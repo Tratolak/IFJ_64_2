@@ -14,31 +14,21 @@ void typeStackInit(struct typeStackNode **head) {
 }
 
 /**
- * Zjisteni zda-li je zasobnik prazdny.
- *
- * @param head - ukazatel na vrchol zasobnik (struct typeStackNode*)
- * @return true | false (bool)
- */
-bool typeStackEmpty(struct typeStackNode *head) {
-    return head == NULL ? true : false;
-}
-
-/**
  * Vlozeni typu promenne (TokType) na zasobnik.
  *
  * @param head   - ukazatel na vrchol zasobniku (struct typeStackNode**)
  * @param type   - vkladany typ hodnoty (TokType)
  * @return false - false = alokace neprobehla uspesne | true - vse ok
  */
-bool typeStackPush(struct typeStackNode **head, TokType type) {
+int typeStackPush(struct typeStackNode **head, TokType type) {
     struct typeStackNode *newNode = (struct typeStackNode *) malloc(sizeof(struct typeStackNode));
     if (newNode == NULL) {
-        return false;
+        return STATUS_MALLOC_ERR;
     }
     (*newNode).type = type;
     (*newNode).next = *head;
     *head = newNode;
-    return true;
+    return STATUS_OK;
 }
 
 /**
@@ -82,16 +72,6 @@ void labelStackInit(struct labelStackNode **head) {
 }
 
 /**
- * Zjisteni zda-li je zasobnik prazdny.
- *
- * @param head - ukazatel na vrchol zasobnik (struct labelStackNode*)
- * @return true | false (bool)
- */
-bool labelStackEmpty(struct labelStackNode *head) {
-    return head == NULL ? true : false;
-}
-
-/**
  * Vlozeni typu a jmena generovanych navesti na zasobnik.
  *
  * @param head      - ukazatel na vrchol zasobniku (struct labelStackNode**)
@@ -100,17 +80,17 @@ bool labelStackEmpty(struct labelStackNode *head) {
  * @param ifElse    - plati pouze pro if a indikuje yda-li byl jiz vygenerovan ELSE
  * @return false    - false  = alokace neprobehla uspesne | true = vse ok
  */
-bool labelStackPush(struct labelStackNode **head, labelType labelType, int quantity, bool ifElse) {
+int labelStackPush(struct labelStackNode **head, labelType labelType, int quantity, bool ifElse) {
     struct labelStackNode *newNode = (struct labelStackNode *) malloc(sizeof(struct labelStackNode));
     if (newNode == NULL) {
-        return false;
+        return STATUS_MALLOC_ERR;
     }
     (*newNode).labelType = labelType;
     (*newNode).quantity = quantity;
     (*newNode).ifElse = ifElse;
     (*newNode).next = *head;
     *head = newNode;
-    return true;
+    return STATUS_OK;
 }
 
 /**

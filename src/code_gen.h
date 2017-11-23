@@ -4,23 +4,26 @@
 #include "scanner.h"
 #include "stack_operations.h"
 
+#define STATUS_OK  0;
+#define STATUS_MALLOC_ERR  1;
+
 struct typeStackNode *typeStack;
 struct labelStackNode *labelStack;
 
 void header();
 
 
-void typeConvert(bool convert, TokType type);
+int typeConvert(bool convert, TokType type);
 
 void convertInstructionSelect(TokType original, TokType new, char *string);
 
-void operationSelect(char operation, bool convert, TokType type);
+int operationSelect(char operation, bool convert, TokType type);
 
 void boolOperationSelect(char operation, TokType var1, TokType var2);
 
 void boolOperationConvert(TokType var1, TokType var2);
 
-bool getOperand(Token *t);
+int getOperand(Token *t);
 
 void TFCreation();
 
@@ -48,9 +51,9 @@ void inBuiltChr();
 
 void inBuiltAsc();
 
-bool whileIfBegin(labelType type);
+int whileIfBegin(labelType type);
 
-void whileIfElseEnd(labelType type);
+int whileIfElseEnd(labelType type);
 
 void variableDeclaration(char *name);
 

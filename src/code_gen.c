@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include "code_gen.h"
 
+
+
 //Pocitani poctu navesti daneho typu
 int whileLabelQuantity = 0;
 int ifLabelQuantity = 0;
@@ -50,8 +52,9 @@ void TFCreation() {
  *
  * @param convert - urcuje zda-li je pretypovani potrebne (bool)
  * @param type    - urcuje typ vysledku (TokType)
+ * @return status - informace o uspesnosti alokace (int)
  */
-void typeConvert(bool convert, TokType type) {
+int typeConvert(bool convert, TokType type) {
     printf("POPS TF@_exprOperand1\n"); //exprOperand1 == first
     printf("POPS TF@_exprOperand2\n"); //exprOperand2 == second
 
@@ -65,7 +68,8 @@ void typeConvert(bool convert, TokType type) {
         if (second != type)
             convertInstructionSelect(second, type, "TF@_exprOperand2");
     }
-    typeStackPush(&typeStack, type);
+    int status = typeStackPush(&typeStack, type);
+    return status;
 }
 
 /**
@@ -93,8 +97,8 @@ void convertInstructionSelect(TokType original, TokType new, char *string) {
  * @param convert   - true = je treba pretypovat | false = neni treba pretypovat (bool)
  * @param type      - typ do ktereho se provede pripadne pretypovani (TokType)
  */
-void operationSelect(char operand, bool convert, TokType type) {
-    typeConvert(convert, type);
+int operationSelect(char operand, bool convert, TokType type) {
+    int status = typeConvert(convert, type);
     switch (operand) {
         case '+':
             if (type == STRING) {
@@ -127,6 +131,7 @@ void operationSelect(char operand, bool convert, TokType type) {
         default:
             break;
     }
+    return status;
 }
 
 /**
@@ -274,24 +279,24 @@ void boolOperationSelect(char operand, TokType var1, TokType var2) {
  * @param t          - promenna/absolutni hodnota (Token)
  * @param isVariable - true jedna-li se o promennou (bool)
  * @param type       - typ promenne (TokType)
- * @return mallocOk - true = ok | false = error (bool)
+ * @return status    -  informace o uspesnosti alokace (int)
  */
-bool getOperand(Token *t) {
-    bool mallocOk = true;
+int getOperand(Token *t) {
+    int status = STATUS_OK;
     if (t->type == INTEGER) {
         printf("PUSHS int@%s\n", t->val);
-        mallocOk = typeStackPush(&typeStack, t->type);
+        status = typeStackPush(&typeStack, t->type);
     } else if (t->type == DOUBLE) {
         printf("PUSHS float@%s\n", t->val);
-        mallocOk = typeStackPush(&typeStack, t->type);
+        status = typeStackPush(&typeStack, t->type);
     } else if (t->type == STRING) {
         printf("PUSHS string@%s\n", t->val);
-        mallocOk = typeStackPush(&typeStack, t->type);
+        status = typeStackPush(&typeStack, t->type);
     } else if (t->type == ID) {
         printf("PUSHS LF@_%s\n", t->val);
-        mallocOk = typeStackPush(&typeStack, t->type);
+        status = typeStackPush(&typeStack, t->type);
     }
-    return mallocOk;
+    return status;
 }
 
 
@@ -300,6 +305,7 @@ bool getOperand(Token *t) {
  * Nastaveni zasobniku typu do vychoziho stavu.
  *
  * @param variableName - nazev promenne, do ktere bude vysledek prirazen (char*)
+
  */
 void getResult(char *variableName, bool isFunction) {
     if (!isFunction) {
@@ -393,11 +399,31 @@ void functionParamLoad(Token t) {
  */
 void functionReturn(bool fReturn) {
     if (fReturn == true) {
+        printf("POPFRAME\n");
         printf("POPS LF@_returnValue\n");
     }
     printf("RETURN\n");
 }
 
+/**
+ * Generovani instrukci pro navrat z funkce ber prikazu RETURN.
+ *
+ * @param type - typ, ktery se bude navrace (TokType)
+ */
+void functionReturn0(TokType type){
+    switch (type){
+        case INTEGER:
+            printf("MOVE LF@_returnValue int@0\n");
+            break;
+        case DOUBLE:
+            printf("MOVE LF@_returnValue float@0.0\n");
+            break;
+        case STRING:
+            printf("MOVE LF@_returnValue string@!""\n");
+            break;
+        default:break;
+    }
+}
 //================================================================================
 // Vestavene funkce
 //================================================================================
@@ -538,30 +564,32 @@ void inBuiltAsc() {
 /**
  * Ulozeni navesti na vrchol zasobniku. A vytvoreni instrukce pro navesti.
  *
- * @param type - typ konstrukce (labelType)
- * @return mallocOk - true = ok | false = error (bool)
+ * @param type    - typ konstrukce (labelType)
+ * @return status - informace o uspesnosti alokace (int)
  */
-bool whileIfBegin(labelType type) {
-    bool mallocOk = true;
+int whileIfBegin(labelType type) {
+    int status = STATUS_OK;
     if (type == WHILE) {
-        mallocOk = labelStackPush(&labelStack, type, whileLabelQuantity, false);
+        status = labelStackPush(&labelStack, type, whileLabelQuantity, false);
         printf("LABEL while%d\n", whileLabelQuantity);
         whileLabelQuantity++;
     } else if (type == IF) {
-        mallocOk = labelStackPush(&labelStack, type, ifLabelQuantity, false);
+        status = labelStackPush(&labelStack, type, ifLabelQuantity, false);
         printf("LABEL if%d\n", ifLabelQuantity);
         ifLabelQuantity++;
     }
-    return mallocOk;
+    return status;
 }
 
 /**
  * Generovani instrukci pro konstrukce IF ,ELSE, WHILE.
  *
  * @param type - typ konstrukce (labelType)
+ * @return status - informace o uspesnosti alokace (int)
  */
-void whileIfElseEnd(labelType type) {
+int whileIfElseEnd(labelType type) {
     labelType lType;
+    int status = STATUS_OK;
     int quantity;
     bool ifElse;
     labelStackPop(&labelStack, &lType, &quantity, &ifElse);
@@ -578,8 +606,9 @@ void whileIfElseEnd(labelType type) {
     } else if (type == ELSE) {
         printf("JUMP if%dEnd\n", quantity);
         printf("LABEL else%d\n", quantity);
-        labelStackPush(&labelStack, type, ifLabelQuantity-1, true);
+        status = labelStackPush(&labelStack, type, ifLabelQuantity-1, true);
     }
+    return status;
 }
 
 /**
