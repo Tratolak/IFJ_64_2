@@ -845,7 +845,15 @@ int DLListInitForParser(tDLList **local,tDLList **rule,tDLList **partrule){
 
     return true;
 }
-
+/**
+ * @brief funkce vykonavajici precedencni analyzu 
+ * @param c
+ * @param act
+ * @param local
+ * @param partrule
+ * @param rule
+ * @return
+ */
 int PreExe(char c, Token* act, tDLList* local,tDLList* partrule,tDLList* rule){
     char *top;
     int ret=0;
@@ -1162,6 +1170,15 @@ int PreTokenAnalyzer(Token *act, char * c){
     return 0;
 
 }
+/**
+ * @brief funkce ridici precedencni analyzu a zaroven ziskavaji dalsi token
+ * @param act aktualni token popripade predany
+ * @param local DLlist je hlavni zasobnik pro prec analyzu
+ * @param partrule DLList pro vyriznuti casti zasobniku a zpraocvani pravidel
+ * @param rule  DLList pravidlo ktere se porovnava obsahuje postupne vsechny pravidla gramatiky pro precedencni analyzu
+ * @param vys DLList vysledek ze sematiky a postupne predavany DLListem
+ * @return v pripade chyby vraci prislusnou chybu jinak 0
+ */
 int PreNextTok(Token* act, tDLList* local,tDLList* partrule,tDLList* rule, Token** vys){
     int err, tok;
     char *c;
