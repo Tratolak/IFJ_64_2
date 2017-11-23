@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include "code_gen.h"
-#include "stack_operations.h"
 
 //Pocitani poctu navesti daneho typu
 int whileLabelQuantity = 0;
@@ -324,7 +323,7 @@ void functionFramePreparation() {
  * @param t - token (Token)
  */
 void callParamLoad(Token t) {
-    printf("DEFVAR TF@_%d", variableQuantity);
+    printf("DEFVAR TF@_%d\n", variableQuantity);
     if (t.type == ID) {
         printf("MOVE TF@_%d LF@_%s\n", variableQuantity, t.val);
     } else if (t.type == INTEGER) {
@@ -341,9 +340,9 @@ void callParamLoad(Token t) {
  * Generovani instrukci pro ulozeni parametu fce na zasobnik.
  */
 void callParamsPush() {
-    while (variableQuantity >= 0) {
-        printf("PUSHS TF@_%d\n", variableQuantity);
+    while (variableQuantity > 0) {
         variableQuantity--;
+        printf("PUSHS TF@_%d\n", variableQuantity);
     }
 }
 
@@ -590,8 +589,8 @@ void variableDeclaration(char *name) {
  * @param isVariable  - TRUE pokud je retezec promenna (bool)
  */
 void write() {
-    printf("POPS TF@_expResult\n");
-    printf("WRITE TF@_expResult\n");
+    printf("POPS TF@_exprResult\n");
+    printf("WRITE TF@_exprResult\n");
     printf("POPFRAME\n");
 }
 
