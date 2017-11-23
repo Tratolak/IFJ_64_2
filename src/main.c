@@ -5,8 +5,10 @@
 
 int main()
 {
+    Symtable_Init();
     int err;
-    printf("Hello world!\n");
+    freopen("test.txt", "r", stdin);
+    //printf("Hello world!\n");
     err=SyntaxAnalyzer();
     switch (err){
         case 1:
@@ -17,5 +19,7 @@ int main()
             break;
 
     }
-    return 0;
+
+    Symtable_Destroy();
+    return err;
 }
