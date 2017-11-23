@@ -1133,9 +1133,13 @@ int PreExe(char c, Token* act, tDLList* local,tDLList* partrule,tDLList* rule){
                         return retid;
                     }
 
-                    getOperand(partrule->First->act);
-                    DLInsertLast(local,'E',vys);
+                    retid=getOperand(partrule->First->act);
+                    if(retid != 0)
+                    {
+                        return retid;
+                    }
 
+                    DLInsertLast(local,'E',vys);
                     continue;
                 }
                 // sem dojde pokud se zadne pravidlo neuplatni
