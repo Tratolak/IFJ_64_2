@@ -23,7 +23,7 @@ int S_Print(Token *act);
 int S_If(Token *act, bool isScope);
 int S_While(Token *act, bool isScope);
 int S_Ret(Token *act);
-int S_Assig(Token *act);
+int S_Assig(Token *act, bool *function);
 
 char ArtPreTB [15][15] = {
     // < - 1, > - 2, = - 3, ' ' - 0
@@ -380,6 +380,7 @@ int S_FuncHeader(bool declare, Token *act){
 
     bool definition = !declare;
     bool temp;
+    char *id2;
     //Function ID
     GET_TOKEN(act);
 
@@ -390,12 +391,14 @@ int S_FuncHeader(bool declare, Token *act){
             if(Search_Func(FUNC, NULL))
                 return SEM_ERROR;
 
-            Dec_Func(FUNC, false);
+            myStrCpy(&id2, FUNC);
+            Dec_Func(id2, false);
         }
         else{
             if(!Search_Func(FUNC, &temp)){
                 declare = true;
-                Dec_Func(FUNC, true);
+                myStrCpy(&id2, FUNC);
+                Dec_Func(id2, true);
             }
             else{
                 if(temp)
@@ -541,16 +544,17 @@ int S_StatList(Token *act, Token **back, bool isScope){
                 return SEM_ERROR;
             }
 
+            bool func;
             GET_TOKEN(act);
             if(act->type == EQL){
-                SYN_EXPAND(S_Assig, act);
+                SYN_EXPAND(S_Assig, act, &func);
             }
             else{
                 free(id);
                 return SYN_ERROR;
             }
 
-            getResult(id, false);
+            getResult(id, func);
             free(id);
         }
         else if(act->type == EOL){
@@ -706,13 +710,15 @@ int S_Ret(Token *act){
     GET_TOKEN(act);
     PreAnalyzer(act, &back, &type);
 
+    functionReturn(true);
+
     if(back->type != EOL)
            return SYN_ERROR;
 
     return SYN_OK;
 }
 
-int S_Assig(Token *act){
+int S_Assig(Token *act, bool *function){
     Token *back;
     TokType type;
 
@@ -784,18 +790,24 @@ int S_Assig(Token *act){
             //Code Gen - actual function call
             callInstruction(id);
 
+            *function = true;
+
             free(id);
         }
         else{
             PreAnalyzer(act, &back, &type);
             if(back->type != EOL)
                 return SYN_ERROR;
+
+            *function = false;
         }
     }
     else{
         PreAnalyzer(act, &back, &type);
         if(back->type != EOL)
             return SYN_ERROR;
+
+        *function = false;
     }
 
     return SYN_OK;
