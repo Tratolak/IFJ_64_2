@@ -70,6 +70,24 @@ FreeToken(&(partrule->First->act));\
 FreeToken(&(partrule->First->rptr->act));\
 FreeToken(&(partrule->First->rptr->rptr->act));\
 
+#define CHECKRULE()\
+ret=CheckRule(partrule->First->act, partrule->First->rptr->act, partrule->First->rptr->rptr->act, &(vys), &type1, &type2);\
+if (ret!=0){\
+return ret;\
+}\
+if((partrule->First->act->type != type1) || (partrule->First->rptr->rptr->act->type != type2)){\
+changed = true;\
+}\
+else{\
+changed = false;\
+}\
+
+#define  CHECKBOOL()\
+ret=CheckRule(partrule->First->act, partrule->First->rptr->act, partrule->First->rptr->rptr->act, &(vys), &type1, &type2);\
+if (ret!=0){\
+return ret;\
+}\
+
 #define SYN_OK 0
 #define SEM_OK 0
 #define SYN_ERROR 2
@@ -892,17 +910,10 @@ int PreExe(char c, Token* act, tDLList* local,tDLList* partrule,tDLList* rule){
                 DLInsertLast(rule, 'E', NULL);
                 if(DLCompare(partrule, rule)==0){
 
-                    CheckRule(partrule->First->act, partrule->First->rptr->act, partrule->First->rptr->rptr->act, &(vys), &type1, &type2);
-
-                    if((partrule->First->act->type != type1) || (partrule->First->rptr->rptr->act->type != type2)){
-                        changed = true;
-                    }
-                    else{
-                        changed = false;
-                    }
+                    CHECKRULE();
 
                     operationSelect('+', changed, vys->type);
-                    // PROSIM UPRAVTE ZDE PARAMETRY VKLADANE DO FCE A ODKOMENTUJTE operationSelect('+',BOOL,TOKTYPE);
+
                     DLInsertLast(local,'E',vys);
                     FREEPARTRULE();
                     continue;
@@ -913,17 +924,10 @@ int PreExe(char c, Token* act, tDLList* local,tDLList* partrule,tDLList* rule){
                 DLInsertLast(rule, 'E',NULL);
                 if(DLCompare(partrule, rule)==0){
 
-                    CheckRule(partrule->First->act, partrule->First->rptr->act, partrule->First->rptr->rptr->act, &(vys), &type1, &type2);
-
-                    if((partrule->First->act->type != type1) || (partrule->First->rptr->rptr->act->type != type2)){
-                        changed = true;
-                    }
-                    else{
-                        changed = false;
-                    }
+                    CHECKRULE();
 
                     operationSelect('*', changed, vys->type);
-                    // PROSIM UPRAVTE ZDE PARAMETRY VKLADANE DO FCE A ODKOMENTUJTE operationSelect('*',BOOL,TOKTYPE);
+
                     DLInsertLast(local,'E',vys);
                     FREEPARTRULE();
                     continue;
@@ -934,14 +938,7 @@ int PreExe(char c, Token* act, tDLList* local,tDLList* partrule,tDLList* rule){
                 DLInsertLast(rule, 'E',NULL);
                 if(DLCompare(partrule, rule)==0){
 
-                    CheckRule(partrule->First->act, partrule->First->rptr->act, partrule->First->rptr->rptr->act, &(vys), &type1, &type2);
-
-                    if((partrule->First->act->type != type1) || (partrule->First->rptr->rptr->act->type != type2)){
-                        changed = true;
-                    }
-                    else{
-                        changed = false;
-                    }
+                   CHECKRULE();
 
                     operationSelect('-', changed, vys->type);
                     DLInsertLast(local,'E',vys);
@@ -954,17 +951,10 @@ int PreExe(char c, Token* act, tDLList* local,tDLList* partrule,tDLList* rule){
                 DLInsertLast(rule, 'E',NULL);
                 if(DLCompare(partrule, rule)==0){
 
-                    CheckRule(partrule->First->act, partrule->First->rptr->act, partrule->First->rptr->rptr->act, &(vys), &type1, &type2);
-
-                    if((partrule->First->act->type != type1) || (partrule->First->rptr->rptr->act->type != type2)){
-                        changed = true;
-                    }
-                    else{
-                        changed = false;
-                    }
+                    CHECKRULE();
 
                     operationSelect('/', changed, vys->type);
-                    // PROSIM UPRAVTE ZDE PARAMETRY VKLADANE DO FCE A ODKOMENTUJTE operationSelect('/',BOOL,TOKTYPE);
+
                     DLInsertLast(local,'E',vys);
                     FREEPARTRULE();
                     continue;
@@ -975,17 +965,10 @@ int PreExe(char c, Token* act, tDLList* local,tDLList* partrule,tDLList* rule){
                 DLInsertLast(rule, 'E',NULL);
                 if(DLCompare(partrule, rule)==0){
 
-                    CheckRule(partrule->First->act, partrule->First->rptr->act, partrule->First->rptr->rptr->act, &(vys), &type1, &type2);
+                    CHECKRULE();
 
-                    if((partrule->First->act->type != type1) || (partrule->First->rptr->rptr->act->type != type2)){
-                        changed = true;
-                    }
-                    else{
-                        changed = false;
-                    }
+                    operationSelect('\\', changed, vys->type);
 
-                    operationSelect('//', changed, vys->type);
-                    // PROSIM UPRAVTE ZDE PARAMETRY VKLADANE DO FCE A ODKOMENTUJTE operationSelect('\\',BOOL,TOKTYPE);
                     DLInsertLast(local,'E',vys);
                     FREEPARTRULE();
                     continue;
@@ -996,8 +979,7 @@ int PreExe(char c, Token* act, tDLList* local,tDLList* partrule,tDLList* rule){
                 DLInsertLast(rule, 'E',NULL);
                 if(DLCompare(partrule, rule)==0){
 
-                    CheckRule(partrule->First->act, partrule->First->rptr->act, partrule->First->rptr->rptr->act, &(vys), &type1, &type2);
-
+                    CHECKBOOL();
                     boolOperationSelect('=', type1, type2);
                     //gen
                     DLInsertLast(local,'E',vys);
@@ -1010,9 +992,9 @@ int PreExe(char c, Token* act, tDLList* local,tDLList* partrule,tDLList* rule){
                 DLInsertLast(rule, 'E',NULL);
                 if(DLCompare(partrule, rule)==0){
 
-                    CheckRule(partrule->First->act, partrule->First->rptr->act, partrule->First->rptr->rptr->act, &(vys), &type1, &type2);
+                    CHECKBOOL();
 
-                    boolOperationSelect('<', type1, type2);
+                    boolOperationSelect('?', type1, type2);
 
                     DLInsertLast(local,'E',vys);
                     FREEPARTRULE();
@@ -1024,9 +1006,9 @@ int PreExe(char c, Token* act, tDLList* local,tDLList* partrule,tDLList* rule){
                 DLInsertLast(rule, 'E',NULL);
                 if(DLCompare(partrule, rule)==0){
 
-                    CheckRule(partrule->First->act, partrule->First->rptr->act, partrule->First->rptr->rptr->act, &(vys), &type1, &type2);
+                    CHECKBOOL();
 
-                    boolOperationSelect('>', type1, type2);
+                    boolOperationSelect(':', type1, type2);
 
                     //gen
 
@@ -1040,7 +1022,7 @@ int PreExe(char c, Token* act, tDLList* local,tDLList* partrule,tDLList* rule){
                 DLInsertLast(rule, 'E',NULL);
                 if(DLCompare(partrule, rule)==0){
 
-                    CheckRule(partrule->First->act, partrule->First->rptr->act, partrule->First->rptr->rptr->act, &(vys), &type1, &type2);
+                    CHECKBOOL();
 
                     boolOperationSelect(',', type1, type2);
 
@@ -1054,10 +1036,9 @@ int PreExe(char c, Token* act, tDLList* local,tDLList* partrule,tDLList* rule){
                 DLInsertLast(rule, 'E',NULL);
                 if(DLCompare(partrule, rule)==0){
 
-                    CheckRule(partrule->First->act, partrule->First->rptr->act, partrule->First->rptr->rptr->act, &(vys), &type1, &type2);
+                    CHECKBOOL();
 
                     boolOperationSelect('.', type1, type2);
-                    //gen
                     DLInsertLast(local,'E',vys);
                     FREEPARTRULE();
                     continue;
@@ -1068,7 +1049,7 @@ int PreExe(char c, Token* act, tDLList* local,tDLList* partrule,tDLList* rule){
                 DLInsertLast(rule, 'E',NULL);
                 if(DLCompare(partrule, rule)==0){
 
-                    CheckRule(partrule->First->act, partrule->First->rptr->act, partrule->First->rptr->rptr->act, &(vys), &type1, &type2);
+                    CHECKBOOL();
 
                     boolOperationSelect('#', type1, type2);
                     //gen
@@ -1081,7 +1062,6 @@ int PreExe(char c, Token* act, tDLList* local,tDLList* partrule,tDLList* rule){
                 DLInsertLast(rule, 'E',NULL);
                 DLInsertLast(rule, ')',NULL);
                 if(DLCompare(partrule, rule)==0){
-                    CheckRule(partrule->First->act, partrule->First->rptr->act, partrule->First->rptr->rptr->act, &(vys), &type1, &type2);
 
                     DLInsertLast(local,'E',vys);
                     FREEPARTRULE();
@@ -1090,7 +1070,11 @@ int PreExe(char c, Token* act, tDLList* local,tDLList* partrule,tDLList* rule){
                 DLDisposeList(rule);
                 DLInsertLast(rule, 'i',NULL);
                 if(DLCompare(partrule, rule)==0){
-                    Checkid(partrule->First->act,&vys);
+                    ret=Checkid(partrule->First->act,&vys);
+                    if(ret != 0)
+                    {
+                        return ret;
+                    }
 
                     getOperand(partrule->First->act);
                     DLInsertLast(local,'E',vys);
