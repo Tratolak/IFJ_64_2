@@ -569,7 +569,7 @@ void whileIfElseEnd(labelType type) {
     } else if (type == ELSE) {
         printf("JUMP if%dEnd\n", quantity);
         printf("LABEL else%d\n", quantity);
-        labelStackPush(&labelStack, type, ifLabelQuantity, true);
+        labelStackPush(&labelStack, type, ifLabelQuantity-1, true);
     }
 }
 
