@@ -874,7 +874,7 @@ int DLListInitForParser(tDLList **local,tDLList **rule,tDLList **partrule){
  */
 int PreExe(char c, Token* act, tDLList* local,tDLList* partrule,tDLList* rule){
     char *top;
-    int ret=0;
+    int ret=0, retid=0;
     bool changed;
     Token *vys;
     TokType type1, type2;
@@ -1070,10 +1070,10 @@ int PreExe(char c, Token* act, tDLList* local,tDLList* partrule,tDLList* rule){
                 DLDisposeList(rule);
                 DLInsertLast(rule, 'i',NULL);
                 if(DLCompare(partrule, rule)==0){
-                    ret=Checkid(partrule->First->act,&vys);
-                    if(ret != 0)
+                    retid=Checkid(partrule->First->act,&vys);
+                    if(retid != 0)
                     {
-                        return ret;
+                        return retid;
                     }
 
                     getOperand(partrule->First->act);
