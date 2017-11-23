@@ -597,6 +597,7 @@ int S_Input(Token *act){
 
 int S_Print(Token *act){
     Token *back;
+    TokType type;
 
     do{
         GET_TOKEN(act);
@@ -604,7 +605,7 @@ int S_Print(Token *act){
         if(act->type == EOL)
             break;
 
-        PreAnalyzer(act, &back);
+        PreAnalyzer(act, &back, &type);
     }while(back->type == SEMICOLON);
 
     write();
@@ -617,11 +618,12 @@ int S_Print(Token *act){
 
 int S_If(Token *act, bool isScope){
     Token *back;
+    TokType type;
 
     whileIfBegin(IF);
 
     GET_TOKEN(act);
-    PreAnalyzer(act, &back);
+    PreAnalyzer(act, &back, &type);
 
     if(back->type != KEYWORD || strcmp(back->val, "then") != 0)
            return SYN_ERROR;
@@ -657,11 +659,12 @@ int S_If(Token *act, bool isScope){
 
 int S_While(Token *act, bool isScope){
     Token *back;
+    TokType type;
 
     whileIfBegin(WHILE);
 
     GET_TOKEN(act);
-    PreAnalyzer(act, &back);
+    PreAnalyzer(act, &back, &type);
 
     if(back->type != EOL){
            return SYN_ERROR;
@@ -680,9 +683,10 @@ int S_While(Token *act, bool isScope){
 
 int S_Ret(Token *act){
     Token *back;
+    TokType type;
 
     GET_TOKEN(act);
-    PreAnalyzer(act, &back);
+    PreAnalyzer(act, &back, &type);
 
     if(back->type != EOL)
            return SYN_ERROR;
@@ -765,13 +769,13 @@ int S_Assig(Token *act){
             free(id);
         }
         else{
-            PreAnalyzer(act, &back);
+            PreAnalyzer(act, &back, &type);
             if(back->type != EOL)
                 return SYN_ERROR;
         }
     }
     else{
-        PreAnalyzer(act, &back);
+        PreAnalyzer(act, &back, &type);
         if(back->type != EOL)
             return SYN_ERROR;
     }
