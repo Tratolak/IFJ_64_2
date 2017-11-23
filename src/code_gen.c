@@ -179,8 +179,10 @@ void boolOperationSelect(char operand, TokType var1, TokType var2) {
             printf("PUSHS bool@true\n");
             labelStackTop(&labelStack, &lType, &quantity);
             if (lType == WHILE) {
+                printf("POPFRAME\n");
                 printf("JUMPIFNEQS while%dEnd\n", quantity); //while%dEnd - navesti konce cyklu
             } else if (lType == IF) {
+                printf("POPFRAME\n");
                 printf("JUMPIFNEQS else%d\n", quantity); //if%dFalse - zacatek false vetve podminky
             }
             break;
@@ -191,8 +193,10 @@ void boolOperationSelect(char operand, TokType var1, TokType var2) {
             printf("PUSHS bool@false\n");
             labelStackTop(&labelStack, &lType, &quantity);
             if (lType == WHILE) {
+                printf("POPFRAME\n");
                 printf("JUMPIFNEQS while%dEnd\n", quantity); //while%dEnd - navesti konce cyklu
             } else if (lType == IF) {
+                printf("POPFRAME\n");
                 printf("JUMPIFNEQS else%d\n", quantity); //if%dFalse - zacatek false vetve podminky
             }
             break;
@@ -207,8 +211,10 @@ void boolOperationSelect(char operand, TokType var1, TokType var2) {
             printf("PUSHS bool@true\n");
             labelStackTop(&labelStack, &lType, &quantity);
             if (lType == WHILE) {
+                printf("POPFRAME\n");
                 printf("JUMPIFNEQS while%dEnd\n", quantity); //while%dEnd - navesti konce cyklu
             } else if (lType == IF) {
+                printf("POPFRAME\n");
                 printf("JUMPIFNEQS else%d\n", quantity); //if%dFalse - zacatek false vetve podminky
             }
             break;
@@ -223,8 +229,10 @@ void boolOperationSelect(char operand, TokType var1, TokType var2) {
             printf("PUSHS bool@true\n");
             labelStackTop(&labelStack, &lType, &quantity);
             if (lType == WHILE) {
+                printf("POPFRAME\n");
                 printf("JUMPIFNEQS while%dEnd\n", quantity); //while%dEnd - navesti konce cyklu
             } else if (lType == IF) {
+                printf("POPFRAME\n");
                 printf("JUMPIFNEQS else%d\n", quantity); //if%dFalse - zacatek false vetve podminky
             }
             break;
@@ -235,8 +243,10 @@ void boolOperationSelect(char operand, TokType var1, TokType var2) {
             printf("PUSHS bool@true\n");
             labelStackTop(&labelStack, &lType, &quantity);
             if (lType == WHILE) {
+                printf("POPFRAME\n");
                 printf("JUMPIFNEQS while%dEnd\n", quantity); //while%dEnd - navesti konce cyklu
             } else if (lType == IF) {
+                printf("POPFRAME\n");
                 printf("JUMPIFNEQS else%d\n", quantity); //if%dFalse - zacatek false vetve podminky
             }
             break;
@@ -247,15 +257,15 @@ void boolOperationSelect(char operand, TokType var1, TokType var2) {
             printf("PUSHS bool@true\n");
             labelStackTop(&labelStack, &lType, &quantity);
             if (lType == WHILE) {
+                printf("POPFRAME\n");
                 printf("JUMPIFNEQS while%dEnd\n", quantity); //while%dEnd - navesti konce cyklu
             } else if (lType == IF) {
+                printf("POPFRAME\n");
                 printf("JUMPIFNEQS else%d\n", quantity); //if%dFalse - zacatek false vetve podminky
             }
         default:
             break;
     }
-    printf("CLEARS\n");
-    printf("POPFRAME\n");
 }
 
 /**
@@ -295,7 +305,6 @@ void getResult(char *variableName, bool isFunction) {
     if (!isFunction) {
         printf("POPS TF@_exprResult\n");
         printf("MOVE LF@_%s TF@_exprResult\n", variableName);
-        printf("CLEARS\n");
         printf("POPFRAME\n");
         typeStackDispose(&typeStack);
     } else {
