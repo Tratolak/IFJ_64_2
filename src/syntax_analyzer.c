@@ -88,6 +88,11 @@ if (retid!=0){\
 return retid;\
 }\
 
+#define  CHECKGEN()\
+if (retid!=0){\
+return retid;\
+}\
+
 #define SYN_OK 0
 #define SEM_OK 0
 #define SYN_ERROR 2
@@ -837,7 +842,11 @@ int S_Assig(Token *act, bool *function){
 
 //zdola nahoru
 
-
+/**
+ * @brief fukce urcuje pozici daneho terminalu v tabulce
+ * @param c terminal jehoz umisteni potrebujeme znat
+ * @return vrati prislusne cislo nebo -1 pokud neexistuje
+ */
 int PrePosition(char c){
 
     switch(c){
@@ -877,6 +886,13 @@ int PrePosition(char c){
 
 }
 
+/**
+ * @brief funkce zarizujici pocatecni inicializaci DLListu
+ * @param local hlavni zasobnik
+ * @param rule  pravidlo podle ktereho se kontroluje
+ * @param partrule vyjmute pravidlo ktere se zrovna vyhodnocuje
+ * @return
+ */
 int DLListInitForParser(tDLList **local,tDLList **rule,tDLList **partrule){
     *rule = (tDLList*)malloc(sizeof(tDLList));
     if (*rule==NULL){
@@ -895,7 +911,7 @@ int DLListInitForParser(tDLList **local,tDLList **rule,tDLList **partrule){
     DLInitList(*partrule);
     DLInitList$(*local);
 
-    return true;
+    return S_TOKEN_OK;
 }
 /**
  * @brief funkce vykonavajici precedencni analyzu
@@ -946,7 +962,7 @@ int PreExe(char c, Token* act, tDLList* local,tDLList* partrule,tDLList* rule){
 
                     CHECKRULE();
 
-                    operationSelect('+', changed, vys->type);
+                    retid=operationSelect('+', changed, vys->type);
 
                     DLInsertLast(local,'E',vys);
                     FREEPARTRULE();
@@ -960,7 +976,8 @@ int PreExe(char c, Token* act, tDLList* local,tDLList* partrule,tDLList* rule){
 
                     CHECKRULE();
 
-                    operationSelect('*', changed, vys->type);
+                    retid=operationSelect('*', changed, vys->type);
+                    CHECKGEN();
 
                     DLInsertLast(local,'E',vys);
                     FREEPARTRULE();
@@ -974,7 +991,9 @@ int PreExe(char c, Token* act, tDLList* local,tDLList* partrule,tDLList* rule){
 
                    CHECKRULE();
 
-                    operationSelect('-', changed, vys->type);
+                    retid=operationSelect('-', changed, vys->type);
+                    CHECKGEN();
+
                     DLInsertLast(local,'E',vys);
                     FREEPARTRULE();
                     continue;
@@ -987,7 +1006,8 @@ int PreExe(char c, Token* act, tDLList* local,tDLList* partrule,tDLList* rule){
 
                     CHECKRULE();
 
-                    operationSelect('/', changed, vys->type);
+                    retid=operationSelect('/', changed, vys->type);
+                    CHECKGEN();
 
                     DLInsertLast(local,'E',vys);
                     FREEPARTRULE();
@@ -1001,7 +1021,8 @@ int PreExe(char c, Token* act, tDLList* local,tDLList* partrule,tDLList* rule){
 
                     CHECKRULE();
 
-                    operationSelect('\\', changed, vys->type);
+                    retid=operationSelect('\\', changed, vys->type);
+                    CHECKGEN();
 
                     DLInsertLast(local,'E',vys);
                     FREEPARTRULE();
@@ -1014,8 +1035,10 @@ int PreExe(char c, Token* act, tDLList* local,tDLList* partrule,tDLList* rule){
                 if(DLCompare(partrule, rule)==0){
 
                     CHECKBOOL();
+
                     boolOperationSelect('=', type1, type2);
-                    //gen
+
+
                     DLInsertLast(local,'E',vys);
                     FREEPARTRULE();
                     continue;
@@ -1060,7 +1083,7 @@ int PreExe(char c, Token* act, tDLList* local,tDLList* partrule,tDLList* rule){
 
                     boolOperationSelect(',', type1, type2);
 
-                    //gen
+
                     DLInsertLast(local,'E',vys);
                     FREEPARTRULE();
                     continue;
@@ -1086,7 +1109,7 @@ int PreExe(char c, Token* act, tDLList* local,tDLList* partrule,tDLList* rule){
                     CHECKBOOL();
 
                     boolOperationSelect('#', type1, type2);
-                    //gen
+
                     DLInsertLast(local,'E',vys);
                     FREEPARTRULE();
                     continue;
@@ -1251,7 +1274,10 @@ int PreNextTok(Token* act, tDLList* local,tDLList* partrule,tDLList* rule, Token
      int err;
 
      TFCreation();   // blok inicializaci
-     DLListInitForParser(&(local), &(rule), &(partrule));
+     err=DLListInitForParser(&(local), &(rule), &(partrule)); // vraci 0 kdyz se povede err tim padem zustane nezmenene pokud se zmeni hned return err
+     if (err != 0) {
+         return err;
+     }
 
      err=PreNextTok(act, local, partrule, rule, &(vys)); // hlavni funkce ridici precedencni analyzu
      *res=local->First->rptr->act->type;
