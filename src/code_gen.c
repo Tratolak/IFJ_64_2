@@ -31,7 +31,7 @@ void header() {
 // Funkce potrebne pro generovani instrukci na vyhodnoceni vyrazu
 //================================================================================
 
-/**
+
 /**
  * Vytvoreni docasneho ramce pro vypocet vyrazu. A inicializace zasobniku typu.
  */
