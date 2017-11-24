@@ -886,7 +886,6 @@ int S_Assig(Token *act, bool *function, TokType inType){
             if(!Convertible(retType, inType))
                 return BIN_OP_INCOMPAT;
 
-            getResult(varid, true, retType, inType);
             free(id);
         }
         else{
@@ -897,8 +896,6 @@ int S_Assig(Token *act, bool *function, TokType inType){
             *function = false;
             if(!Convertible(type, inType))
                 return BIN_OP_INCOMPAT;
-
-            getResult(varid, false, type, inType);
         }
     }
     else{
@@ -910,7 +907,6 @@ int S_Assig(Token *act, bool *function, TokType inType){
         if(!Convertible(type, inType))
             return BIN_OP_INCOMPAT;
 
-        getResult(varid, false, type, inType);
     }
 
     return SYN_OK;
