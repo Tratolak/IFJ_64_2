@@ -71,7 +71,7 @@ FreeToken(&(partrule->First->rptr->act));\
 FreeToken(&(partrule->First->rptr->rptr->act));\
 
 #define CHECKRULE()\
-retid=CheckRule(partrule->First->act, partrule->First->rptr->act, partrule->First->rptr->rptr->act, &(vys), &type1, &type2, func);\
+retid=CheckRule(partrule->First->act, partrule->First->rptr->act, partrule->First->rptr->rptr->act, &(vys), &type1, &type2, fce);\
 if (retid != 0){\
 return retid;\
 }\
@@ -83,7 +83,7 @@ changed = false;\
 }\
 
 #define  CHECKBOOL()\
-retid=CheckRule(partrule->First->act, partrule->First->rptr->act, partrule->First->rptr->rptr->act, &(vys), &type1, &type2, func);\
+retid=CheckRule(partrule->First->act, partrule->First->rptr->act, partrule->First->rptr->rptr->act, &(vys), &type1, &type2, fce);\
 if (retid!=0){\
 return retid;\
 }\
@@ -664,7 +664,7 @@ int S_Print(Token *act){
         if(act->type == EOL)
             break;
 
-        PreAnalyzer(act, &back, &type);
+        PreAnalyzer(act, &back, &type, C_PRINT);
 
         if(type == BOOL)
             return SEM_ERROR;
@@ -686,7 +686,7 @@ int S_If(Token *act, bool isScope){
     whileIfBegin(IF);
 
     GET_TOKEN(act);
-    PreAnalyzer(act, &back, &type);
+    PreAnalyzer(act, &back, &type, C_IF);
 
     if(type != BOOL)
         return SEM_ERROR;
@@ -730,7 +730,7 @@ int S_While(Token *act, bool isScope){
     whileIfBegin(WHILE);
 
     GET_TOKEN(act);
-    PreAnalyzer(act, &back, &type);
+    PreAnalyzer(act, &back, &type, C_WHILE);
     if(type != BOOL)
         return SEM_ERROR;
 
@@ -754,7 +754,7 @@ int S_Ret(Token *act){
     TokType type, functype;
 
     GET_TOKEN(act);
-    PreAnalyzer(act, &back, &type);
+    PreAnalyzer(act, &back, &type, C_RETURN);
 
     if(!Ret_Func_Type(FUNC, &functype))
         return SEM_ERROR;
@@ -868,7 +868,7 @@ int S_Assig(Token *act, bool *function, TokType inType){
             free(id);
         }
         else{
-            PreAnalyzer(act, &back, &type);
+            PreAnalyzer(act, &back, &type, C_ASSIG);
             if(back->type != EOL)
                 return SYN_ERROR;
 
@@ -876,7 +876,7 @@ int S_Assig(Token *act, bool *function, TokType inType){
         }
     }
     else{
-        PreAnalyzer(act, &back, &type);
+        PreAnalyzer(act, &back, &type, C_ASSIG);
         if(back->type != EOL)
             return SYN_ERROR;
 
