@@ -206,15 +206,13 @@ bool Search_Func(char *funcname, bool *isdef) {
   return TSearch(Func, funcname, isdef, false);
 }
 
-bool Ret_Func_Type(char *funcname, TokType rettype) {
+bool Ret_Func_Type(char *funcname, TokType *rettype) {
   tItem *item = TRead(Func, funcname);
   if (item == NULL)
     return false;
 
-  if (item->type == rettype)
-    return true;
-  else
-    return false;
+  *rettype = item->type;
+  return true;
 }
 
 bool Nth_Func_ArgType(char *funcname, int n, TokType argtype) {

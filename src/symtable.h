@@ -42,7 +42,7 @@ bool Define_Func(char *funcname);
 
 bool Search_Func(char *funcname, bool *isdef);
 
-bool Ret_Func_Type(char *funcname, TokType rettype);
+bool Ret_Func_Type(char *funcname, TokType *rettype);
 
 bool Nth_Func_ArgType(char *funcname, int n, TokType argtype);
 

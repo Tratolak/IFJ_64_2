@@ -71,7 +71,7 @@ FreeToken(&(partrule->First->rptr->act));\
 FreeToken(&(partrule->First->rptr->rptr->act));\
 
 #define CHECKRULE()\
-retid=CheckRule(partrule->First->act, partrule->First->rptr->act, partrule->First->rptr->rptr->act, &(vys), &type1, &type2);\
+retid=CheckRule(partrule->First->act, partrule->First->rptr->act, partrule->First->rptr->rptr->act, &(vys), &type1, &type2, func);\
 if (retid != 0){\
 return retid;\
 }\
@@ -83,7 +83,7 @@ changed = false;\
 }\
 
 #define  CHECKBOOL()\
-retid=CheckRule(partrule->First->act, partrule->First->rptr->act, partrule->First->rptr->rptr->act, &(vys), &type1, &type2);\
+retid=CheckRule(partrule->First->act, partrule->First->rptr->act, partrule->First->rptr->rptr->act, &(vys), &type1, &type2, func);\
 if (retid!=0){\
 return retid;\
 }\
@@ -99,6 +99,11 @@ return retid;\
 #define SEM_ERROR 3
 #define BIN_OP_INCOMPAT 4
 
+#define C_PRINT 0
+#define C_ASSIG 0
+#define C_RETURN 0
+#define C_IF 1
+#define C_WHILE 1
 
 //Semantic
 
@@ -126,7 +131,7 @@ void myStrCpy(char **to, char *from)
     strcpy(*to, from);
 }
 
-int CheckRule(Token *op1, Token *oper, Token* op2, Token** res, TokType *typ1, TokType *typ2)
+int CheckRule(Token *op1, Token *oper, Token* op2, Token** res, TokType *typ1, TokType *typ2, int func)
 {
     (*res) = malloc(sizeof(Token));
     if(res == NULL){
@@ -172,19 +177,16 @@ int CheckRule(Token *op1, Token *oper, Token* op2, Token** res, TokType *typ1, T
         *typ1 = STRING;
         *typ2 = STRING;
         (*res)->type = STRING;
-        return SEM_OK;
     }
     else if((type1 == DOUBLE || type2 == DOUBLE) && (type1 != STRING && type2 != STRING)){
         *typ1 = DOUBLE;
         *typ2 = DOUBLE;
         (*res)->type = DOUBLE;
-        return SEM_OK;
     }
     else if(type1 == INTEGER && type2 == INTEGER){
         *typ1 = INTEGER;
         *typ2 = INTEGER;
         (*res)->type = INTEGER;
-        return SEM_OK;
     }
     else{
         return BIN_OP_INCOMPAT;
@@ -222,6 +224,9 @@ int CheckRule(Token *op1, Token *oper, Token* op2, Token** res, TokType *typ1, T
     default:
         break;
     }
+
+    if(func == C_PRINT || func == C_RETURN || func == C_ASSIG)
+        return BIN_OP_INCOMPAT;
 
     (*res)->type = BOOL;
 
@@ -324,7 +329,10 @@ int SyntaxAnalyzer(){
     header();
 
     while(1){
-        GET_TOKEN(act);
+        result = GetToken(&act);
+        if(result == S_END_OF_FILE && scope){
+            return SYN_OK;
+        }
 
         if (act->type==KEYWORD && !scope){
             if(strcmp(act->val,"scope")==0){
