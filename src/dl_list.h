@@ -2,7 +2,11 @@
 #include<stdlib.h>
 #include "scanner.h"
 
- 
+//Martin Stodůlka(xstodu08)
+//Ondřej Olšák(xolsak00)
+//Michael Schneider(xschne07)
+//Marek Kuchynka(xkuchy00)
+
 typedef struct tDLElem {                 // prvek dvousměrně vázaného seznamu
         char data;   // terminal popr. neterminal
         Token *act; //ukayatal na token k prislusnemu terminalu

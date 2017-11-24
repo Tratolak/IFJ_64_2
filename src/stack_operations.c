@@ -1,5 +1,10 @@
 #include "stack_operations.h"
 
+//Martin Stodùlka(xstodu08)
+//Ondøej Olšák(xolsak00)
+//Michael Schneider(xschne07)
+//Marek Kuchynka(xkuchy00)
+
 //================================================================================
 // Funkce pro praci se zasobnikem typu promennych
 //================================================================================

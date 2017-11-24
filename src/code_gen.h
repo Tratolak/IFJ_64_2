@@ -1,6 +1,11 @@
 #ifndef IFJ_64_2_CODE_GEN_H
 #define IFJ_64_2_CODE_GEN_H
 
+//Martin Stodùlka(xstodu08)
+//Ondøej Olšák(xolsak00)
+//Michael Schneider(xschne07)
+//Marek Kuchynka(xkuchy00)
+
 #include "scanner.h"
 #include "stack_operations.h"
 

@@ -4,6 +4,11 @@
 #include "syntax_analyzer.h"
 #include "symtable.h"
 
+//Martin Stodùlka(xstodu08)
+//Ondøej Olšák(xolsak00)
+//Michael Schneider(xschne07)
+//Marek Kuchynka(xkuchy00)
+
 int main()
 {
     Symtable_Init();

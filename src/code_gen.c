@@ -1,6 +1,10 @@
 #include <stdio.h>
 #include "code_gen.h"
 
+//Martin Stodùlka(xstodu08)
+//Ondøej Olšák(xolsak00)
+//Michael Schneider(xschne07)
+//Marek Kuchynka(xkuchy00)
 
 
 //Pocitani poctu navesti daneho typu

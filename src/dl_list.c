@@ -2,7 +2,10 @@
 #include "string.h"
 #include "syntax_analyzer.h"
 
-
+//Martin Stodůlka(xstodu08)
+//Ondřej Olšák(xolsak00)
+//Michael Schneider(xschne07)
+//Marek Kuchynka(xkuchy00)
 
 void DLInitList (tDLList *L) {
 /*

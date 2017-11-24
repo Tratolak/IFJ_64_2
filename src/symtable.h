@@ -9,6 +9,11 @@
 
 #define MAX_TSIZE 101
 
+//Martin Stodùlka(xstodu08)
+//Ondøej Olšák(xolsak00)
+//Michael Schneider(xschne07)
+//Marek Kuchynka(xkuchy00)
+
 typedef struct tItem tItem;
 typedef tItem* Table[MAX_TSIZE];
 

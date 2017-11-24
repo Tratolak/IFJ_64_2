@@ -1,5 +1,9 @@
 #include "symtable.h"
 
+//Martin Stodůlka(xstodu08)
+//Ondřej Olšák(xolsak00)
+//Michael Schneider(xschne07)
+//Marek Kuchynka(xkuchy00)
 
 /******* základní operace nad tabulkou ********/
 
