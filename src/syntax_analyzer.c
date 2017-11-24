@@ -402,6 +402,11 @@ int SyntaxAnalyzer(){
                     if((strcmp(act->val,"function") != 0))
                         return SYN_ERROR;
 
+                    TokType type;
+                    Ret_Func_Type(FUNC, &type);
+
+                    functionReturn0(type);
+
                     GET_TOKEN(act);
                     if(act->type != EOL)
                         return SYN_ERROR;
