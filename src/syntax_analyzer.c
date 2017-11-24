@@ -23,7 +23,7 @@ int S_Print(Token *act);
 int S_If(Token *act, bool isScope);
 int S_While(Token *act, bool isScope);
 int S_Ret(Token *act);
-int S_Assig(Token *act, bool *function);
+int S_Assig(Token *act, bool *function, TokType inType);
 
 char ArtPreTB [15][15] = {
     // < - 1, > - 2, = - 3, ' ' - 0
@@ -361,12 +361,6 @@ int SyntaxAnalyzer(){
                         return SYN_ERROR;
                     if((strcmp(act->val,"scope") != 0))
                         return SYN_ERROR;
-
-                    GET_TOKEN(act);
-
-                    if(act->type != EOL){
-                        return SYN_ERROR;
-                    }
                 }
                 else{
                     return SYN_ERROR;
@@ -462,6 +456,9 @@ int S_FuncHeader(bool declare, Token *act){
 
     while(act->type!=RBRACKET){
         GET_TOKEN(act);
+
+        if(act->type == RBRACKET)
+            break;
 
         if(act->type == ID){
             myStrCpy(&id, act->val);
@@ -573,8 +570,13 @@ int S_StatList(Token *act, Token **back, bool isScope){
         }
         else if(act->type == ID){
             char *id = NULL;
+            TokType inType;
             myStrCpy(&id, act->val);
-            if(!SEM_existId(act->val)){
+
+            if(Search_Func(id, NULL)){
+                Ret_Func_Type(id, &inType);
+            }
+            else if(!Search_Var(FUNC, id , &inType)){
                 free(id);
                 return SEM_ERROR;
             }
@@ -582,7 +584,7 @@ int S_StatList(Token *act, Token **back, bool isScope){
             bool func;
             GET_TOKEN(act);
             if(act->type == EQL){
-                SYN_EXPAND(S_Assig, act, &func);
+                SYN_EXPAND(S_Assig, act, &func, inType);
             }
             else{
                 free(id);
@@ -663,6 +665,10 @@ int S_Print(Token *act){
             break;
 
         PreAnalyzer(act, &back, &type);
+
+        if(type == BOOL)
+            return SEM_ERROR;
+
         write();
     }while(back->type == SEMICOLON);
 
@@ -681,6 +687,9 @@ int S_If(Token *act, bool isScope){
 
     GET_TOKEN(act);
     PreAnalyzer(act, &back, &type);
+
+    if(type != BOOL)
+        return SEM_ERROR;
 
     if(back->type != KEYWORD || strcmp(back->val, "then") != 0)
            return SYN_ERROR;
@@ -722,6 +731,8 @@ int S_While(Token *act, bool isScope){
 
     GET_TOKEN(act);
     PreAnalyzer(act, &back, &type);
+    if(type != BOOL)
+        return SEM_ERROR;
 
     if(back->type != EOL){
            return SYN_ERROR;
@@ -740,10 +751,37 @@ int S_While(Token *act, bool isScope){
 
 int S_Ret(Token *act){
     Token *back;
-    TokType type;
+    TokType type, functype;
 
     GET_TOKEN(act);
     PreAnalyzer(act, &back, &type);
+
+    if(!Ret_Func_Type(FUNC, &functype))
+        return SEM_ERROR;
+
+    if(functype == STRING){
+        if(type != STRING)
+            return BIN_OP_INCOMPAT;
+    }
+    else if(functype == DOUBLE){
+        if(type == STRING){
+            return BIN_OP_INCOMPAT;
+        }
+        else if(type == INTEGER){
+            //convert
+        }
+    }
+    else if(functype == INTEGER){
+        if(type == STRING){
+            return BIN_OP_INCOMPAT;
+        }
+        else if(type == DOUBLE){
+            //convert
+        }
+    }
+    else{
+        return BIN_OP_INCOMPAT;
+    }
 
     functionReturn(true);
 
@@ -753,7 +791,7 @@ int S_Ret(Token *act){
     return SYN_OK;
 }
 
-int S_Assig(Token *act, bool *function){
+int S_Assig(Token *act, bool *function, TokType inType){
     Token *back;
     TokType type;
 
