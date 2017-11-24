@@ -332,7 +332,10 @@ int SyntaxAnalyzer(){
     header();
 
     while(1){
-        GET_TOKEN(act);
+        result = GetToken(&act);
+        if(result == S_END_OF_FILE && scope){
+            return SYN_OK;
+        }
 
         if (act->type==KEYWORD && !scope){
             if(strcmp(act->val,"scope")==0){
