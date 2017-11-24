@@ -177,19 +177,16 @@ int CheckRule(Token *op1, Token *oper, Token* op2, Token** res, TokType *typ1, T
         *typ1 = STRING;
         *typ2 = STRING;
         (*res)->type = STRING;
-        return SEM_OK;
     }
     else if((type1 == DOUBLE || type2 == DOUBLE) && (type1 != STRING && type2 != STRING)){
         *typ1 = DOUBLE;
         *typ2 = DOUBLE;
         (*res)->type = DOUBLE;
-        return SEM_OK;
     }
     else if(type1 == INTEGER && type2 == INTEGER){
         *typ1 = INTEGER;
         *typ2 = INTEGER;
         (*res)->type = INTEGER;
-        return SEM_OK;
     }
     else{
         return BIN_OP_INCOMPAT;
