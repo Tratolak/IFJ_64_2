@@ -65,6 +65,13 @@ if(RET_VAL != SYN_OK)\
   return RET_VAL;\
 }\
 
+#define PREANALYZER(...)\
+RET_VAL = PreAnalyzer(__VA_ARGS__);\
+if(RET_VAL != 0)\
+{\
+  return RET_VAL;\
+}\
+
 #define  FREEPARTRULE()\
 FreeToken(&(partrule->First->act));\
 FreeToken(&(partrule->First->rptr->act));\
@@ -664,7 +671,7 @@ int S_Print(Token *act){
         if(act->type == EOL)
             break;
 
-        PreAnalyzer(act, &back, &type, C_PRINT);
+        PREANALYZER(act, &back, &type, C_PRINT);
 
         if(type == BOOL)
             return SEM_ERROR;
@@ -686,7 +693,7 @@ int S_If(Token *act, bool isScope){
     whileIfBegin(IF);
 
     GET_TOKEN(act);
-    PreAnalyzer(act, &back, &type, C_IF);
+    PREANALYZER(act, &back, &type, C_IF);
 
     if(type != BOOL)
         return SEM_ERROR;
@@ -730,7 +737,7 @@ int S_While(Token *act, bool isScope){
     whileIfBegin(WHILE);
 
     GET_TOKEN(act);
-    PreAnalyzer(act, &back, &type, C_WHILE);
+    PREANALYZER(act, &back, &type, C_WHILE);
     if(type != BOOL)
         return SEM_ERROR;
 
@@ -754,7 +761,7 @@ int S_Ret(Token *act){
     TokType type, functype;
 
     GET_TOKEN(act);
-    PreAnalyzer(act, &back, &type, C_RETURN);
+    PREANALYZER(act, &back, &type, C_RETURN);
 
     if(!Ret_Func_Type(FUNC, &functype))
         return SEM_ERROR;
@@ -868,7 +875,7 @@ int S_Assig(Token *act, bool *function, TokType inType){
             free(id);
         }
         else{
-            PreAnalyzer(act, &back, &type, C_ASSIG);
+            PREANALYZER(act, &back, &type, C_ASSIG);
             if(back->type != EOL)
                 return SYN_ERROR;
 
@@ -876,7 +883,7 @@ int S_Assig(Token *act, bool *function, TokType inType){
         }
     }
     else{
-        PreAnalyzer(act, &back, &type, C_ASSIG);
+        PREANALYZER(act, &back, &type, C_ASSIG);
         if(back->type != EOL)
             return SYN_ERROR;
 
