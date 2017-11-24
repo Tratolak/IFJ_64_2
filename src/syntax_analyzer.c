@@ -1329,26 +1329,16 @@ int PreNextTok(Token* act, tDLList* local,tDLList* partrule,tDLList* rule, Token
      }
 
      err=PreNextTok(act, local, partrule, rule, &(vys), fce); // hlavni funkce ridici precedencni analyzu
-     if (err!=0){
-
+     if (err==0 || err==7){
+         err=0;
+         *res=local->First->rptr->act->type;
+         *back=vys;
+     }
+     else{
          *res=-1;
          *back=NULL;
-
-         DLDisposeList(local);  //cisteni chybove
-         DLDisposeList(partrule);
-         DLDisposeList(rule);
-
-         free(local);
-         free(partrule);
-         free(rule);
-
-         local=NULL;
-         partrule=NULL;
-         rule=NULL;
-         return err;
      }
-     *res=local->First->rptr->act->type;
-     *back=vys;
+
 
      DLDisposeList(local);  //cisteni
      DLDisposeList(partrule);
