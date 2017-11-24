@@ -1286,7 +1286,7 @@ int PreNextTok(Token* act, tDLList* local,tDLList* partrule,tDLList* rule, Token
         }
         tok = PreTokenAnalyzer(act, c); //overeni zda token je validni pro precedencni analyzu
         if (tok == 1) { //kdyz token nepotri ukoncujeme prec analyzu
-            PreExe('$', NULL, local, partrule, rule, fce); // posleme ukoncovaci znak
+            err=PreExe('$', NULL, local, partrule, rule, fce); // posleme ukoncovaci znak
         }
         else // novy nebo stavajici token
         {
@@ -1307,7 +1307,7 @@ int PreNextTok(Token* act, tDLList* local,tDLList* partrule,tDLList* rule, Token
     c=NULL;
 
     *vys=act;
-    return 0;
+    return err;
 }
 /**
  * @brief hlavni fce pro precedencni analyzu
@@ -1329,6 +1329,24 @@ int PreNextTok(Token* act, tDLList* local,tDLList* partrule,tDLList* rule, Token
      }
 
      err=PreNextTok(act, local, partrule, rule, &(vys), fce); // hlavni funkce ridici precedencni analyzu
+     if (err!=0){
+
+         *res=-1;
+         *back=NULL;
+
+         DLDisposeList(local);  //cisteni chybove
+         DLDisposeList(partrule);
+         DLDisposeList(rule);
+
+         free(local);
+         free(partrule);
+         free(rule);
+
+         local=NULL;
+         partrule=NULL;
+         rule=NULL;
+         return err;
+     }
      *res=local->First->rptr->act->type;
      *back=vys;
 
