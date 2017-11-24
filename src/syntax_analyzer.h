@@ -6,6 +6,6 @@
 //TBD
 
 int SyntaxAnalyzer();
-int PreAnalyzer(Token *act,Token **back, TokType * res);
+int PreAnalyzer(Token *act,Token **back, TokType * res, int fce);
 int PrePosition(char c);
 #endif // SYNTAX_ANALYZER_H_INCLUDED
