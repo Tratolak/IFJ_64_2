@@ -244,5 +244,5 @@ bool Search_Var(char *funcname, char *varname, TokType *vartype) {
   if (vartype != NULL)
     *vartype = item->type;
 
-    return true;
+  return true;
 }

@@ -8,8 +8,8 @@
 CC=gcc
 CFLAGS= -std=c99 -pedantic -Wall -Wextra -Werror
 
-ifj17: ifj17.o code_gen.o DLlist.o scanner.o stack_operations.o symtable.o syntax_analyzer.o
-	$(CC) $(CFLAGS) ifj17.o code_gen.o DLlist.o scanner.o stack_operations.o symtable.o syntax_analyzer.o -o $@
+ifj17: ifj17.o code_gen.o dl_list.o scanner.o stack_operations.o symtable.o syntax_analyzer.o
+	$(CC) $(CFLAGS) ifj17.o code_gen.o dl_list.o scanner.o stack_operations.o symtable.o syntax_analyzer.o -o $@
 
 
 ifj17.o: main.c code_gen.h syntax_analyzer.h
@@ -18,8 +18,8 @@ ifj17.o: main.c code_gen.h syntax_analyzer.h
 code_gen.o: code_gen.c code_gen.h syntax_analyzer.h scanner.h
 	$(CC) $(CFLAGS) -o $@ -c code_gen.c
 
-DLlist.o: DLlist.c DLlist.h syntax_analyzer.h scanner.h
-	$(CC) $(CFLAGS) -o $@ -c DLlist.c
+dl_list.o: dl_list.c dl_list.h syntax_analyzer.h scanner.h
+	$(CC) $(CFLAGS) -o $@ -c dl_list.c
 
 scanner.o: scanner.c scanner.h
 	$(CC) $(CFLAGS) -o $@ -c scanner.c
@@ -30,7 +30,7 @@ stack_operations.o: stack_operations.c stack_operations.h scanner.h
 symtable.o: symtable.c symtable.h scanner.h
 	$(CC) $(CFLAGS) -o $@ -c symtable.c
 
-syntax_analyzer.o: syntax_analyzer.c syntax_analyzer.h scanner.h symtable.h DLlist.h stack_operations.h code_gen.h
+syntax_analyzer.o: syntax_analyzer.c syntax_analyzer.h scanner.h symtable.h dl_list.h stack_operations.h code_gen.h
 	$(CC) $(CFLAGS) -o $@ -c syntax_analyzer.c
 
 clean:
