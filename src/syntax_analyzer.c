@@ -71,7 +71,7 @@ FreeToken(&(partrule->First->rptr->act));\
 FreeToken(&(partrule->First->rptr->rptr->act));\
 
 #define CHECKRULE()\
-retid=CheckRule(partrule->First->act, partrule->First->rptr->act, partrule->First->rptr->rptr->act, &(vys), &type1, &type2);\
+retid=CheckRule(partrule->First->act, partrule->First->rptr->act, partrule->First->rptr->rptr->act, &(vys), &type1, &type2, func);\
 if (retid != 0){\
 return retid;\
 }\
@@ -83,7 +83,7 @@ changed = false;\
 }\
 
 #define  CHECKBOOL()\
-retid=CheckRule(partrule->First->act, partrule->First->rptr->act, partrule->First->rptr->rptr->act, &(vys), &type1, &type2);\
+retid=CheckRule(partrule->First->act, partrule->First->rptr->act, partrule->First->rptr->rptr->act, &(vys), &type1, &type2, func);\
 if (retid!=0){\
 return retid;\
 }\
@@ -99,6 +99,11 @@ return retid;\
 #define SEM_ERROR 3
 #define BIN_OP_INCOMPAT 4
 
+#define C_PRINT 0
+#define C_ASSIG 0
+#define C_RETURN 0
+#define C_IF 1
+#define C_WHILE 1
 
 //Semantic
 
@@ -126,7 +131,7 @@ void myStrCpy(char **to, char *from)
     strcpy(*to, from);
 }
 
-int CheckRule(Token *op1, Token *oper, Token* op2, Token** res, TokType *typ1, TokType *typ2)
+int CheckRule(Token *op1, Token *oper, Token* op2, Token** res, TokType *typ1, TokType *typ2, int func)
 {
     (*res) = malloc(sizeof(Token));
     if(res == NULL){
@@ -222,6 +227,9 @@ int CheckRule(Token *op1, Token *oper, Token* op2, Token** res, TokType *typ1, T
     default:
         break;
     }
+
+    if(func == C_PRINT || func == C_RETURN || func == C_ASSIG)
+        return BIN_OP_INCOMPAT;
 
     (*res)->type = BOOL;
 
