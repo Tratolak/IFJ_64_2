@@ -43,6 +43,8 @@ void functionParamLoad(Token t);
 
 void functionReturn(bool fReturn);
 
+void functionReturn0(TokType type);
+
 void inBuiltLength();
 
 void inBuiltSubStr();
