@@ -302,7 +302,7 @@ bool isType(Token *tok, TokType *type)
 int SyntaxAnalyzer(){
     Token *act,*back;
     bool scope = false;
-
+    int result;
 
     Dec_Func("length", true);
     Dec_Func("substr", true);
