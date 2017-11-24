@@ -968,7 +968,7 @@ int DLListInitForParser(tDLList **local,tDLList **rule,tDLList **partrule){
  * @param rule
  * @return
  */
-int PreExe(char c, Token* act, tDLList* local,tDLList* partrule,tDLList* rule){
+int PreExe(char c, Token* act, tDLList* local,tDLList* partrule,tDLList* rule, int fce){
     char *top;
     int ret=0, retid=0;
     bool changed;
@@ -1270,7 +1270,7 @@ int PreTokenAnalyzer(Token *act, char * c){
  * @param vys DLList vysledek ze sematiky a postupne predavany DLListem
  * @return v pripade chyby vraci prislusnou chybu jinak 0
  */
-int PreNextTok(Token* act, tDLList* local,tDLList* partrule,tDLList* rule, Token** vys){
+int PreNextTok(Token* act, tDLList* local,tDLList* partrule,tDLList* rule, Token** vys, int fce){
     int err, tok;
     char *c;
 
@@ -1286,11 +1286,11 @@ int PreNextTok(Token* act, tDLList* local,tDLList* partrule,tDLList* rule, Token
         }
         tok = PreTokenAnalyzer(act, c); //overeni zda token je validni pro precedencni analyzu
         if (tok == 1) { //kdyz token nepotri ukoncujeme prec analyzu
-            PreExe('$', NULL, local, partrule, rule); // posleme ukoncovaci znak
+            PreExe('$', NULL, local, partrule, rule, fce); // posleme ukoncovaci znak
         }
         else // novy nebo stavajici token
         {
-            err=PreExe(*c, act,local,partrule,rule);
+            err=PreExe(*c, act,local,partrule,rule, fce);
             if(err==7){ // pokud neprobehlo zpracovani stavajiciho tokenu TOTO NENI CHYBA
 
             }
@@ -1316,7 +1316,7 @@ int PreNextTok(Token* act, tDLList* local,tDLList* partrule,tDLList* rule, Token
  * @param res vysledek posledni vrchol simulovaneho derivacniho stromu
  * @return v pripade chyby vraci jeji cislo jinak 0
  */
- int PreAnalyzer(Token *act, Token**back, TokType* res){
+ int PreAnalyzer(Token *act, Token**back, TokType* res, int fce){
 
      tDLList *local, *partrule, *rule;
      Token* vys;
@@ -1328,7 +1328,7 @@ int PreNextTok(Token* act, tDLList* local,tDLList* partrule,tDLList* rule, Token
          return err;
      }
 
-     err=PreNextTok(act, local, partrule, rule, &(vys)); // hlavni funkce ridici precedencni analyzu
+     err=PreNextTok(act, local, partrule, rule, &(vys), fce); // hlavni funkce ridici precedencni analyzu
      *res=local->First->rptr->act->type;
      *back=vys;
 
