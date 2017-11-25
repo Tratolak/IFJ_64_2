@@ -31,14 +31,14 @@
 		<Compiler>
 			<Add option="-Wall" />
 		</Compiler>
-		<Unit filename="src/DLlist.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="src/DLlist.h" />
 		<Unit filename="src/code_gen.c">
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="src/code_gen.h" />
+		<Unit filename="src/dl_list.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/dl_list.h" />
 		<Unit filename="src/main.c">
 			<Option compilerVar="CC" />
 		</Unit>
