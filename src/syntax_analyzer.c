@@ -2,9 +2,14 @@
 #include "symtable.h"
 #include "string.h"
 #include "stdbool.h"
-#include "DLlist.h"
+#include "dl_list.h"
 #include "stack_operations.h"
 #include "code_gen.h"
+
+//Martin Stodùlka(xstodu08)
+//Ondøej Olšák(xolsak00)
+//Michael Schneider(xschne07)
+//Marek Kuchynka(xkuchy00)
 
 /**
 *
@@ -113,6 +118,13 @@ return retid;\
 #define C_WHILE 1
 
 //Semantic
+
+bool Convertible(TokType original, TokType to) {
+    if((original != STRING && to == STRING)||(original == STRING && to != STRING))
+        return false;
+
+    return true;
+}
 
 //check if sym table contains ID
 int SEM_existId(char* name)
@@ -394,6 +406,11 @@ int SyntaxAnalyzer(){
                         return SYN_ERROR;
                     if((strcmp(act->val,"function") != 0))
                         return SYN_ERROR;
+
+                    TokType type;
+                    Ret_Func_Type(FUNC, &type);
+
+                    functionReturn0(type);
 
                     GET_TOKEN(act);
                     if(act->type != EOL)
@@ -800,12 +817,14 @@ int S_Ret(Token *act){
 
 int S_Assig(Token *act, bool *function, TokType inType){
     Token *back;
-    TokType type;
+    TokType type, retType;
 
     GET_TOKEN(act);
     if(act->type == ID || act->type == KEYWORD){
         //if func - params else preanalyzer
         if(Search_Func(act->val, NULL)){
+            Ret_Func_Type(act->val, &retType);
+
             //Code Gen - f. call init
             functionFramePreparation();
 
@@ -819,6 +838,9 @@ int S_Assig(Token *act, bool *function, TokType inType){
             int i = 0;
             while(act->type!=RBRACKET){
                 GET_TOKEN(act);
+
+                if(act->type == RBRACKET)
+                    break;
 
                 if(act->type == ID){
                     if(!Search_Var(FUNC, act->val, &type)){
@@ -871,6 +893,8 @@ int S_Assig(Token *act, bool *function, TokType inType){
             callInstruction(id);
 
             *function = true;
+            if(!Convertible(retType, inType))
+                return BIN_OP_INCOMPAT;
 
             free(id);
         }
@@ -880,6 +904,8 @@ int S_Assig(Token *act, bool *function, TokType inType){
                 return SYN_ERROR;
 
             *function = false;
+            if(!Convertible(type, inType))
+                return BIN_OP_INCOMPAT;
         }
     }
     else{
@@ -888,6 +914,9 @@ int S_Assig(Token *act, bool *function, TokType inType){
             return SYN_ERROR;
 
         *function = false;
+        if(!Convertible(type, inType))
+            return BIN_OP_INCOMPAT;
+
     }
 
     return SYN_OK;

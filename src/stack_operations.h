@@ -5,6 +5,11 @@
 #define STATUS_OK  0;
 #define STATUS_MALLOC_ERR  1;
 
+//Martin Stodùlka(xstodu08)
+//Ondøej Olšák(xolsak00)
+//Michael Schneider(xschne07)
+//Marek Kuchynka(xkuchy00)
+
 typedef enum enLabelType {
     WHILE, IF, ELSE
 } labelType;

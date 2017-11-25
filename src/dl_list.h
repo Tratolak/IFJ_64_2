@@ -1,22 +1,12 @@
-
-/* Předmět: Algoritmy (IAL) - FIT VUT v Brně
- * Hlavičkový soubor pro c206.c (Dvousměrně vázaný lineární seznam)
- * Vytvořil: Martin Tuček, září 2005
- * Upravil: Kamil Jeřábek, říjen 2017
- *  
- * Tento soubor, prosíme, neupravujte!  
- */
-
 #include<stdio.h>
 #include<stdlib.h>
 #include "scanner.h"
 
-#define FALSE 0
-#define TRUE 1
+//Martin Stodůlka(xstodu08)
+//Ondřej Olšák(xolsak00)
+//Michael Schneider(xschne07)
+//Marek Kuchynka(xkuchy00)
 
-extern int errflg;
-extern int solved;
- 
 typedef struct tDLElem {                 // prvek dvousměrně vázaného seznamu
         char data;   // terminal popr. neterminal
         Token *act; //ukayatal na token k prislusnemu terminalu

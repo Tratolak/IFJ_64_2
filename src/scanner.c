@@ -1,5 +1,10 @@
 #include "scanner.h"
 
+//Martin Stodùlka(xstodu08)
+//Ondøej Olšák(xolsak00)
+//Michael Schneider(xschne07)
+//Marek Kuchynka(xkuchy00)
+
 // reserved words from the language  (35)
 const char * const Reserved[] = {"as", "asc", "declare", "dim", "do", "double",
 "else", "end", "chr", "function", "if", "input", "integer", "length", "loop",

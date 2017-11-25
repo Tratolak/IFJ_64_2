@@ -12,6 +12,10 @@
 #define S_LEXEM_FAIL 1      // returns after wrong lexem is readed
 #define S_MEMORY_ERROR 99    // returns after memory allocation error
 
+//Martin Stodùlka(xstodu08)
+//Ondøej Olšák(xolsak00)
+//Michael Schneider(xschne07)
+//Marek Kuchynka(xkuchy00)
 
 typedef enum TokenType {INTEGER, DOUBLE, STRING, ID, KEYWORD, DIV, MUL, ADD,
                         SUB, IDIV, EQL, NEQL, LEQL, GEQL, LT, GT, COMMA,
