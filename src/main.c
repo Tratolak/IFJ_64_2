@@ -4,8 +4,8 @@
 #include "syntax_analyzer.h"
 #include "symtable.h"
 
-//Martin Stodùlka(xstodu08)
-//Ondøej Olšák(xolsak00)
+//Martin StodÃ¹lka(xstodu08)
+//OndÃ¸ej OlÅ¡Ã¡k(xolsak00)
 //Michael Schneider(xschne07)
 //Marek Kuchynka(xkuchy00)
 
@@ -17,6 +17,7 @@ int main()
     //printf("Hello world!\n");
     err=SyntaxAnalyzer();
 
+    GarbageFree();
     Symtable_Destroy();
     return err;
 }

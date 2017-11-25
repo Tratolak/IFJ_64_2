@@ -99,7 +99,7 @@ void TClearAll (Table* t) {
       ptr = nextptr;
     }
   }
-  TInit(t);
+  free(t);
 }
 
 
@@ -128,7 +128,6 @@ void Symtable_Destroy() {
     }
   }
   TClearAll(Func);
-  free(Func);
 }
 
 
@@ -137,7 +136,7 @@ bool Dec_Func(char *funcname, bool define) {
   if (item == NULL)
     return false;
 
-  item->name = malloc(sizeof(char)* (strlen(funcname)+1));
+  item->name = (char *) malloc(sizeof(char)* (strlen(funcname)+1));
   if(item->name == NULL)
     return false;
   strcpy(item->name, funcname);
@@ -175,7 +174,7 @@ bool Dec_Func_AddArgument(char *funcname, int n, TokType argtype) {
   if (newArg == NULL)
     return false;
 
-  char *name = (char *) malloc(sizeof(char)*12);
+  char *name = (char *) malloc(sizeof(char) * 12);
   sprintf(name, "%d", n);
   newArg->name = name;
   newArg->type = argtype;
@@ -194,7 +193,11 @@ bool Add_Var(char *funcname, char *varname, TokType vartype) {
   if (newVar == NULL)
     return false;
 
-  newVar->name = varname;
+  newVar->name = (char *) malloc(sizeof(char)* (strlen(varname)+1));
+  if(newVar->name == NULL)
+    return false;
+  strcpy(newVar->name, varname);
+
   newVar->type = vartype;
 
   TInsert(func->var, newVar);
@@ -224,7 +227,7 @@ bool Nth_Func_ArgType(char *funcname, int n, TokType argtype) {
   if (item == NULL)
     return false;
 
-  char *name = (char *) malloc(sizeof(char)*12);
+  char name[12];
   sprintf(name, "%d", n);
   item = TRead(item->arg, name);
   if (item == NULL)
