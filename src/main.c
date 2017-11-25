@@ -20,7 +20,7 @@ int main()
             break;
 
     }
-
+    GarbageFree();
     Symtable_Destroy();
     return err;
 }

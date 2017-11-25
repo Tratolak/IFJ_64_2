@@ -14,37 +14,7 @@ enum enState {START, IDENTIFIER, COMLINE, COMBLOCK, COMBLOCK_F, LESS, GREATER,
 } state;
 
 
-
-Token* FormToken(TokType type, char* value) {
-  Token *token = malloc(sizeof(Token));
-  if (token == NULL)
-    return NULL;
-
-  token->type = type;
-  token->val = value;
-
-  return token;
-}
-
-
-void FreeToken(Token **token) {
-  TokType type = (*token)->type;
-  if (type == INTEGER || type == DOUBLE || type == STRING
-      || type == ID || type == KEYWORD)
-    free((*token)->val);
-  free(*token);
-  *token = NULL;
-}
-
-
-bool IsReserved(char* str) {
-  for (int i = 0; i < 35; i++) {
-    if (strcmp(str, Reserved[i]) == 0)
-      return true;
-  }
-  return false;
-}
-
+/********* DYNAMIC BUFFER ************/
 
 bool BufferInit(DynamicBuffer *b, int size) {
   b->buffer = (char *) malloc(size * sizeof(char));
@@ -65,6 +35,77 @@ bool BufferInsert(DynamicBuffer *b, char c) {
   }
   b->buffer[b->used++] = c;
   return true;
+}
+
+
+/********* GARBAGE COLLECTOR ************/
+
+GarbageItem *Garbage = NULL;
+
+Token* GarbageInsert(Token *token) {
+  GarbageItem *new = (GarbageItem *) malloc(sizeof(GarbageItem));
+  if (new == NULL)
+    return NULL;
+  new->token = token;
+  new->next = NULL;
+
+  GarbageItem *ptr = Garbage;
+  if (ptr != NULL) {
+    while (ptr->next != NULL)
+      ptr = ptr->next;
+
+    ptr->next = new;
+  }
+  else
+    Garbage = new;
+
+  return new->token;
+}
+
+
+void GarbageFree() {
+  GarbageItem *ptr;
+  while (Garbage != NULL) {
+    ptr = Garbage->next;
+    FreeToken(&(Garbage->token));
+    free(Garbage);
+    Garbage = ptr;
+  }
+}
+
+
+/********* TOKENS ************/
+
+Token* FormToken(TokType type, char* value) {
+  Token *token = malloc(sizeof(Token));
+  if (token == NULL)
+    return NULL;
+
+  token->type = type;
+  token->val = value;
+
+  return GarbageInsert(token);
+}
+
+
+void FreeToken(Token **token) {
+  if (*token == NULL)
+    return;
+  TokType type = (*token)->type;
+  if (type == INTEGER || type == DOUBLE || type == STRING
+      || type == ID || type == KEYWORD)
+    free((*token)->val);
+  free(*token);
+  *token = NULL;
+}
+
+
+bool IsReserved(char* str) {
+  for (int i = 0; i < 35; i++) {
+    if (strcmp(str, Reserved[i]) == 0)
+      return true;
+  }
+  return false;
 }
 
 

@@ -24,10 +24,17 @@ typedef struct token {
   char* val;
 } Token;
 
-
 int GetToken(Token **token);
 
 void FreeToken(Token **token);
+
+
+typedef struct GarbageItem {
+  Token *token;
+  struct GarbageItem *next;
+} GarbageItem;
+
+void GarbageFree();
 
 
 typedef struct buffer {
