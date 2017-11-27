@@ -1,7 +1,7 @@
 #include "scanner.h"
 
-//Martin Stodùlka(xstodu08)
-//Ondøej Olšák(xolsak00)
+//Martin StodÅ¯lka(xstodu08)
+//OndÅ™ej OlÅ¡Ã¡k(xolsak00)
 //Michael Schneider(xschne07)
 //Marek Kuchynka(xkuchy00)
 
@@ -518,17 +518,17 @@ int GetToken(Token **token) {
           count++;
           switch (count) {
             case 1:
-              sym = c * 100;
+              sym = (c - '0') * 100;
               if (!BufferInsert(&str, '\\') || !BufferInsert(&str, c))
                 return S_MEMORY_ERROR;
               break;
             case 2:
-              sym = sym + c * 10;
+              sym = sym + (c - '0') * 10;
               if (!BufferInsert(&str, c))
                 return S_MEMORY_ERROR;
               break;
             case 3:
-              sym = sym + c;
+              sym = sym + (c - '0');
               if (!BufferInsert(&str, c))
                 return S_MEMORY_ERROR;
               break;
@@ -538,7 +538,7 @@ int GetToken(Token **token) {
               state = STR;
             }
             else {
-              fprintf(stderr, "ERROR: too big number in escape sequence \"%s\\%d\".\n", str.buffer, sym);
+              fprintf(stderr, "ERROR: too big number in escape sequence \"%s\".\n", str.buffer);
               free(str.buffer);
               return S_LEXEM_FAIL;
             }
@@ -567,7 +567,7 @@ int GetToken(Token **token) {
                 return S_MEMORY_ERROR;
             }
             else {
-              fprintf(stderr, "ERROR: unknown escape sequence \"\\%c\" in \"%s\".\n", c, str.buffer);
+              fprintf(stderr, "ERROR: unknown escape sequence \"%s\".\n", str.buffer);
               free(str.buffer);
               return S_LEXEM_FAIL;
             }
