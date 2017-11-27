@@ -20,7 +20,13 @@ enum enState {START, IDENTIFIER, COMLINE, COMBLOCK, COMBLOCK_F, LESS, GREATER,
 
 
 /********* DYNAMIC BUFFER ************/
-
+/**
+ * Vytvoří nový dynamický buffer pro řetězec (pole charů)
+ * @param  b    ukazatel na buffer
+ * @param  size počáteční velikost bufferu
+ * @return      true  při úspěchu
+ *              false při selhání alokace
+ */
 bool BufferInit(DynamicBuffer *b, int size) {
   b->buffer = (char *) malloc(size * sizeof(char));
   if (b->buffer == NULL)
@@ -30,7 +36,13 @@ bool BufferInit(DynamicBuffer *b, int size) {
   return true;
 }
 
-
+/**
+ * Vloží znak na konec řetězce v bufferu, pokud na něj již není místo, zvětší se
+ * @param  b ukazatel na buffer
+ * @param  c znak pro vložení
+ * @return   true  při úspěšném vložení
+ *           false při selhání realokace
+ */
 bool BufferInsert(DynamicBuffer *b, char c) {
   if (b->used == b->size) {
     b->size += 32;
@@ -47,6 +59,12 @@ bool BufferInsert(DynamicBuffer *b, char c) {
 
 GarbageItem *Garbage = NULL;
 
+/**
+ * Vloží token do garbage collectoru, který leží v glob. proměnné Garbage
+ * @param  token ukazatel na token, který se má vložit
+ * @return       ukazatel na vložený token při úspěšném vložení
+ *               NULL při selhání alokace
+ */
 Token* GarbageInsert(Token *token) {
   GarbageItem *new = (GarbageItem *) malloc(sizeof(GarbageItem));
   if (new == NULL)
@@ -67,7 +85,9 @@ Token* GarbageInsert(Token *token) {
   return new->token;
 }
 
-
+/**
+ * Uvolní celý garbage collector v glob. proměnné Garbage
+ */
 void GarbageFree() {
   GarbageItem *ptr;
   while (Garbage != NULL) {
@@ -80,7 +100,13 @@ void GarbageFree() {
 
 
 /********* TOKENS ************/
-
+/**
+ * Alokuje místo pro nový token a přiřadí do něj získané hodnoty
+ * @param  type  typ tokenu z enum TokType
+ * @param  value hodnota tokenu v případě INT, DOUBLE, STRING, ID, KEYWORD
+ * @return       ukazatel na načtený token v případě úspěchu
+ *               NULL při selhání alokace
+ */
 Token* FormToken(TokType type, char* value) {
   Token *token = malloc(sizeof(Token));
   if (token == NULL)
@@ -92,7 +118,10 @@ Token* FormToken(TokType type, char* value) {
   return GarbageInsert(token);
 }
 
-
+/**
+ * Uvolní token z paměti, ukazateli dá hodnotu NULL
+ * @param token ukazatel na ukazatel na token, který se má uvolnit
+ */
 void FreeToken(Token **token) {
   if (*token == NULL)
     return;
@@ -104,7 +133,12 @@ void FreeToken(Token **token) {
   *token = NULL;
 }
 
-
+/**
+ * Zjistí, zda je načtené slovo mezi rezervovanými, nebo je to identifikátor
+ * @param  str ukazatel na řetězec s načteným slovem
+ * @return     true  v případě, že bylo načteno klíčové slovo
+ *             false v případě, že načtené slovo nené klíčové
+ */
 bool IsReserved(char* str) {
   for (int i = 0; i < 35; i++) {
     if (strcmp(str, Reserved[i]) == 0)
@@ -113,7 +147,14 @@ bool IsReserved(char* str) {
   return false;
 }
 
-
+/**
+ * Ze vstupu načte další lexém, vyhodnotí jej a předá jej jako token
+ * @param  token ukazatel na ukazatel na načtený token
+ * @return       S_END_OF_FILE  při načtení konce souboru
+ *               S_TOKEN_OK     při úspěšném načtení dalšího tokenu
+ *               S_LEXEM_FAIL   při lexikální chybě
+ *               S_MEMORY_ERROR při chybě v alokaci paměti
+ */
 int GetToken(Token **token) {
   int c, count, sym;
   bool t = false;

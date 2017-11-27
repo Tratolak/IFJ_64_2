@@ -12,8 +12,8 @@
 #define S_LEXEM_FAIL 1      // returns after wrong lexem is readed
 #define S_MEMORY_ERROR 99    // returns after memory allocation error
 
-//Martin Stodùlka(xstodu08)
-//Ondøej Olšák(xolsak00)
+//Martin StodÅ¯lka(xstodu08)
+//OndÅ™ej OlÅ¡Ã¡k(xolsak00)
 //Michael Schneider(xschne07)
 //Marek Kuchynka(xkuchy00)
 
