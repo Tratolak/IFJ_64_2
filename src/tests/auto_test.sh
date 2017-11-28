@@ -21,7 +21,27 @@ do
   if (($ifj17_exit == 0)); then
     ifj17_out="\e[32m$ifj17_exit\e[0m"
   else
-    ifj17_out="\e[31m$ifj17_exit\e[0m"
+    ifj17_out="\e[31m$ifj17_exit\e[0m -"
+    case $ifj17_exit in
+      1)
+        ifj17_out="$ifj17_out chyba v programu v rámci lexikální analýzy (chybná struktura aktuálního lexému)."
+        ;;
+      2)
+        ifj17_out="$ifj17_out chyba v programu v rámci syntaktické analýzy (chybná syntaxe programu)."
+        ;;
+      3)
+        ifj17_out="$ifj17_out sémantická chyba v programu – nedefinovaná funkce/promenná, pokus o redefinici funkce/promenné, atd."
+        ;;
+      4)
+        ifj17_out="$ifj17_out sémantická chyba typové kompatibility v aritmetických, řetezcových a relačních výrazech, příp. špatný pocet či typ parametrů u volání funkce."
+        ;;
+      6)
+        ifj17_out="$ifj17_out ostatní sémantické chyby."
+        ;;
+      99)
+        ifj17_out="$ifj17_out interní chyba překladače tj. neovlivněná vstupním programem (např. chyba alokace paměti, atd.)."
+        ;;
+    esac
   fi
   echo -e "compiler returns \t\e[1m$ifj17_out\e[0m"
 
@@ -30,7 +50,36 @@ do
   if (($ic17int_exit == 0)); then
     ic17int_out="\e[32m$ic17int_exit\e[0m"
   else
-    ic17int_out="\e[31m$ic17int_exit\e[0m"
+    ic17int_out="\e[31m$ic17int_exit\e[0m -"
+    case $ic17int_exit in
+      51)
+        ic17int_out="$ic17int_out chyba při analýze (lexikální, syntaktická) vstupního kódu v IFJcode17."
+        ;;
+      52)
+        ic17int_out="$ic17int_out chyba při sémantických kontrolách vstupního kódu v IFJcode17."
+        ;;
+      53)
+        ic17int_out="$ic17int_out běhová chyba interpretace – špatné typy operandů."
+        ;;
+      54)
+        ic17int_out="$ic17int_out běhová chyba interpretace – přístup k neexistující proměnné (rámec existuje)."
+        ;;
+      55)
+        ic17int_out="$ic17int_out běhová chyba interpretace – rámec neexistuje (např. čtení z prázdného zásobníku rámců)."
+        ;;
+      56)
+        ic17int_out="$ic17int_out běhová chyba interpretace – chybějící hodnota (v proměnné nebo na datovém zásobníku)."
+        ;;
+      57)
+        ic17int_out="$ic17int_out běhová chyba interpretace – dělení nulou."
+        ;;
+      58)
+        ic17int_out="$ic17int_out běhová chyba interpretace – chybná práce s řetezcem."
+        ;;
+      60)
+        ic17int_out="$ic17int_out interní chyba interpretu tj. neovlivnená vstupním programem (např. chyba alokace paměti, chyba při otvírání souboru s řídicím programem atd.)."
+        ;;
+    esac
   fi
   echo -e "interpreter returns \t\e[1m$ic17int_out\e[0m"
 
