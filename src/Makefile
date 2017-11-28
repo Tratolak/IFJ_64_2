@@ -40,7 +40,7 @@ syntax_analyzer.o: syntax_analyzer.c syntax_analyzer.h scanner.h symtable.h dl_l
 	$(CC) $(CFLAGS) -o $@ -c syntax_analyzer.c
 
 
-test:
+test: ifj17
 	bash tests/auto_test.sh
 
 
@@ -48,3 +48,6 @@ clean:
 	rm *.o
 	rm ifj17
 	rm tests/correct/*.output
+	rm tests/correct/*.ifj17code
+	rm tests/correct/*.diff
+	rm tests/incorrect/*.ifj17code
