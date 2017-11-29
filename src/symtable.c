@@ -23,13 +23,15 @@ void TInit(Table* t) {
 }
 
 
-bool TSearch (Table* t, char* name, bool *isdef, bool define) {
+bool TSearch (Table* t, char* name, bool *isdef, bool define, int *numofargs) {
   int hash = DJBHash(name);
   tItem* ptr = (*t)[hash];
   while (ptr != NULL) {
     if (!strcmp(ptr->name, name)){
         if(isdef != NULL)
             *isdef = ptr->isdef;
+        if(numofargs != NULL)
+            *numofargs = ptr->numofargs;
         if(define)
             ptr->isdef = true;
         return true;
@@ -141,6 +143,7 @@ bool Dec_Func(char *funcname, bool define) {
     return false;
   strcpy(item->name, funcname);
 
+  item->numofargs = 0;
   item->isdef = define;
   item->type = EOL;
   item->arg = (Table *) malloc(sizeof(Table));
@@ -170,6 +173,7 @@ bool Dec_Func_AddArgument(char *funcname, int n, TokType argtype) {
   if (func == NULL)
     return false;
 
+  func->numofargs++;
   tItem *newArg = (tItem *) malloc(sizeof(tItem));
   if (newArg == NULL)
     return false;
@@ -206,11 +210,11 @@ bool Add_Var(char *funcname, char *varname, TokType vartype) {
 }
 
 bool Define_Func(char *funcname) {
-  return TSearch(Func, funcname, NULL, true);
+  return TSearch(Func, funcname, NULL, true, NULL);
 }
 
-bool Search_Func(char *funcname, bool *isdef) {
-  return TSearch(Func, funcname, isdef, false);
+bool Search_Func(char *funcname, bool *isdef, int *numofargs) {
+  return TSearch(Func, funcname, isdef, false, numofargs);
 }
 
 bool Ret_Func_Type(char *funcname, TokType *rettype) {
