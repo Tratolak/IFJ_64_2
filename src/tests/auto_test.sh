@@ -13,7 +13,8 @@ while [ $count -gt 0 ]
 do
   count=`expr $count - 1`
   i=`expr $correct_test_count - $count`
-  echo "TEST $i"
+  name=`sed "${i}q;d" tests/correct/names`
+  echo "TEST $i  ($name)"
   echo ""
 
   # spuštění překladu
@@ -51,7 +52,14 @@ do
 
   # spuštění interpretu (pouze, pokud se povedl překlad)
   if (($ifj17_exit == 0)); then
-  tests/ic17int tests/correct/test$i.ifjcode17 > tests/correct/test$i.output
+    # požaduje vstup?
+  if [ -f "tests/correct/test$i.input" ]
+  then
+    tests/ic17int tests/correct/test$i.ifjcode17 < tests/correct/test$i.input > tests/correct/test$i.output
+  else
+    tests/ic17int tests/correct/test$i.ifjcode17 > tests/correct/test$i.output
+  fi
+  #tests/ic17int tests/correct/test$i.ifjcode17 $input> tests/correct/test$i.output
   ic17int_exit=$?
   if (($ic17int_exit == 0)); then
     ic17int_out="\e[32m$ic17int_exit\e[0m"
@@ -131,7 +139,8 @@ while [ $count -gt 0 ]
 do
   count=`expr $count - 1`
   i=`expr $incorrect_test_count - $count`
-  echo "TEST $i"
+  name=`sed "${i}q;d" tests/incorrect/names`
+  echo "TEST $i  ($name)"
   echo ""
 
   corr_err=`head -n 1 tests/incorrect/test$i.ok`
