@@ -222,6 +222,8 @@ int CheckRule(Token *op1, Token *oper, Token* op2, Token** res, TokType *typ1, T
     case DIV:
         if((*res)->type != STRING ){
             FreeToken(res);
+            *typ1 = DOUBLE;
+            *typ2 = DOUBLE;
             *res = FormToken(DOUBLE, NULL);
             if(*res == NULL)
                 return S_MEMORY_ERROR;
@@ -663,7 +665,7 @@ int S_Dim(Token *act){
     }
 
     Add_Var(FUNC, id, type);
-    variableDeclaration(id);
+    variableDeclaration(id, type);
 
     GET_TOKEN(act);
     if(act->type == EOL){
