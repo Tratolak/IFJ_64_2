@@ -19,3 +19,11 @@
 *.exe
 *.out
 
+
+src/ifj17
+
+*.ifj17code
+
+*.output
+
+*.diff

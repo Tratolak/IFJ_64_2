@@ -24,22 +24,22 @@ do
     ifj17_out="\e[31m$ifj17_exit\e[0m -"
     case $ifj17_exit in
       1)
-        ifj17_out="$ifj17_out chyba v programu v rámci lexikální analýzy (chybná struktura aktuálního lexému)."
+        ifj17_out="$ifj17_out chyba v programu v rámci lexikální analýzy."
         ;;
       2)
-        ifj17_out="$ifj17_out chyba v programu v rámci syntaktické analýzy (chybná syntaxe programu)."
+        ifj17_out="$ifj17_out chyba v programu v rámci syntaktické analýzy."
         ;;
       3)
         ifj17_out="$ifj17_out sémantická chyba v programu – nedefinovaná funkce/promenná, pokus o redefinici funkce/promenné, atd."
         ;;
       4)
-        ifj17_out="$ifj17_out sémantická chyba typové kompatibility v aritmetických, řetezcových a relačních výrazech, příp. špatný pocet či typ parametrů u volání funkce."
+        ifj17_out="$ifj17_out sémantická chyba typové kompatibility v aritmetických, řetezcových a relačních výrazech, příp. špatný počet či typ parametrů u volání funkce."
         ;;
       6)
         ifj17_out="$ifj17_out ostatní sémantické chyby."
         ;;
       99)
-        ifj17_out="$ifj17_out interní chyba překladače tj. neovlivněná vstupním programem (např. chyba alokace paměti, atd.)."
+        ifj17_out="$ifj17_out interní chyba překladače (např. chyba alokace paměti, atd.)."
         ;;
     esac
   fi
@@ -77,7 +77,7 @@ do
         ic17int_out="$ic17int_out běhová chyba interpretace – chybná práce s řetezcem."
         ;;
       60)
-        ic17int_out="$ic17int_out interní chyba interpretu tj. neovlivnená vstupním programem (např. chyba alokace paměti, chyba při otvírání souboru s řídicím programem atd.)."
+        ic17int_out="$ic17int_out interní chyba interpretu (např. chyba alokace paměti, atd.)."
         ;;
     esac
   fi
@@ -124,10 +124,32 @@ do
 
   ./ifj17 < tests/incorrect/test$i > tests/incorrect/test$i.ifj17code
   ifj17_exit=$?
+
+  case $ifj17_exit in
+    1)
+      ifj17_out="chyba v programu v rámci lexikální analýzy."
+      ;;
+    2)
+      ifj17_out="chyba v programu v rámci syntaktické analýzy."
+      ;;
+    3)
+      ifj17_out="sémantická chyba v programu – nedefinovaná funkce/proměnná, pokus o redefinici funkce/promenné, atd."
+      ;;
+    4)
+      ifj17_out="sémantická chyba typové kompatibility v aritmetických, řetezcových a relačních výrazech, příp. špatný pocet či typ parametrů u volání funkce."
+      ;;
+    6)
+      ifj17_out="ostatní sémantické chyby."
+      ;;
+    99)
+      ifj17_out="interní chyba překladače (např. chyba alokace paměti, atd.)."
+      ;;
+  esac
+
   if (($ifj17_exit == $corr_err)); then
-    ifj17_out="\e[32m$ifj17_exit\e[0m"
+    ifj17_out="\e[32m$ifj17_exit\e[0m - $ifj17_out"
   else
-    ifj17_out="\e[31m$ifj17_exit\e[0m (should be $corr_err)"
+    ifj17_out="\e[31m$ifj17_exit\e[0m - $ifj17_out (should be $corr_err)"
   fi
   echo -e "compiler returns \t\e[1m$ifj17_out\e[0m"
 
@@ -135,7 +157,7 @@ do
     echo -e "\e[1mRESULT: \e[32mOK\e[0m"
   else
     echo -e "\e[1mRESULT: \e[31mFAIL\e[0m"
-    correct_failed=`expr $correct_failed + 1`
+    incorrect_failed=`expr $incorrect_failed + 1`
   fi
   echo "-----------------------------------------------------------------------"
 done

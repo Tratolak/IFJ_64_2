@@ -1,0 +1,4 @@
+scope
+  dim a as integer
+  a = 6.e5
+end scope
