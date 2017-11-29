@@ -28,6 +28,8 @@ typedef struct token {
   char* val;
 } Token;
 
+Token* FormToken(TokType type, char* value);
+
 int GetToken(Token **token);
 
 void FreeToken(Token **token);

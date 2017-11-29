@@ -6,8 +6,8 @@
 #include "stack_operations.h"
 #include "code_gen.h"
 
-//Martin Stodùlka(xstodu08)
-//Ondøej Olšák(xolsak00)
+//Martin StodÅ¯lka(xstodu08)
+//OndÅ™ej OlÅ¡Ã¡k(xolsak00)
 //Michael Schneider(xschne07)
 //Marek Kuchynka(xkuchy00)
 
@@ -77,10 +77,6 @@ if(RET_VAL != 0)\
   return RET_VAL;\
 }\
 
-#define  FREEPARTRULE()\
-FreeToken(&(partrule->First->act));\
-FreeToken(&(partrule->First->rptr->act));\
-FreeToken(&(partrule->First->rptr->rptr->act));\
 
 #define CHECKRULE()\
 retid=CheckRule(partrule->First->act, partrule->First->rptr->act, partrule->First->rptr->rptr->act, &(vys), &type1, &type2, fce);\
@@ -152,10 +148,6 @@ void myStrCpy(char **to, char *from)
 
 int CheckRule(Token *op1, Token *oper, Token* op2, Token** res, TokType *typ1, TokType *typ2, int func)
 {
-    (*res) = malloc(sizeof(Token));
-    if(res == NULL){
-        return S_MEMORY_ERROR;
-    }
 
     TokType type1,type2;
     if(op1->type == ID){
@@ -195,17 +187,23 @@ int CheckRule(Token *op1, Token *oper, Token* op2, Token** res, TokType *typ1, T
     if(type1 == STRING && type2 == STRING){
         *typ1 = STRING;
         *typ2 = STRING;
-        (*res)->type = STRING;
+        *res = FormToken(STRING, NULL);
+        if(*res == NULL)
+            return S_MEMORY_ERROR;
     }
     else if((type1 == DOUBLE || type2 == DOUBLE) && (type1 != STRING && type2 != STRING)){
         *typ1 = DOUBLE;
         *typ2 = DOUBLE;
-        (*res)->type = DOUBLE;
+        *res = FormToken(DOUBLE, NULL);
+        if(*res == NULL)
+            return S_MEMORY_ERROR;
     }
     else if(type1 == INTEGER && type2 == INTEGER){
         *typ1 = INTEGER;
         *typ2 = INTEGER;
-        (*res)->type = INTEGER;
+        *res = FormToken(INTEGER, NULL);
+        if(*res == NULL)
+            return S_MEMORY_ERROR;
     }
     else{
         return BIN_OP_INCOMPAT;
@@ -223,7 +221,10 @@ int CheckRule(Token *op1, Token *oper, Token* op2, Token** res, TokType *typ1, T
         break;
     case DIV:
         if((*res)->type != STRING ){
-            (*res)->type = DOUBLE;
+            FreeToken(res);
+            *res = FormToken(DOUBLE, NULL);
+            if(*res == NULL)
+                return S_MEMORY_ERROR;
             return SEM_OK;
         }
         else{
@@ -234,7 +235,10 @@ int CheckRule(Token *op1, Token *oper, Token* op2, Token** res, TokType *typ1, T
         if((*res)->type != STRING){
             *typ1 = INTEGER;
             *typ2 = INTEGER;
-            (*res)->type = INTEGER;
+            FreeToken(res);
+            *res = FormToken(INTEGER, NULL);
+            if(*res == NULL)
+                return S_MEMORY_ERROR;
             return SEM_OK;
         }
         else{
@@ -247,7 +251,9 @@ int CheckRule(Token *op1, Token *oper, Token* op2, Token** res, TokType *typ1, T
     if(func == C_PRINT || func == C_RETURN || func == C_ASSIG)
         return BIN_OP_INCOMPAT;
 
-    (*res)->type = BOOL;
+    *res = FormToken(BOOL, NULL);
+    if(*res == NULL)
+        return S_MEMORY_ERROR;
 
     if((type1 == INTEGER && type2 == DOUBLE) || (type1 == DOUBLE && type2 == INTEGER)){
         type1 = DOUBLE;
@@ -260,9 +266,6 @@ int CheckRule(Token *op1, Token *oper, Token* op2, Token** res, TokType *typ1, T
 int Checkid(Token *in, Token **out)
 {
     TokType type;
-    *out = malloc(sizeof(Token));
-    if(out == NULL)
-        return S_MEMORY_ERROR;
 
     if(in->type == ID){
         if(!Search_Var(FUNC, in->val, &type)){
@@ -282,7 +285,9 @@ int Checkid(Token *in, Token **out)
         return SEM_ERROR;
     }
 
-    (*out)->type = type;
+    *out = FormToken(type, NULL);
+    if(*out == NULL)
+        return S_MEMORY_ERROR;
 
     return SEM_OK;
 }
@@ -1047,7 +1052,7 @@ int PreExe(char c, Token* act, tDLList* local,tDLList* partrule,tDLList* rule, i
                     retid=operationSelect('+', changed, vys->type);
 
                     DLInsertLast(local,'E',vys);
-                    FREEPARTRULE();
+
                     continue;
                 }
                 DLDisposeList(rule);
@@ -1062,7 +1067,7 @@ int PreExe(char c, Token* act, tDLList* local,tDLList* partrule,tDLList* rule, i
                     CHECKGEN();
 
                     DLInsertLast(local,'E',vys);
-                    FREEPARTRULE();
+
                     continue;
                 }
                 DLDisposeList(rule);
@@ -1077,7 +1082,7 @@ int PreExe(char c, Token* act, tDLList* local,tDLList* partrule,tDLList* rule, i
                     CHECKGEN();
 
                     DLInsertLast(local,'E',vys);
-                    FREEPARTRULE();
+
                     continue;
                 }
                 DLDisposeList(rule);
@@ -1092,7 +1097,7 @@ int PreExe(char c, Token* act, tDLList* local,tDLList* partrule,tDLList* rule, i
                     CHECKGEN();
 
                     DLInsertLast(local,'E',vys);
-                    FREEPARTRULE();
+
                     continue;
                 }
                 DLDisposeList(rule);
@@ -1107,7 +1112,7 @@ int PreExe(char c, Token* act, tDLList* local,tDLList* partrule,tDLList* rule, i
                     CHECKGEN();
 
                     DLInsertLast(local,'E',vys);
-                    FREEPARTRULE();
+
                     continue;
                 }
                 DLDisposeList(rule);
@@ -1122,7 +1127,7 @@ int PreExe(char c, Token* act, tDLList* local,tDLList* partrule,tDLList* rule, i
 
 
                     DLInsertLast(local,'E',vys);
-                    FREEPARTRULE();
+
                     continue;
                 }
                 DLDisposeList(rule);
@@ -1136,7 +1141,7 @@ int PreExe(char c, Token* act, tDLList* local,tDLList* partrule,tDLList* rule, i
                     boolOperationSelect('?', type1, type2);
 
                     DLInsertLast(local,'E',vys);
-                    FREEPARTRULE();
+
                     continue;
                 }
                 DLDisposeList(rule);
@@ -1152,7 +1157,7 @@ int PreExe(char c, Token* act, tDLList* local,tDLList* partrule,tDLList* rule, i
 
 
                     DLInsertLast(local,'E',vys);
-                    FREEPARTRULE();
+
                     continue;
                 }
                 DLDisposeList(rule);
@@ -1167,7 +1172,7 @@ int PreExe(char c, Token* act, tDLList* local,tDLList* partrule,tDLList* rule, i
 
 
                     DLInsertLast(local,'E',vys);
-                    FREEPARTRULE();
+
                     continue;
                 } DLDisposeList(rule);
                 DLInsertLast(rule, 'E',NULL);
@@ -1179,7 +1184,7 @@ int PreExe(char c, Token* act, tDLList* local,tDLList* partrule,tDLList* rule, i
 
                     boolOperationSelect('.', type1, type2);
                     DLInsertLast(local,'E',vys);
-                    FREEPARTRULE();
+
                     continue;
                 }
                 DLDisposeList(rule);
@@ -1193,7 +1198,7 @@ int PreExe(char c, Token* act, tDLList* local,tDLList* partrule,tDLList* rule, i
                     boolOperationSelect('#', type1, type2);
 
                     DLInsertLast(local,'E',vys);
-                    FREEPARTRULE();
+
                     continue;
                 }
                 DLDisposeList(rule);
@@ -1203,7 +1208,7 @@ int PreExe(char c, Token* act, tDLList* local,tDLList* partrule,tDLList* rule, i
                 if(DLCompare(partrule, rule)==0){
 
                     DLInsertLast(local,'E',vys);
-                    FREEPARTRULE();
+
                     continue;
                 }
                 DLDisposeList(rule);
