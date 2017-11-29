@@ -1,0 +1,17 @@
+Hello world!
+a = 1
+Dim a As Integer = 1
+a = 1 + 1
+Dim a As Integer = 1 + 1
+Hell\032world
+Hell\tworld
+Hell w<>rld!
+Iterativni faktorial (3!)
+Dim a As Integer = 1 + 1 - 1
+a = 1 + 1 - 1
+a = 1 * 1
+Dim a As Integer = 1 * 1
+Dim a As Integer = 1 * 2 - 1
+a = 1 * 2 - 1
+a = 1 * 2 * 1 - 1
+a = 2 / 1 - 1
