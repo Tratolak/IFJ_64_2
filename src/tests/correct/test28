@@ -3,5 +3,5 @@ scope
   dim b as integer
   input a
   input b
-  print !"Vysledek:" ; a ; b ; !"\n"
+  print !"Vysledek:" ; a ; b ; !"\n" ;
 end scope

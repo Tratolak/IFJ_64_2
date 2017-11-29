@@ -1,0 +1,6 @@
+scope
+  dim a as integer
+  A = 1
+  dim a as string
+  
+end scope

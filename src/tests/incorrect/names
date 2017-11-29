@@ -10,3 +10,10 @@ Nedeklarovana funkce
 Neexistujici funkce
 Nespravny pocet argumentu vestavene funkce
 Nespravny pocet argumentu funkce
+Za print chybí ;
+Špatně ukončený program (jen end)
+Chybí EOL za then
+Chybí EOL za while
+return v hlavním těle
+nedefinovaná proměnná
+2 definice proměnné

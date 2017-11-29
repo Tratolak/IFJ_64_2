@@ -59,7 +59,6 @@ do
   else
     tests/ic17int tests/correct/test$i.ifjcode17 > tests/correct/test$i.output
   fi
-  #tests/ic17int tests/correct/test$i.ifjcode17 $input> tests/correct/test$i.output
   ic17int_exit=$?
   if (($ic17int_exit == 0)); then
     ic17int_out="\e[32m$ic17int_exit\e[0m"
