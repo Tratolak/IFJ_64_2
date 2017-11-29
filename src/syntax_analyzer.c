@@ -711,23 +711,21 @@ int S_Input(Token *act){
 int S_Print(Token *act){
     Token *back;
     TokType type;
+    bool first = false;
 
     do{
         GET_TOKEN(act);
-
-        if(act->type == EOL)
+        if(act->type == EOL && first)
             break;
 
         PREANALYZER(act, &back, &type, C_PRINT);
 
-        if(type == BOOL)
-            return SEM_ERROR;
+        first = true;
 
         write();
     }while(back->type == SEMICOLON);
 
-
-    if(back->type != EOL && act->type != EOL)
+    if(act->type != EOL)
         return SYN_ERROR;
 
     return SYN_OK;
