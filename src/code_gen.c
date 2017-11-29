@@ -1,8 +1,8 @@
 #include <stdio.h>
 #include "code_gen.h"
 
-//Martin Stodùlka(xstodu08)
-//Ondøej Olšák(xolsak00)
+//Martin Stodï¿½lka(xstodu08)
+//Ondï¿½ej Olï¿½ï¿½k(xolsak00)
 //Michael Schneider(xschne07)
 //Marek Kuchynka(xkuchy00)
 
@@ -303,6 +303,24 @@ int getOperand(Token *t) {
     return status;
 }
 
+/**
+ * Generovani instrukci pro pretypovani vysledku vyrazu.
+ * @brief Je treba tuhle fci volat jeste pred funkcemi getRestult() a functionReturn().
+ *
+ * @param original - aktualni typ promenne (TokType)
+ * @param new      - vysledny typ promenne (TokType)
+ */
+void retype(TokType original, TokType new){
+    printf("POPS TF@_exprResult\n");
+    if (original == INTEGER && new == DOUBLE) {
+        printf("INT2FLOAT TF@_exprResult TF@_exprResult\n");
+    } else if (original == DOUBLE && new == INTEGER) {
+        printf("FLOAT2INT TF@_exprResult TF@_exprResult\n");
+    } else if (original == INTEGER && new == STRING) {
+        printf("INT2CHAR TF@_exprResult TF@_exprResult\n");
+    }
+    printf("PUSHS TF@_exprResult\n");
+}
 
 /**
  * Generovani prirazeni vysledku vyrazu do urcene promenne a uvolneni celeho zasobniku.
