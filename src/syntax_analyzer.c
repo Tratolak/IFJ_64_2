@@ -6,8 +6,8 @@
 #include "stack_operations.h"
 #include "code_gen.h"
 
-//Martin Stodùlka(xstodu08)
-//Ondøej Olšák(xolsak00)
+//Martin StodÅ¯lka(xstodu08)
+//OndÅ™ej OlÅ¡Ã¡k(xolsak00)
 //Michael Schneider(xschne07)
 //Marek Kuchynka(xkuchy00)
 
@@ -77,10 +77,6 @@ if(RET_VAL != 0)\
   return RET_VAL;\
 }\
 
-#define  FREEPARTRULE()\
-FreeToken(&(partrule->First->act));\
-FreeToken(&(partrule->First->rptr->act));\
-FreeToken(&(partrule->First->rptr->rptr->act));\
 
 #define CHECKRULE()\
 retid=CheckRule(partrule->First->act, partrule->First->rptr->act, partrule->First->rptr->rptr->act, &(vys), &type1, &type2, fce);\
@@ -1047,7 +1043,7 @@ int PreExe(char c, Token* act, tDLList* local,tDLList* partrule,tDLList* rule, i
                     retid=operationSelect('+', changed, vys->type);
 
                     DLInsertLast(local,'E',vys);
-                    FREEPARTRULE();
+
                     continue;
                 }
                 DLDisposeList(rule);
@@ -1062,7 +1058,7 @@ int PreExe(char c, Token* act, tDLList* local,tDLList* partrule,tDLList* rule, i
                     CHECKGEN();
 
                     DLInsertLast(local,'E',vys);
-                    FREEPARTRULE();
+
                     continue;
                 }
                 DLDisposeList(rule);
@@ -1077,7 +1073,7 @@ int PreExe(char c, Token* act, tDLList* local,tDLList* partrule,tDLList* rule, i
                     CHECKGEN();
 
                     DLInsertLast(local,'E',vys);
-                    FREEPARTRULE();
+
                     continue;
                 }
                 DLDisposeList(rule);
@@ -1092,7 +1088,7 @@ int PreExe(char c, Token* act, tDLList* local,tDLList* partrule,tDLList* rule, i
                     CHECKGEN();
 
                     DLInsertLast(local,'E',vys);
-                    FREEPARTRULE();
+
                     continue;
                 }
                 DLDisposeList(rule);
@@ -1107,7 +1103,7 @@ int PreExe(char c, Token* act, tDLList* local,tDLList* partrule,tDLList* rule, i
                     CHECKGEN();
 
                     DLInsertLast(local,'E',vys);
-                    FREEPARTRULE();
+
                     continue;
                 }
                 DLDisposeList(rule);
@@ -1122,7 +1118,7 @@ int PreExe(char c, Token* act, tDLList* local,tDLList* partrule,tDLList* rule, i
 
 
                     DLInsertLast(local,'E',vys);
-                    FREEPARTRULE();
+
                     continue;
                 }
                 DLDisposeList(rule);
@@ -1136,7 +1132,7 @@ int PreExe(char c, Token* act, tDLList* local,tDLList* partrule,tDLList* rule, i
                     boolOperationSelect('?', type1, type2);
 
                     DLInsertLast(local,'E',vys);
-                    FREEPARTRULE();
+
                     continue;
                 }
                 DLDisposeList(rule);
@@ -1152,7 +1148,7 @@ int PreExe(char c, Token* act, tDLList* local,tDLList* partrule,tDLList* rule, i
 
 
                     DLInsertLast(local,'E',vys);
-                    FREEPARTRULE();
+
                     continue;
                 }
                 DLDisposeList(rule);
@@ -1167,7 +1163,7 @@ int PreExe(char c, Token* act, tDLList* local,tDLList* partrule,tDLList* rule, i
 
 
                     DLInsertLast(local,'E',vys);
-                    FREEPARTRULE();
+
                     continue;
                 } DLDisposeList(rule);
                 DLInsertLast(rule, 'E',NULL);
@@ -1179,7 +1175,7 @@ int PreExe(char c, Token* act, tDLList* local,tDLList* partrule,tDLList* rule, i
 
                     boolOperationSelect('.', type1, type2);
                     DLInsertLast(local,'E',vys);
-                    FREEPARTRULE();
+
                     continue;
                 }
                 DLDisposeList(rule);
@@ -1193,7 +1189,7 @@ int PreExe(char c, Token* act, tDLList* local,tDLList* partrule,tDLList* rule, i
                     boolOperationSelect('#', type1, type2);
 
                     DLInsertLast(local,'E',vys);
-                    FREEPARTRULE();
+
                     continue;
                 }
                 DLDisposeList(rule);
@@ -1203,7 +1199,7 @@ int PreExe(char c, Token* act, tDLList* local,tDLList* partrule,tDLList* rule, i
                 if(DLCompare(partrule, rule)==0){
 
                     DLInsertLast(local,'E',vys);
-                    FREEPARTRULE();
+
                     continue;
                 }
                 DLDisposeList(rule);
