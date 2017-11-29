@@ -222,6 +222,8 @@ int CheckRule(Token *op1, Token *oper, Token* op2, Token** res, TokType *typ1, T
     case DIV:
         if((*res)->type != STRING ){
             FreeToken(res);
+            *typ1 = DOUBLE;
+            *typ2 = DOUBLE;
             *res = FormToken(DOUBLE, NULL);
             if(*res == NULL)
                 return S_MEMORY_ERROR;
