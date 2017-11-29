@@ -647,8 +647,20 @@ int whileIfElseEnd(labelType type) {
  *
  * @param name - jmeno promenne (char*)
  */
-void variableDeclaration(char *name) {
+void variableDeclaration(char *name, TokType type) {
     printf("DEFVAR TF@_%s\n", name);
+    switch (type){
+        case INTEGER:
+            printf("MOVE TF@_%s int@0\n");
+            break;
+        case DOUBLE:
+            printf("MOVE TF@_%s float@0.0\n");
+            break;
+        case STRING:
+            printf("MOVE TF@_%s string@!""\n");
+            break;
+        default:break;
+    }
 }
 
 /**

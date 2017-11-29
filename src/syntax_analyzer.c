@@ -665,7 +665,7 @@ int S_Dim(Token *act){
     }
 
     Add_Var(FUNC, id, type);
-    variableDeclaration(id);
+    variableDeclaration(id, type);
 
     GET_TOKEN(act);
     if(act->type == EOL){

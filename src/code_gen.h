@@ -64,7 +64,7 @@ int whileIfBegin(labelType type);
 
 int whileIfElseEnd(labelType type);
 
-void variableDeclaration(char *name);
+void variableDeclaration(char *name, TokType type);
 
 void write();
 
