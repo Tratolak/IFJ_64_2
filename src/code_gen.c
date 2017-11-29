@@ -311,15 +311,19 @@ int getOperand(Token *t) {
  * @param new      - vysledny typ promenne (TokType)
  */
 void retype(TokType original, TokType new){
-    printf("POPS TF@_exprResult\n");
     if (original == INTEGER && new == DOUBLE) {
+        printf("POPS TF@_exprResult\n");
         printf("INT2FLOAT TF@_exprResult TF@_exprResult\n");
+        printf("PUSHS TF@_exprResult\n");
     } else if (original == DOUBLE && new == INTEGER) {
+        printf("POPS TF@_exprResult\n");
         printf("FLOAT2INT TF@_exprResult TF@_exprResult\n");
+        printf("PUSHS TF@_exprResult\n");
     } else if (original == INTEGER && new == STRING) {
+        printf("POPS TF@_exprResult\n");
         printf("INT2CHAR TF@_exprResult TF@_exprResult\n");
+        printf("PUSHS TF@_exprResult\n");
     }
-    printf("PUSHS TF@_exprResult\n");
 }
 
 /**
