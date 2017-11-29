@@ -125,7 +125,7 @@ bool Convertible(TokType original, TokType to) {
 //check if sym table contains ID
 int SEM_existId(char* name)
 {
-    if(!Search_Func(name, NULL))
+    if(!Search_Func(name, NULL, NULL))
         if(!Search_Var(FUNC, name, NULL))
             return false;
 
@@ -438,6 +438,7 @@ int SyntaxAnalyzer(){
 
 int S_FuncHeader(bool declare, Token *act){
 
+    int numofargs;
     bool definition = !declare;
     bool temp;
     //Function ID
@@ -447,13 +448,13 @@ int S_FuncHeader(bool declare, Token *act){
         setCurrFunc(act->val);
 
         if(declare){
-            if(Search_Func(FUNC, NULL))
+            if(Search_Func(FUNC, NULL, NULL))
                 return SEM_ERROR;
 
             Dec_Func(FUNC, false);
         }
         else{
-            if(!Search_Func(FUNC, &temp)){
+            if(!Search_Func(FUNC, &temp, &numofargs)){
                 declare = true;
 
                 Dec_Func(FUNC, true);
@@ -603,7 +604,7 @@ int S_StatList(Token *act, Token **back, bool isScope){
             TokType inType;
             myStrCpy(&id, act->val);
 
-            if(Search_Func(id, NULL)){
+            if(Search_Func(id, NULL, NULL)){
                 Ret_Func_Type(id, &inType);
             }
             else if(!Search_Var(FUNC, id , &inType)){
@@ -847,11 +848,12 @@ int S_Ret(Token *act){
 int S_Assig(Token *act, bool *function, TokType inType){
     Token *back;
     TokType type, retType;
+    int numofrags;
 
     GET_TOKEN(act);
     if(act->type == ID || act->type == KEYWORD){
         //if func - params else preanalyzer
-        if(Search_Func(act->val, NULL)){
+        if(Search_Func(act->val, NULL, &numofrags)){
             Ret_Func_Type(act->val, &retType);
 
             //Code Gen - f. call init
