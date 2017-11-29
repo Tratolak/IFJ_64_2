@@ -53,5 +53,7 @@ bool Nth_Func_ArgType(char *funcname, int n, TokType argtype);
 
 bool Search_Var(char *funcname, char *varname, TokType *vartype);
 
+bool Every_Func_Defed();
+
 
 #endif // SYMTABLE_H_INCLUDED

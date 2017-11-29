@@ -17,6 +17,10 @@ int main()
     //printf("Hello world!\n");
     err=SyntaxAnalyzer();
 
+    if(!Every_Func_Defed()){
+        err = 3;
+    }
+
     GarbageFree();
     Symtable_Destroy();
     return err;

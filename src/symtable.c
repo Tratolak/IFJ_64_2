@@ -253,3 +253,23 @@ bool Search_Var(char *funcname, char *varname, TokType *vartype) {
 
   return true;
 }
+
+bool Every_Func_Defed(){
+    tItem *ptr;
+    tItem *nextptr;
+
+    for(int i = 0; i < MAX_TSIZE; ++i){
+        ptr = (*Func)[i];
+        while (ptr != NULL) {
+            nextptr = ptr->next;
+
+            if(!ptr->isdef){
+                return false;
+            }
+
+            ptr = nextptr;
+        }
+    }
+
+    return true;
+}
