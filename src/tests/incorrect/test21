@@ -1,0 +1,9 @@
+Function foo (n As double) As Integer
+Print n;
+End Function
+
+scope
+Dim i As Integer
+dim a as string
+i = foo(a)
+end scope

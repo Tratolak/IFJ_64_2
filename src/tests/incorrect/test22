@@ -1,0 +1,8 @@
+Function foo (n As double) As Integer
+Print n;
+End Function
+
+scope
+Dim i As double
+i = foo(4)
+end scope

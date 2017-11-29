@@ -1,6 +1,5 @@
-Function foo (n As Integer) As Integer
-Print n;
-End Function
+Declare Function foo (n As Integer) As Integer
+
 scope
 Dim i As Integer
 i = foo(4)
