@@ -915,6 +915,10 @@ int S_Assig(Token *act, bool *function, TokType inType){
                 }
                 i++;
             }
+
+            if(i != numofrags)
+                return BIN_OP_INCOMPAT;
+
             //Code Gen
             callParamsPush();
 
