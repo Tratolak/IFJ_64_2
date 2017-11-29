@@ -1,0 +1,9 @@
+/' Test vestavene fce Chr'/
+Scope 'Hlavni telo programu
+Dim r As String
+
+/'Vse OK'/
+r = Chr(64)
+Print !"\nVysledek je:" ; r ; !"\n";
+
+End Scope

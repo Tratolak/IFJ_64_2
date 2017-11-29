@@ -1,0 +1,9 @@
+Declare Function foo () As Integer
+Function foo () As Integer
+Print 4;
+Return 8
+End Function
+scope
+Dim i As Integer
+i = foo()
+end scope

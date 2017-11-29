@@ -1,0 +1,7 @@
+Function foo (n As Integer) As Integer
+Print n;
+End Function
+scope
+Dim i As Integer
+i = foo(4)
+end scope
