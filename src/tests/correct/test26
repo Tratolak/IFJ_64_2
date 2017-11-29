@@ -1,0 +1,18 @@
+/' Test vestavene fce Asc'/
+Scope 'Hlavni telo programu
+Dim str As String
+Dim i As Integer
+Dim r As Integer
+
+Print !"Zadejte retezec.\n";
+Input str
+
+/'Vse OK'/
+i = 6
+r = Asc(str, 6)
+Print !"\nVysledek je:" ; r ; !"\n";
+
+r = Asc(str, 59)
+Print !"\nVysledek je:" ; r ; !"\n";
+
+End Scope

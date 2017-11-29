@@ -580,6 +580,7 @@ void inBuiltAsc() {
     printf("MOVE LF@_returnValue int@0\n");
     printf("RETURN\n");
     printf("LABEL Asc$\n");
+    printf("SUB TF@_i TF@_i int@1\n");
     printf("STRI2INT LF@_returnValue TF@_s TF@_i\n");
     printf("RETURN\n");
 }
