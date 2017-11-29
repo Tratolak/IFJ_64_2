@@ -1,14 +1,15 @@
 ############################################################
-# Makefile                                       					 #
-# automatizovaný překlad všech zdrojových soborů 					 #
-# make        - překlad programu          								 #
-# make test		- spustí automatizované testy								 #
+# Makefile                                                 #
+# automatizovaný překlad všech zdrojových soborů           #
+# make        - překlad programu                           #
+# make test   - spustí automatizované testy                #
 # make clean  - odstraní spustitelné a binární soubory     #
-# 																												 #
-# Martin Stodůlka(xstodu08)																 #
-# Ondřej Olšák(xolsak00)																	 #
-# Michael Schneider(xschne07)															 #
-# Marek Kuchynka(xkuchy00)																 #
+#               .diff, .output, .ifj17 soubory po testech  #
+#                                                          #
+# Martin Stodůlka(xstodu08)                                #
+# Ondřej Olšák(xolsak00)                                   #
+# Michael Schneider(xschne07)                              #
+# Marek Kuchynka(xkuchy00)                                 #
 ############################################################
 
 CC=gcc
@@ -45,9 +46,9 @@ test: ifj17
 
 
 clean:
-	rm *.o
-	rm ifj17
-	rm tests/correct/*.output
-	rm tests/correct/*.ifj17code
-	rm tests/correct/*.diff
-	rm tests/incorrect/*.ifj17code
+	-rm -f *.o
+	-rm -f ifj17
+	-rm -f tests/correct/*.output
+	-rm -f tests/correct/*.ifj17code
+	-rm -f tests/correct/*.diff
+	-rm -f tests/incorrect/*.ifj17code
