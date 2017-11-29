@@ -667,6 +667,7 @@ void write() {
  * @param type     - typ promenne (TokType)
  */
 void input(char *variableName, TokType type) {
+    printf("WRITE string@\\010?\n");
     switch (type) {
         case INTEGER:
             printf("READ TF@_%s int\n", variableName);

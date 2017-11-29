@@ -4,7 +4,7 @@ Dim str As String
 Dim i As Integer
 Dim r As Integer
 
-Print !"Zadejte retezec.\n";
+Print !"Zadejte retezec.";
 Input str
 
 /'Vse OK'/

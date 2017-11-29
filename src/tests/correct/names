@@ -24,3 +24,4 @@ a = 2 / 1 - 1
 Zjisteni delky retezce - vestavena fce Length
 Podretezec - vestavena fce SubStr
 Hodnota znaku - vestavena fce Asc
+Integer to srting - vestavena fce Chr
