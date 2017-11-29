@@ -561,6 +561,7 @@ int S_StatList(Token *act, Token **back, bool isScope){
         if(act->type == KEYWORD){
             if(strcmp(act->val,"dim") == 0){
                 SYN_EXPAND(S_Dim, act);
+                continue;
             }
             else if(strcmp(act->val,"input") == 0){
                 SYN_EXPAND(S_Input, act);
@@ -662,6 +663,29 @@ int S_Dim(Token *act){
 
     Add_Var(FUNC, id, type);
     variableDeclaration(id);
+
+    GET_TOKEN(act);
+    if(act->type == EOL){
+        return SYN_OK;
+    }
+    else if(act->type != EQL){
+        return SYN_ERROR;
+    }
+
+    GET_TOKEN(act);
+    Token *back;
+    TokType inType;
+    PREANALYZER(act, &back, &inType, C_ASSIG);
+
+    if(back->type != EOL){
+        return SYN_ERROR;
+    }
+
+    if(!Convertible(type, inType))
+        return BIN_OP_INCOMPAT;
+
+    retype(inType, type);
+    getResult(id, false);
 
     return SYN_OK;
 }
@@ -850,29 +874,29 @@ int S_Assig(Token *act, bool *function, TokType inType){
                 if(act->type == ID){
                     if(!Search_Var(FUNC, act->val, &type)){
                         free(id);
-                        return SEM_ERROR;
+                        return BIN_OP_INCOMPAT;
                     }
                     if(!Nth_Func_ArgType(id, i, type)){
                         free(id);
-                        return SEM_ERROR;
+                        return BIN_OP_INCOMPAT;
                     }
                 }
                 else if(act->type == INTEGER){
                     if(!Nth_Func_ArgType(id, i, INTEGER)){
                         free(id);
-                        return SEM_ERROR;
+                        return BIN_OP_INCOMPAT;
                     }
                 }
                 else if(act->type == DOUBLE){
                     if(!Nth_Func_ArgType(id, i, DOUBLE)){
                         free(id);
-                        return SEM_ERROR;
+                        return BIN_OP_INCOMPAT;
                     }
                 }
                 else if(act->type == STRING){
                     if(!Nth_Func_ArgType(id, i, STRING)){
                         free(id);
-                        return SEM_ERROR;
+                        return BIN_OP_INCOMPAT;
                     }
                 }
                 else{
@@ -901,6 +925,8 @@ int S_Assig(Token *act, bool *function, TokType inType){
             if(!Convertible(retType, inType))
                 return BIN_OP_INCOMPAT;
 
+            retype(retType, inType);
+
             free(id);
         }
         else{
@@ -911,6 +937,8 @@ int S_Assig(Token *act, bool *function, TokType inType){
             *function = false;
             if(!Convertible(type, inType))
                 return BIN_OP_INCOMPAT;
+
+            retype(type, inType);
         }
     }
     else{
@@ -921,6 +949,8 @@ int S_Assig(Token *act, bool *function, TokType inType){
         *function = false;
         if(!Convertible(type, inType))
             return BIN_OP_INCOMPAT;
+
+        retype(type, inType);
 
     }
 
