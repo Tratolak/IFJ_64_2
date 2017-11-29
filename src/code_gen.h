@@ -1,8 +1,8 @@
 #ifndef IFJ_64_2_CODE_GEN_H
 #define IFJ_64_2_CODE_GEN_H
 
-//Martin Stodùlka(xstodu08)
-//Ondøej Olšák(xolsak00)
+//Martin Stodï¿½lka(xstodu08)
+//Ondï¿½ej Olï¿½ï¿½k(xolsak00)
 //Michael Schneider(xschne07)
 //Marek Kuchynka(xkuchy00)
 
@@ -31,6 +31,8 @@ void boolOperationConvert(TokType var1, TokType var2);
 int getOperand(Token *t);
 
 void TFCreation();
+
+void retype(TokType original, TokType new);
 
 void getResult(char *variableName, bool isFunction);
 
