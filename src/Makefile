@@ -49,6 +49,6 @@ clean:
 	-rm -f *.o
 	-rm -f ifj17
 	-rm -f tests/correct/*.output
-	-rm -f tests/correct/*.ifj17code
+	-rm -f tests/correct/*.ifjcode17
 	-rm -f tests/correct/*.diff
-	-rm -f tests/incorrect/*.ifj17code
+	-rm -f tests/incorrect/*.ifjcode17

@@ -22,8 +22,8 @@
 
 src/ifj17
 
-*.ifj17code
-
 *.output
 
 *.diff
+
+*.ifjcode17

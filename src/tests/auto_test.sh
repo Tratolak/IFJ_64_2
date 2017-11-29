@@ -16,7 +16,8 @@ do
   echo "TEST $i"
   echo ""
 
-  ./ifj17 < tests/correct/test$i > tests/correct/test$i.ifj17code
+  # spuštění překladu
+  ./ifj17 < tests/correct/test$i > tests/correct/test$i.ifjcode17
   ifj17_exit=$?
   if (($ifj17_exit == 0)); then
     ifj17_out="\e[32m$ifj17_exit\e[0m"
@@ -41,11 +42,16 @@ do
       99)
         ifj17_out="$ifj17_out interní chyba překladače (např. chyba alokace paměti, atd.)."
         ;;
+      *)
+        ifj17_out="$ifj17_out neznámá chyba (viz výpis ^ )"
+        ;;
     esac
   fi
   echo -e "compiler returns \t\e[1m$ifj17_out\e[0m"
 
-  tests/ic17int tests/correct/test$i.ifj17code > tests/correct/test$i.output
+  # spuštění interpretu (pouze, pokud se povedl překlad)
+  if (($ifj17_exit == 0)); then
+  tests/ic17int tests/correct/test$i.ifjcode17 > tests/correct/test$i.output
   ic17int_exit=$?
   if (($ic17int_exit == 0)); then
     ic17int_out="\e[32m$ic17int_exit\e[0m"
@@ -82,7 +88,12 @@ do
     esac
   fi
   echo -e "interpreter returns \t\e[1m$ic17int_out\e[0m"
+  else
+    ic17int_exit=1
+  fi
 
+  #spuštění diff (pouze, pokud se povedla interpretace programu)
+  if (($ic17int_exit == 0)); then
   diff=$(diff tests/correct/test$i.ok tests/correct/test$i.output)
   diff_exit=$?
   if (($diff_exit == 0)); then
@@ -91,6 +102,9 @@ do
     diff_out="\e[31m$diff_exit\e[0m (diff stored in tests/correct/test$i.diff)"
   fi
   echo -e "diff returns \t\t\e[1m$diff_out\e[0m"
+  else
+    diff_exit=1
+  fi
 
   if (($ifj17_exit == 0 && $ic17int_exit == 0 && $diff_exit == 0)); then
     echo -e "\e[1mRESULT: \e[32mOK\e[0m"
@@ -122,7 +136,7 @@ do
 
   corr_err=`head -n 1 tests/incorrect/test$i.ok`
 
-  ./ifj17 < tests/incorrect/test$i > tests/incorrect/test$i.ifj17code
+  ./ifj17 < tests/incorrect/test$i > tests/incorrect/test$i.ifjcode17
   ifj17_exit=$?
 
   case $ifj17_exit in
@@ -143,6 +157,9 @@ do
       ;;
     99)
       ifj17_out="interní chyba překladače (např. chyba alokace paměti, atd.)."
+      ;;
+    *)
+      ifj17_out="neznámá chyba (viz výpis ^ )"
       ;;
   esac
 
