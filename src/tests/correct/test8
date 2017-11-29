@@ -1,0 +1,3 @@
+scope
+  print !"Hell w<>rld!\n"
+end scope
