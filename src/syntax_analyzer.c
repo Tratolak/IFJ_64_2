@@ -874,29 +874,29 @@ int S_Assig(Token *act, bool *function, TokType inType){
                 if(act->type == ID){
                     if(!Search_Var(FUNC, act->val, &type)){
                         free(id);
-                        return SEM_ERROR;
+                        return BIN_OP_INCOMPAT;
                     }
                     if(!Nth_Func_ArgType(id, i, type)){
                         free(id);
-                        return SEM_ERROR;
+                        return BIN_OP_INCOMPAT;
                     }
                 }
                 else if(act->type == INTEGER){
                     if(!Nth_Func_ArgType(id, i, INTEGER)){
                         free(id);
-                        return SEM_ERROR;
+                        return BIN_OP_INCOMPAT;
                     }
                 }
                 else if(act->type == DOUBLE){
                     if(!Nth_Func_ArgType(id, i, DOUBLE)){
                         free(id);
-                        return SEM_ERROR;
+                        return BIN_OP_INCOMPAT;
                     }
                 }
                 else if(act->type == STRING){
                     if(!Nth_Func_ArgType(id, i, STRING)){
                         free(id);
-                        return SEM_ERROR;
+                        return BIN_OP_INCOMPAT;
                     }
                 }
                 else{
