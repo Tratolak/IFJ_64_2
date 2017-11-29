@@ -149,6 +149,9 @@ do
   ifj17_exit=$?
 
   case $ifj17_exit in
+    0)
+      ifj17_out="bez chyby."
+      ;;
     1)
       ifj17_out="chyba v programu v rámci lexikální analýzy."
       ;;
