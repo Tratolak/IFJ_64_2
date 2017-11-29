@@ -446,7 +446,7 @@ void functionReturn0(TokType type){
             printf("MOVE LF@_returnValue float@0.0\n");
             break;
         case STRING:
-            printf("MOVE LF@_returnValue string@!""\n");
+            printf("MOVE LF@_returnValue string@\n");
             break;
         default:break;
     }
@@ -658,7 +658,7 @@ void variableDeclaration(char *name, TokType type) {
             printf("MOVE TF@_%s float@0.0\n", name);
             break;
         case STRING:
-            printf("MOVE TF@_%s string@!""\n", name);
+            printf("MOVE TF@_%s string@\n", name);
             break;
         default:break;
     }
