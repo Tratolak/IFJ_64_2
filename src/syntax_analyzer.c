@@ -132,22 +132,6 @@ int SEM_existId(char* name)
     return true;
 }
 
-void setCurrFunc(char* name)
-{
-    if(FUNC != NULL)
-        free(FUNC);
-    FUNC = malloc((strlen(name)+1) * sizeof(char));
-    strcpy(FUNC, name);
-}
-
-void myStrCpy(char **to, char *from)
-{
-    if(*to != NULL)
-        free(*to);
-    *to = malloc((strlen(from)+1) * sizeof(char));
-    strcpy(*to, from);
-}
-
 int CheckRule(Token *op1, Token *oper, Token* op2, Token** res, TokType *typ1, TokType *typ2, int func)
 {
 
@@ -361,6 +345,9 @@ int SyntaxAnalyzer(){
         if(result == S_END_OF_FILE && scope){
             return SYN_OK;
         }
+        else if(result != S_TOKEN_OK){
+            return result;
+        }
 
         if (act->type==KEYWORD && !scope){
             if(strcmp(act->val,"scope")==0){
@@ -368,10 +355,9 @@ int SyntaxAnalyzer(){
                     return SYN_ERROR;
                 }
 
-                free(FUNC);
                 scopeLabel();
                 Dec_Func("scope", true);
-                setCurrFunc("scope");
+                FUNC = act->val;
 
                 GET_TOKEN(act);
                 if(act->type == EOL)
@@ -449,7 +435,7 @@ int S_FuncHeader(bool declare, Token *act){
     GET_TOKEN(act);
 
     if(act->type == ID){
-        setCurrFunc(act->val);
+        FUNC = act->val;
 
         if(declare){
             if(Search_Func(FUNC, NULL, NULL))
@@ -495,15 +481,13 @@ int S_FuncHeader(bool declare, Token *act){
             break;
 
         if(act->type == ID){
-            myStrCpy(&id, act->val);
+           id = act->val;
         }
         else{
-            free(id);
             return SYN_ERROR;
         }
 
         if(SEM_existId(id)){
-            free(id);
             return SEM_ERROR;
         }
 
@@ -513,13 +497,11 @@ int S_FuncHeader(bool declare, Token *act){
 
         GET_TOKEN(act);
         if(act->type != KEYWORD || strcmp(act->val, "as") != 0){
-            free(id);
             return SYN_ERROR;
         }
 
         GET_TOKEN(act);
         if(!isType(act, &type)){
-            free(id);
             return SYN_ERROR;
         }
 
@@ -532,14 +514,10 @@ int S_FuncHeader(bool declare, Token *act){
 
             Add_Var(FUNC, id, type);
         }
-        else{
-            free(id);
-        }
 
         GET_TOKEN(act);
 
         if(act->type != COMMA && act->type != RBRACKET){
-            free(id);
             return SYN_ERROR;
         }
         i++;
@@ -619,13 +597,12 @@ int S_StatList(Token *act, Token **back, bool isScope){
         else if(act->type == ID){
             char *id = NULL;
             TokType inType;
-            myStrCpy(&id, act->val);
+            id = act->val;
 
             if(Search_Func(id, NULL, NULL)){
                 Ret_Func_Type(id, &inType);
             }
             else if(!Search_Var(FUNC, id , &inType)){
-                free(id);
                 return SEM_ERROR;
             }
 
@@ -635,12 +612,10 @@ int S_StatList(Token *act, Token **back, bool isScope){
                 SYN_EXPAND(S_Assig, act, &func, inType);
             }
             else{
-                free(id);
                 return SYN_ERROR;
             }
 
             getResult(id, func);
-            free(id);
         }
         else if(act->type == EOL){
             continue;
@@ -660,7 +635,7 @@ int S_Dim(Token *act){
 
     GET_TOKEN(act);
     if(act->type == ID){
-        myStrCpy(&id, act->val);
+        id = act->val;
     }
     else{
         return SYN_ERROR;
@@ -675,7 +650,6 @@ int S_Dim(Token *act){
         return SYN_ERROR;
 
     if(SEM_existId(id)){
-        free(id);
         return SEM_ERROR;
     }
 
@@ -875,7 +849,7 @@ int S_Assig(Token *act, bool *function, TokType inType){
             functionFramePreparation();
 
             char *id;
-            myStrCpy(&id, act->val);
+            id = act->val;
 
             GET_TOKEN(act);
             if(act->type != LBRACKET)
@@ -890,34 +864,28 @@ int S_Assig(Token *act, bool *function, TokType inType){
 
                 if(act->type == ID){
                     if(!Search_Var(FUNC, act->val, &type)){
-                        free(id);
                         return BIN_OP_INCOMPAT;
                     }
                     if(!Nth_Func_ArgType(id, i, type)){
-                        free(id);
                         return BIN_OP_INCOMPAT;
                     }
                 }
                 else if(act->type == INTEGER){
                     if(!Nth_Func_ArgType(id, i, INTEGER)){
-                        free(id);
                         return BIN_OP_INCOMPAT;
                     }
                 }
                 else if(act->type == DOUBLE){
                     if(!Nth_Func_ArgType(id, i, DOUBLE)){
-                        free(id);
                         return BIN_OP_INCOMPAT;
                     }
                 }
                 else if(act->type == STRING){
                     if(!Nth_Func_ArgType(id, i, STRING)){
-                        free(id);
                         return BIN_OP_INCOMPAT;
                     }
                 }
                 else{
-                    free(id);
                     return SYN_ERROR;
                 }
 
@@ -927,7 +895,6 @@ int S_Assig(Token *act, bool *function, TokType inType){
                 GET_TOKEN(act);
 
                 if(act->type != COMMA && act->type != RBRACKET){
-                    free(id);
                     return SYN_ERROR;
                 }
                 i++;
@@ -947,8 +914,6 @@ int S_Assig(Token *act, bool *function, TokType inType){
                 return BIN_OP_INCOMPAT;
 
             retype(retType, inType);
-
-            free(id);
         }
         else{
             PREANALYZER(act, &back, &type, C_ASSIG);
