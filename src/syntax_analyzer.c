@@ -897,7 +897,7 @@ int S_Assig(Token *act, bool *function, TokType inType){
 
             retype(retType, inType);
         }
-        else{
+        else if(Search_Var(FUNC, act->val, NULL)){
             PREANALYZER(act, &back, &type, C_ASSIG);
             if(back->type != EOL)
                 return SYN_ERROR;
@@ -907,6 +907,9 @@ int S_Assig(Token *act, bool *function, TokType inType){
                 return BIN_OP_INCOMPAT;
 
             retype(type, inType);
+        }
+        else{
+            return SEM_ERROR;
         }
     }
     else{
