@@ -1,0 +1,42 @@
+/' Volani vice funkci v jedmo programu '/
+Declare Function factorial (n As Integer) As Integer
+Function factorial (n As Integer) As Integer
+Dim temp_result As Integer
+Dim decremented_n As Integer
+Dim result As Integer
+If n < 2 Then
+result = 1
+Else
+decremented_n = n - 1
+temp_result = factorial(decremented_n)
+result = n * temp_result
+End If
+Return result
+End Function
+
+Scope 'Hlavni telo programu
+Dim a As Integer
+Dim vysl As Integer
+Dim str As String
+Dim i As Integer
+Dim n As Integer
+Dim stringResult As String
+Dim intResult As Integer
+
+a = 5
+If a < 0 Then
+Print !"\nFaktorial nelze spocitat\n";
+Else
+vysl = factorial(a)
+Print !"\nVysledek je:" ; vysl ; !"\n";
+End If
+
+
+str = !"Toto je testovaci text."
+intResult = Length(str)
+Print !"\nVysledek je:" ; intResult ; !"\n";
+
+stringResult = SubStr(str, 2, 5)
+Print !"\nVysledek je:" ; stringResult ; !"\n";
+
+End Scope
