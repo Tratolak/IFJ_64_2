@@ -446,7 +446,7 @@ void functionReturn0(TokType type){
             printf("MOVE LF@_returnValue float@0.0\n");
             break;
         case STRING:
-            printf("MOVE LF@_returnValue string@!""\n");
+            printf("MOVE LF@_returnValue string@\n");
             break;
         default:break;
     }
@@ -584,6 +584,7 @@ void inBuiltAsc() {
     printf("MOVE LF@_returnValue int@0\n");
     printf("RETURN\n");
     printf("LABEL Asc$\n");
+    printf("SUB TF@_i TF@_i int@1\n");
     printf("STRI2INT LF@_returnValue TF@_s TF@_i\n");
     printf("RETURN\n");
 }
@@ -657,7 +658,7 @@ void variableDeclaration(char *name, TokType type) {
             printf("MOVE TF@_%s float@0.0\n", name);
             break;
         case STRING:
-            printf("MOVE TF@_%s string@!""\n", name);
+            printf("MOVE TF@_%s string@\n", name);
             break;
         default:break;
     }
@@ -682,6 +683,7 @@ void write() {
  * @param type     - typ promenne (TokType)
  */
 void input(char *variableName, TokType type) {
+    printf("WRITE string@\\010?\n");
     switch (type) {
         case INTEGER:
             printf("READ TF@_%s int\n", variableName);

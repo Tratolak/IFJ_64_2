@@ -1,0 +1,31 @@
+Hello world!
+a = 1
+Dim a As Integer = 1
+a = 1 + 1
+Dim a As Integer = 1 + 1
+Hell\032world
+Hell\tworld
+Hell w<>rld!
+Hello ; world ; !
+Dim a As Integer = 1 + 1 - 1
+a = 1 + 1 - 1
+a = 1 * 1
+Dim a As Integer = 1 * 1
+Dim a As Integer = 1 * 2 - 1
+a = 1 * 2 - 1
+a = 1 * 2 * 1 - 1
+a = 2 / 1 - 1
+3! iterativně
+5! iterativně
+-2! iterativně
+3! rekurzivně
+5! rekurzivně
+-2! rekurzivně
+Zjisteni delky retezce - vestavena fce Length
+Podretezec - vestavena fce SubStr
+Hodnota znaku - vestavena fce Asc
+Integer to string - vestavena fce Chr
+Načtení 2 čísel
+Automatická inicializace INT
+Automatická inicializace DOUBLE
+Automatická inicializace STRING

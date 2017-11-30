@@ -1,0 +1,6 @@
+Declare Function foo (n As Integer) As Integer
+
+scope
+Dim i As Integer
+i = foo(4)
+end scope

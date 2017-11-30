@@ -1,0 +1,3 @@
+scope
+  print !"Hell\world"
+end scope

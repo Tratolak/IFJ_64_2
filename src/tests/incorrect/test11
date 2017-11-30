@@ -1,0 +1,4 @@
+scope
+Dim a As Integer
+a = Length()
+end scope

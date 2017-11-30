@@ -1,0 +1,5 @@
+scope
+  dim a as integer
+  A = 1
+  return a
+end scope

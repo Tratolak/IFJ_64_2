@@ -1,0 +1,34 @@
+/' Test vestavene fce SubStr '/
+Scope 'Hlavni telo programu
+Dim str As String
+Dim i As Integer
+Dim n As Integer
+Dim r As String
+
+Print !"Zadejte retezec.";
+Input str
+
+/'Vse OK'/
+r = SubStr(str, 6, 16)
+Print !"\nVysledek je:" ; r ; !"\n";
+
+/'n < 0'/
+n = 4-5
+r = SubStr(str, 6, n)
+Print !"\nVysledek je:" ; r ; !"\n";
+
+/'n > Length(str) - i'/
+r = SubStr(str, 6, 48)
+Print !"\nVysledek je:" ; r ; !"\n";
+
+/'i <= 0'/
+i = 5-10
+r = SubStr(str, i, 5)
+Print !"\nVysledek je:" ; r ; !"\n";
+
+/'str = ""'/
+n = 16
+str = !""
+r = SubStr(str, 6, n)
+Print !"\nVysledek je:" ; r ; !"\n";
+End Scope

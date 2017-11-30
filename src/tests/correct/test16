@@ -1,0 +1,7 @@
+scope
+Dim a As Integer 
+
+a = 1 * 2 * 1 - 1
+
+Print !"Vysledek je: " ; a ; !"\n";
+END SCOPE

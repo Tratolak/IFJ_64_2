@@ -1,8 +1,15 @@
 ############################################################
-# Makefile                                       					 #
-# automatizovaný překlad všech zdrojových soborů 					 #
-# make        - překlad programu          								 #
+# Makefile                                                 #
+# automatizovaný překlad všech zdrojových soborů           #
+# make        - překlad programu                           #
+# make test   - spustí automatizované testy                #
 # make clean  - odstraní spustitelné a binární soubory     #
+#               .diff, .output, .ifj17 soubory po testech  #
+#                                                          #
+# Martin Stodůlka(xstodu08)                                #
+# Ondřej Olšák(xolsak00)                                   #
+# Michael Schneider(xschne07)                              #
+# Marek Kuchynka(xkuchy00)                                 #
 ############################################################
 
 CC=gcc
@@ -33,6 +40,15 @@ symtable.o: symtable.c symtable.h scanner.h
 syntax_analyzer.o: syntax_analyzer.c syntax_analyzer.h scanner.h symtable.h dl_list.h stack_operations.h code_gen.h
 	$(CC) $(CFLAGS) -o $@ -c syntax_analyzer.c
 
+
+test: ifj17
+	bash tests/auto_test.sh
+
+
 clean:
-	rm *.o
-	rm ifj17
+	-rm -f *.o
+	-rm -f ifj17
+	-rm -f tests/correct/*.output
+	-rm -f tests/correct/*.ifjcode17
+	-rm -f tests/correct/*.diff
+	-rm -f tests/incorrect/*.ifjcode17

@@ -1,0 +1,9 @@
+/' Test vestavene fce Length '/
+Scope 'Hlavni telo programu
+Dim str As String
+Dim len As Integer
+Print !"Zadejte retezec, u kterehoo se urci delka.";
+Input str
+len = Length(str)
+Print !"\nVysledek je:" ; len ; !"\n";
+End Scope
