@@ -263,12 +263,6 @@ int GetToken(Token **token) {
           t = true;
         }
 
-        // percent sign
-        else if (c == '%') {
-          *token = FormToken(PERCENT, NULL);
-          t = true;
-        }
-
         // left bracket
         else if (c == '(') {
           *token = FormToken(LBRACKET, NULL);
@@ -517,7 +511,6 @@ int GetToken(Token **token) {
           state = STR;
         }
         else {
-          state = START;
           ungetc(c, stdin);
           fprintf(stderr, "ERROR: unexpected symbol \"!\".\n");
           return S_LEXEM_FAIL;
