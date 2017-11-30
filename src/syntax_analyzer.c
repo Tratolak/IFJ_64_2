@@ -1349,7 +1349,7 @@ int PreTokenAnalyzer(Token *act, char * c){
  */
 int PreNextTok(Token* act, tDLList* local,tDLList* partrule,tDLList* rule, Token** vys, int fce){
     int err, tok, once=1;
-    char *c;
+    char *c, isfunc='';
 
     c=(char*)malloc(sizeof(char));
     if(c==NULL){
@@ -1362,8 +1362,16 @@ int PreNextTok(Token* act, tDLList* local,tDLList* partrule,tDLList* rule, Token
             GET_TOKEN(act);
         }
         tok = PreTokenAnalyzer(act, c); //overeni zda token je validni pro precedencni analyzu
+        if (once == 1) {
+            isfunc = *c;
+        }
+        if ((isfunc == 'i') && (*c=='(') ){
+            //martinova fce
+            tok = 1;
+            once= 1;
+        }
         if (tok == 1) { //kdyz token nepotri ukoncujeme prec analyzu
-            if (once == 0) {
+            if (once == 0) { // testuji zda to neni prazdny vyraz
                 err = PreExe('$', NULL, local, partrule, rule, fce); // posleme ukoncovaci znak
             }
             else{
