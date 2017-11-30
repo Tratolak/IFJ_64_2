@@ -5,5 +5,6 @@ Return 8
 End Function
 scope
 Dim i As Integer
-i = foo()
+Dim param As String
+i = foo(param)
 end scope
