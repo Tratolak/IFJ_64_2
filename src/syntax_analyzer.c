@@ -802,29 +802,11 @@ int S_Ret(Token *act){
     if(!Ret_Func_Type(FUNC, &functype))
         return SEM_ERROR;
 
-    if(functype == STRING){
-        if(type != STRING)
-            return BIN_OP_INCOMPAT;
-    }
-    else if(functype == DOUBLE){
-        if(type == STRING){
-            return BIN_OP_INCOMPAT;
-        }
-        else if(type == INTEGER){
-            //convert
-        }
-    }
-    else if(functype == INTEGER){
-        if(type == STRING){
-            return BIN_OP_INCOMPAT;
-        }
-        else if(type == DOUBLE){
-            //convert
-        }
-    }
-    else{
+    if(!Convertible(type, functype)){
         return BIN_OP_INCOMPAT;
     }
+
+    retype(type, functype);
 
     functionReturn(true);
 
