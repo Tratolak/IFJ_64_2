@@ -54,7 +54,7 @@ char ArtPreTB [15][15] = {
 Table sym_table;
 
 int RET_VAL;
-char *FUNC;
+char *FUNC = NULL;
 
 #define GET_TOKEN(A)\
 RET_VAL = GetToken(&(A));\
@@ -134,14 +134,16 @@ int SEM_existId(char* name)
 
 void setCurrFunc(char* name)
 {
-    free(FUNC);
+    if(FUNC != NULL)
+        free(FUNC);
     FUNC = malloc((strlen(name)+1) * sizeof(char));
     strcpy(FUNC, name);
 }
 
 void myStrCpy(char **to, char *from)
 {
-    free(*to);
+    if(*to != NULL)
+        free(*to);
     *to = malloc((strlen(from)+1) * sizeof(char));
     strcpy(*to, from);
 }
