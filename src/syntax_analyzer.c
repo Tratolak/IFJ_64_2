@@ -1348,7 +1348,7 @@ int PreTokenAnalyzer(Token *act, char * c){
  * @return v pripade chyby vraci prislusnou chybu jinak 0
  */
 int PreNextTok(Token* act, tDLList* local,tDLList* partrule,tDLList* rule, Token** vys, int fce){
-    int err, tok;
+    int err, tok, once=1;
     char *c;
 
     c=(char*)malloc(sizeof(char));
@@ -1363,10 +1363,16 @@ int PreNextTok(Token* act, tDLList* local,tDLList* partrule,tDLList* rule, Token
         }
         tok = PreTokenAnalyzer(act, c); //overeni zda token je validni pro precedencni analyzu
         if (tok == 1) { //kdyz token nepotri ukoncujeme prec analyzu
-            err=PreExe('$', NULL, local, partrule, rule, fce); // posleme ukoncovaci znak
+            if (once == 0) {
+                err = PreExe('$', NULL, local, partrule, rule, fce); // posleme ukoncovaci znak
+            }
+            else{
+                err = 2;
+            }
         }
         else // novy nebo stavajici token
         {
+            once=0;
             err=PreExe(*c, act,local,partrule,rule, fce);
             if(err==7){ // pokud neprobehlo zpracovani stavajiciho tokenu TOTO NENI CHYBA
 
