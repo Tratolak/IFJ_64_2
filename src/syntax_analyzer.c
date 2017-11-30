@@ -480,7 +480,7 @@ int S_FuncHeader(bool declare, Token *act){
     //Function Arguments
     char *id = NULL;
     int i = 0;
-    TokType type;
+    TokType type, rettype;
 
     GET_TOKEN(act);
     if(act->type != LBRACKET)
@@ -524,6 +524,10 @@ int S_FuncHeader(bool declare, Token *act){
         if(declare)
             Dec_Func_AddArgument(FUNC, i, type);
         if(definition){
+            if(!declare && !Nth_Func_ArgType(FUNC, i, type)){
+                 return SEM_ERROR;
+            }
+
             Add_Var(FUNC, id, type);
         }
         else{
@@ -539,6 +543,9 @@ int S_FuncHeader(bool declare, Token *act){
         i++;
     }
 
+    if((definition && !declare) && (i != numofargs))
+        return SEM_ERROR;
+
     //Function Type
     GET_TOKEN(act);
     if(act->type != KEYWORD || strcmp(act->val, "as") != 0)
@@ -548,6 +555,12 @@ int S_FuncHeader(bool declare, Token *act){
     if(!isType(act, &type))
         return SYN_ERROR;
 
+    if(!declare && definition){
+        Ret_Func_Type(FUNC, &rettype);
+
+        if(type != rettype )
+            return SEM_ERROR;
+    }
     Dec_Func_Set_Type(FUNC, type);
 
     GET_TOKEN(act);
