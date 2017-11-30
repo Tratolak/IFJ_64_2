@@ -15,7 +15,7 @@ const char * const Reserved[] = {"as", "asc", "declare", "dim", "do", "double",
 
 enum enState {START, IDENTIFIER, COMLINE, COMBLOCK, COMBLOCK_F, LESS, GREATER,
               SLASH, INT_Z, INT, DOUBLE_NN, DOUBLE_N, DOUBLE_ES, DOUBLE_EN,
-              DOUBLE_E, EXCLAMATION, STR, ESCAPE
+              DOUBLE_E, EXCLAMATION, STR, ESCAPE, ESCAPE_N1, ESCAPE_N2
 } state;
 
 
@@ -156,7 +156,7 @@ bool IsReserved(char* str) {
  *               S_MEMORY_ERROR při chybě v alokaci paměti
  */
 int GetToken(Token **token) {
-  int c, count, sym;
+  int c, sum;
   bool t = false;
   DynamicBuffer str;
   state = START;
@@ -363,6 +363,8 @@ int GetToken(Token **token) {
             return S_MEMORY_ERROR;
         }
         else {
+          if (!BufferInsert(&str, '\0'))
+            return S_MEMORY_ERROR;
           if (c == '\n')
             fprintf(stderr, "ERROR: Unexpected EOL after %s.\n", str.buffer);
           else
@@ -404,6 +406,8 @@ int GetToken(Token **token) {
             return S_MEMORY_ERROR;
         }
         else {
+          if (!BufferInsert(&str, '\0'))
+            return S_MEMORY_ERROR;
           fprintf(stderr, "ERROR: %s is not valid double.\n", str.buffer);
           free(str.buffer);
           return S_LEXEM_FAIL;
@@ -417,6 +421,8 @@ int GetToken(Token **token) {
             return S_MEMORY_ERROR;
         }
         else {
+          if (!BufferInsert(&str, '\0'))
+            return S_MEMORY_ERROR;
           if (c == '\n')
             fprintf(stderr, "ERROR: Unexpected EOL after %s.\n", str.buffer);
           else
@@ -525,14 +531,15 @@ int GetToken(Token **token) {
           t = true;
         }
         else if (c == '\n') {
+          if (!BufferInsert(&str, '\0'))
+            return S_MEMORY_ERROR;
           fprintf(stderr, "ERROR: unexpected EOL in string \"%s\".\n", str.buffer);
           free(str.buffer);
           return S_LEXEM_FAIL;
         }
         else if (c == '\\') {
           state = ESCAPE;
-          count = 0;
-          sym = 0;
+          sum = 0;
         }
         else if (c <= 32 || c == 35 || c == 92) {
           char esc[4];
@@ -546,48 +553,25 @@ int GetToken(Token **token) {
             return S_MEMORY_ERROR;
         break;
 
+      // "\"
       case ESCAPE:
         if (isdigit(c)) {
           // "\number"
-          count++;
-          switch (count) {
-            case 1:
-              sym = (c - '0') * 100;
-              if (!BufferInsert(&str, '\\') || !BufferInsert(&str, c))
-                return S_MEMORY_ERROR;
-              break;
-            case 2:
-              sym = sym + (c - '0') * 10;
-              if (!BufferInsert(&str, c))
-                return S_MEMORY_ERROR;
-              break;
-            case 3:
-              sym = sym + (c - '0');
-              if (!BufferInsert(&str, c))
-                return S_MEMORY_ERROR;
-              break;
-          }
-          if (count == 3) {
-            if (sym < 256) {
-              state = STR;
-            }
-            else {
-              fprintf(stderr, "ERROR: too big number in escape sequence \"%s\".\n", str.buffer);
-              free(str.buffer);
-              return S_LEXEM_FAIL;
-            }
-          }
+          sum = (c - '0') * 100;
+          if (!BufferInsert(&str, '\\') || !BufferInsert(&str, c))
+            return S_MEMORY_ERROR;
+          state = ESCAPE_N1;
         }
-        else if (count == 0) {
+        else {
           // "\n \t \" \\"
-          state = STR;
           if (c == '"') {
             if (!BufferInsert(&str, '"'))
               return S_MEMORY_ERROR;
           }
-          else {
+          else if (c == 'n' || c == 't' || c == '\\') {
             if (!BufferInsert(&str, '\\') || !BufferInsert(&str, '0'))
               return S_MEMORY_ERROR;
+
             if (c == 'n') {
               if (!BufferInsert(&str, '1') || !BufferInsert(&str, '0'))
                 return S_MEMORY_ERROR;
@@ -596,23 +580,69 @@ int GetToken(Token **token) {
               if (!BufferInsert(&str, '0') || !BufferInsert(&str, '9'))
                 return S_MEMORY_ERROR;
             }
-            else if (c == '\\') {
+            else {
               if (!BufferInsert(&str, '9') || !BufferInsert(&str, '2'))
                 return S_MEMORY_ERROR;
             }
-            else {
-              fprintf(stderr, "ERROR: unknown escape sequence \"%s\".\n", str.buffer);
-              free(str.buffer);
-              return S_LEXEM_FAIL;
-            }
+            state = STR;
+          }
+          else {
+            if (!BufferInsert(&str, '\\') || !BufferInsert(&str, c) || !BufferInsert(&str, '\0'))
+              return S_MEMORY_ERROR;
+            fprintf(stderr, "ERROR: unknown escape sequence \"%s\".\n", str.buffer);
+            free(str.buffer);
+            return S_LEXEM_FAIL;
           }
         }
+        break;
+
+      // "\x"
+      case ESCAPE_N1:
+        if (!BufferInsert(&str, c))
+          return S_MEMORY_ERROR;
+
+        if (isdigit(c)) {
+          sum = sum + (c - '0') * 10;
+          state = ESCAPE_N2;
+        }
         else {
-          fprintf(stderr, "ERROR: unknown escape sequence \"\\%d\" in \"%s\".\n", sym, str.buffer);
+          if (!BufferInsert(&str, '\0'))
+            return S_MEMORY_ERROR;
+          fprintf(stderr, "ERROR: unknown escape sequence \"%s\".\n", str.buffer);
           free(str.buffer);
           return S_LEXEM_FAIL;
         }
         break;
+
+      // "\xx"
+      case ESCAPE_N2:
+        if (!BufferInsert(&str, c))
+          return S_MEMORY_ERROR;
+
+        if (isdigit(c)) {
+          sum = sum + (c - '0');
+
+          // number should be 0 - 255
+          if (sum < 256) {
+            state = STR;
+          }
+          else {
+            if (!BufferInsert(&str, '\0'))
+              return S_MEMORY_ERROR;
+            fprintf(stderr, "ERROR: too big number in escape sequence \"%s\".\n", str.buffer);
+            free(str.buffer);
+            return S_LEXEM_FAIL;
+          }
+        }
+        else {
+          if (!BufferInsert(&str, '\0'))
+            return S_MEMORY_ERROR;
+          fprintf(stderr, "ERROR: unknown escape sequence \"%s\".\n", str.buffer);
+          free(str.buffer);
+          return S_LEXEM_FAIL;
+        }
+        break;
+
 
       default:
         // nothing
