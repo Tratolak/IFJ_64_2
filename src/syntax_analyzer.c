@@ -1349,7 +1349,7 @@ int PreTokenAnalyzer(Token *act, char * c){
  */
 int PreNextTok(Token* act, tDLList* local,tDLList* partrule,tDLList* rule, Token** vys, int fce){
     int err, tok, once=1;
-    char *c, isfunc='';
+    char *c, isfunc=' ';
 
     c=(char*)malloc(sizeof(char));
     if(c==NULL){
@@ -1362,12 +1362,12 @@ int PreNextTok(Token* act, tDLList* local,tDLList* partrule,tDLList* rule, Token
             GET_TOKEN(act);
         }
         tok = PreTokenAnalyzer(act, c); //overeni zda token je validni pro precedencni analyzu
-        if (once == 1) {
+        if (once == 1) { // poye ymena kdzy je to prvni token
             isfunc = *c;
         }
-        if ((isfunc == 'i') && (*c=='(') ){
+        if ((isfunc == 'i') && (*c=='(') ){ // prvni a druhej token je funkce
             //martinova fce
-            tok = 1;
+            tok = 1; //kdzy nebude vzskoc s erorem popripade uspesne vzskoceni asi go to
             once= 1;
         }
         if (tok == 1) { //kdyz token nepotri ukoncujeme prec analyzu
