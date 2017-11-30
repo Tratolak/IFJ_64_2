@@ -825,6 +825,9 @@ int S_Assig(Token *act, bool *function, TokType inType){
     if(act->type == ID || act->type == KEYWORD){
         //if func - params else preanalyzer
         if(Search_Func(act->val, NULL, &numofrags)){
+            if(!strcmp("scope", act->val))
+                return SEM_ERROR;
+
             Ret_Func_Type(act->val, &retType);
 
             //Code Gen - f. call init
