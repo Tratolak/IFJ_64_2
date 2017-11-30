@@ -54,7 +54,7 @@ char ArtPreTB [15][15] = {
 Table sym_table;
 
 int RET_VAL;
-char *FUNC;
+char *FUNC = NULL;
 
 #define GET_TOKEN(A)\
 RET_VAL = GetToken(&(A));\
@@ -130,20 +130,6 @@ int SEM_existId(char* name)
             return false;
 
     return true;
-}
-
-void setCurrFunc(char* name)
-{
-    free(FUNC);
-    FUNC = malloc((strlen(name)+1) * sizeof(char));
-    strcpy(FUNC, name);
-}
-
-void myStrCpy(char **to, char *from)
-{
-    free(*to);
-    *to = malloc((strlen(from)+1) * sizeof(char));
-    strcpy(*to, from);
 }
 
 int CheckRule(Token *op1, Token *oper, Token* op2, Token** res, TokType *typ1, TokType *typ2, int func)
@@ -359,6 +345,9 @@ int SyntaxAnalyzer(){
         if(result == S_END_OF_FILE && scope){
             return SYN_OK;
         }
+        else if(result != S_TOKEN_OK){
+            return result;
+        }
 
         if (act->type==KEYWORD && !scope){
             if(strcmp(act->val,"scope")==0){
@@ -366,10 +355,9 @@ int SyntaxAnalyzer(){
                     return SYN_ERROR;
                 }
 
-                free(FUNC);
                 scopeLabel();
                 Dec_Func("scope", true);
-                setCurrFunc("scope");
+                FUNC = act->val;
 
                 GET_TOKEN(act);
                 if(act->type == EOL)
@@ -447,7 +435,7 @@ int S_FuncHeader(bool declare, Token *act){
     GET_TOKEN(act);
 
     if(act->type == ID){
-        setCurrFunc(act->val);
+        FUNC = act->val;
 
         if(declare){
             if(Search_Func(FUNC, NULL, NULL))
@@ -480,7 +468,7 @@ int S_FuncHeader(bool declare, Token *act){
     //Function Arguments
     char *id = NULL;
     int i = 0;
-    TokType type;
+    TokType type, rettype;
 
     GET_TOKEN(act);
     if(act->type != LBRACKET)
@@ -493,15 +481,13 @@ int S_FuncHeader(bool declare, Token *act){
             break;
 
         if(act->type == ID){
-            myStrCpy(&id, act->val);
+           id = act->val;
         }
         else{
-            free(id);
             return SYN_ERROR;
         }
 
         if(SEM_existId(id)){
-            free(id);
             return SEM_ERROR;
         }
 
@@ -511,33 +497,34 @@ int S_FuncHeader(bool declare, Token *act){
 
         GET_TOKEN(act);
         if(act->type != KEYWORD || strcmp(act->val, "as") != 0){
-            free(id);
             return SYN_ERROR;
         }
 
         GET_TOKEN(act);
         if(!isType(act, &type)){
-            free(id);
             return SYN_ERROR;
         }
 
         if(declare)
             Dec_Func_AddArgument(FUNC, i, type);
         if(definition){
+            if(!declare && !Nth_Func_ArgType(FUNC, i, type)){
+                 return SEM_ERROR;
+            }
+
             Add_Var(FUNC, id, type);
-        }
-        else{
-            free(id);
         }
 
         GET_TOKEN(act);
 
         if(act->type != COMMA && act->type != RBRACKET){
-            free(id);
             return SYN_ERROR;
         }
         i++;
     }
+
+    if((definition && !declare) && (i != numofargs))
+        return SEM_ERROR;
 
     //Function Type
     GET_TOKEN(act);
@@ -548,6 +535,12 @@ int S_FuncHeader(bool declare, Token *act){
     if(!isType(act, &type))
         return SYN_ERROR;
 
+    if(!declare && definition){
+        Ret_Func_Type(FUNC, &rettype);
+
+        if(type != rettype )
+            return SEM_ERROR;
+    }
     Dec_Func_Set_Type(FUNC, type);
 
     GET_TOKEN(act);
@@ -604,13 +597,12 @@ int S_StatList(Token *act, Token **back, bool isScope){
         else if(act->type == ID){
             char *id = NULL;
             TokType inType;
-            myStrCpy(&id, act->val);
+            id = act->val;
 
             if(Search_Func(id, NULL, NULL)){
                 Ret_Func_Type(id, &inType);
             }
             else if(!Search_Var(FUNC, id , &inType)){
-                free(id);
                 return SEM_ERROR;
             }
 
@@ -620,12 +612,10 @@ int S_StatList(Token *act, Token **back, bool isScope){
                 SYN_EXPAND(S_Assig, act, &func, inType);
             }
             else{
-                free(id);
                 return SYN_ERROR;
             }
 
             getResult(id, func);
-            free(id);
         }
         else if(act->type == EOL){
             continue;
@@ -645,7 +635,7 @@ int S_Dim(Token *act){
 
     GET_TOKEN(act);
     if(act->type == ID){
-        myStrCpy(&id, act->val);
+        id = act->val;
     }
     else{
         return SYN_ERROR;
@@ -660,7 +650,6 @@ int S_Dim(Token *act){
         return SYN_ERROR;
 
     if(SEM_existId(id)){
-        free(id);
         return SEM_ERROR;
     }
 
@@ -860,7 +849,7 @@ int S_Assig(Token *act, bool *function, TokType inType){
             functionFramePreparation();
 
             char *id;
-            myStrCpy(&id, act->val);
+            id = act->val;
 
             GET_TOKEN(act);
             if(act->type != LBRACKET)
@@ -875,34 +864,28 @@ int S_Assig(Token *act, bool *function, TokType inType){
 
                 if(act->type == ID){
                     if(!Search_Var(FUNC, act->val, &type)){
-                        free(id);
                         return BIN_OP_INCOMPAT;
                     }
                     if(!Nth_Func_ArgType(id, i, type)){
-                        free(id);
                         return BIN_OP_INCOMPAT;
                     }
                 }
                 else if(act->type == INTEGER){
                     if(!Nth_Func_ArgType(id, i, INTEGER)){
-                        free(id);
                         return BIN_OP_INCOMPAT;
                     }
                 }
                 else if(act->type == DOUBLE){
                     if(!Nth_Func_ArgType(id, i, DOUBLE)){
-                        free(id);
                         return BIN_OP_INCOMPAT;
                     }
                 }
                 else if(act->type == STRING){
                     if(!Nth_Func_ArgType(id, i, STRING)){
-                        free(id);
                         return BIN_OP_INCOMPAT;
                     }
                 }
                 else{
-                    free(id);
                     return SYN_ERROR;
                 }
 
@@ -912,7 +895,6 @@ int S_Assig(Token *act, bool *function, TokType inType){
                 GET_TOKEN(act);
 
                 if(act->type != COMMA && act->type != RBRACKET){
-                    free(id);
                     return SYN_ERROR;
                 }
                 i++;
@@ -932,8 +914,6 @@ int S_Assig(Token *act, bool *function, TokType inType){
                 return BIN_OP_INCOMPAT;
 
             retype(retType, inType);
-
-            free(id);
         }
         else{
             PREANALYZER(act, &back, &type, C_ASSIG);
@@ -1348,8 +1328,8 @@ int PreTokenAnalyzer(Token *act, char * c){
  * @return v pripade chyby vraci prislusnou chybu jinak 0
  */
 int PreNextTok(Token* act, tDLList* local,tDLList* partrule,tDLList* rule, Token** vys, int fce){
-    int err, tok;
-    char *c;
+    int err, tok, once=1;
+    char *c, isfunc=' ';
 
     c=(char*)malloc(sizeof(char));
     if(c==NULL){
@@ -1362,11 +1342,25 @@ int PreNextTok(Token* act, tDLList* local,tDLList* partrule,tDLList* rule, Token
             GET_TOKEN(act);
         }
         tok = PreTokenAnalyzer(act, c); //overeni zda token je validni pro precedencni analyzu
+        if (once == 1) { // poye ymena kdzy je to prvni token
+            isfunc = *c;
+        }
+        if ((isfunc == 'i') && (*c=='(') ){ // prvni a druhej token je funkce
+            //martinova fce
+            tok = 1; //kdzy nebude vzskoc s erorem popripade uspesne vzskoceni asi go to
+            once= 1;
+        }
         if (tok == 1) { //kdyz token nepotri ukoncujeme prec analyzu
-            err=PreExe('$', NULL, local, partrule, rule, fce); // posleme ukoncovaci znak
+            if (once == 0) { // testuji zda to neni prazdny vyraz
+                err = PreExe('$', NULL, local, partrule, rule, fce); // posleme ukoncovaci znak
+            }
+            else{
+                err = 2;
+            }
         }
         else // novy nebo stavajici token
         {
+            once=0;
             err=PreExe(*c, act,local,partrule,rule, fce);
             if(err==7){ // pokud neprobehlo zpracovani stavajiciho tokenu TOTO NENI CHYBA
 
