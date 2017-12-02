@@ -174,7 +174,11 @@ void Symtable_Destroy() {
   TClearAll(Func);
 }
 
-
+/**
+ * Ulozi prvek (funkci) do tabulky symbolu
+ * @param funcname - jmeno funkce
+ * @param define - zda-li se zaroven jedna o definici
+ */
 bool Dec_Func(char *funcname, bool define) {
   tItem *item = (tItem *) malloc(sizeof(tItem));
   if (item == NULL)
@@ -200,6 +204,11 @@ bool Dec_Func(char *funcname, bool define) {
   return true;
 }
 
+/**
+ * Nastavi navratovou hodnotu funkce
+ * @param funcname - jmeno funkce
+ * @param type - navratovy typ
+ */
 bool Dec_Func_Set_Type(char *funcname, TokType type) {
   tItem *item = TRead(Func, funcname);
   if (item == NULL)
@@ -210,6 +219,12 @@ bool Dec_Func_Set_Type(char *funcname, TokType type) {
   return true;
 }
 
+/**
+ * Nastavi nty argument funkce
+ * @param funcname - jmeno funkce
+ * @param n - cislo argumentu
+ * @param argtype - typ argumentu
+ */
 bool Dec_Func_AddArgument(char *funcname, int n, TokType argtype) {
   tItem *func = TRead(Func, funcname);
   if (func == NULL)
@@ -230,6 +245,12 @@ bool Dec_Func_AddArgument(char *funcname, int n, TokType argtype) {
   return true;
 }
 
+/**
+ * Deklaruje promennou uvnitr funkce
+ * @param funcname - jmeno funkce
+ * @param varname - nazev promenne
+ * @param vartype - typ promenne
+ */
 bool Add_Var(char *funcname, char *varname, TokType vartype) {
   tItem *func = TRead(Func, funcname);
   if (func == NULL)
@@ -251,14 +272,29 @@ bool Add_Var(char *funcname, char *varname, TokType vartype) {
   return true;
 }
 
+/**
+ * Definuje funkci
+ * @param funcname - jmeno funkce
+ */
 bool Define_Func(char *funcname) {
   return TSearch(Func, funcname, NULL, true, NULL);
 }
 
+/**
+ * Zkontroluje zda funkce je obsazena uvnitr tabulky, poprida vraci pocet argumentu a zda-li je definovana
+ * @param funcname - jmeno funkce
+ * @param isdef - je definovana
+ * @param numofargs - pocet argumentu
+ */
 bool Search_Func(char *funcname, bool *isdef, int *numofargs) {
   return TSearch(Func, funcname, isdef, false, numofargs);
 }
 
+/**
+ * Vraci navratovy typ funkce
+ * @param funcname - jmeno funkce
+ * @param rettype - navratovy typ
+ */
 bool Ret_Func_Type(char *funcname, TokType *rettype) {
   tItem *item = TRead(Func, funcname);
   if (item == NULL)
@@ -268,6 +304,12 @@ bool Ret_Func_Type(char *funcname, TokType *rettype) {
   return true;
 }
 
+/**
+ * Zkontroluje zda-li nty argument funkce je urciteho typu
+ * @param funcname - jmeno funkce
+ * @param n - poradi argumentu
+ * @param argtype - typ ktery je ocekavan
+ */
 bool Nth_Func_ArgType(char *funcname, int n, TokType argtype) {
   tItem *item = TRead(Func, funcname);
   if (item == NULL)
@@ -285,6 +327,12 @@ bool Nth_Func_ArgType(char *funcname, int n, TokType argtype) {
     return false;
 }
 
+/**
+ * Zkontroluje zda-li funkce obsahuje promennou/vrati jeji typ
+ * @param funcname - jmeno funkce
+ * @param varname - jmeno promenne
+ * @param vartype - typ vyhledane promenne
+ */
 bool Search_Var(char *funcname, char *varname, TokType *vartype) {
   tItem *item = TRead(Func, funcname);
   if (item == NULL)
@@ -300,6 +348,9 @@ bool Search_Var(char *funcname, char *varname, TokType *vartype) {
   return true;
 }
 
+/**
+ * Zkontroluje zda-li je kazda funkce definovana
+ */
 bool Every_Func_Defed(){
   tItem *ptr;
   tItem *nextptr;
