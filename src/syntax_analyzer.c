@@ -115,6 +115,12 @@ return retid;\
 
 //Semantic
 
+/**
+ * Kontrola zda lze provest konverzi mezi typy
+ *
+ * @param original - prvni typ
+ * @param to      - druhy typ
+ */
 bool Convertible(TokType original, TokType to) {
     if((original != STRING && to == STRING)||(original == STRING && to != STRING))
         return false;
@@ -122,7 +128,11 @@ bool Convertible(TokType original, TokType to) {
     return true;
 }
 
-//check if sym table contains ID
+/**
+ * Kontrola zda indetifikator je zarbany v ramci prave zrpacovavane funkce
+ *
+ * @param name - indetifikator
+ */
 int SEM_existId(char* name)
 {
     if(!Search_Func(name, NULL, NULL))
@@ -132,6 +142,17 @@ int SEM_existId(char* name)
     return true;
 }
 
+/**
+ * Kontrola zda pri zadanych typech a operaci lze provest binarni operaci
+ *
+ * @param op1 - prvni operand
+ * @param oper - operace
+ * @param op2 - druhy operand
+ * @param res - vysledny token operace
+ * @param typ1 - typ prvniho operandu pri implicitni konverzy
+ * @param typ2 - typ druheho operandu pri implicitni konverzy
+ * @param func - prikaz ve kterem je vyraz zpracovavan
+ */
 int CheckRule(Token *op1, Token *oper, Token* op2, Token** res, TokType *typ1, TokType *typ2, int func)
 {
 
@@ -251,6 +272,12 @@ int CheckRule(Token *op1, Token *oper, Token* op2, Token** res, TokType *typ1, T
     return SEM_OK;
 }
 
+/**
+ * Vraci datovy typ (v tokenu) vstupniho tokenu, v pripade ze se jedna o id zkontroluje zda je definovane
+ *
+ * @param in - vstupni token
+ * @param out - vraceny token
+ */
 int Checkid(Token *in, Token **out)
 {
     TokType type;
@@ -287,6 +314,12 @@ int Checkid(Token *in, Token **out)
  *
  ****************/
 
+/**
+ * Zkontroluje zda token je datovy typ(klicove slovo), pripadne ho vrati jako TokType
+ *
+ * @param tok - vstupni token
+ * @param type - vraceny typ
+ */
 bool isType(Token *tok, TokType *type)
 {
     if(tok->type != KEYWORD)
@@ -311,6 +344,9 @@ bool isType(Token *tok, TokType *type)
     return false;
 }
 
+/**
+ * Hlavni funkce pro spusteni prekladu programu
+ */
 int SyntaxAnalyzer(){
     Token *act,*back;
     bool scope = false;
@@ -426,6 +462,12 @@ int SyntaxAnalyzer(){
 
 }
 
+/**
+ * Zpracovava argumenty a navratovou hodnotu funkce
+ *
+ * @param act - vstupni token
+ * @param declare - zda-li se jedna o deklaraci
+ */
 int S_FuncHeader(bool declare, Token *act){
 
     int numofargs;
@@ -550,6 +592,13 @@ int S_FuncHeader(bool declare, Token *act){
     return SYN_OK;
 }
 
+/**
+ * Zpracovava jednotlive prikazy v tele funkce/ridici struktury
+ *
+ * @param act - vstupni token
+ * @param back - vraceni tokenu pri pripadnem cteni do predu
+ * @param isScope - zda-li se zpracovava scope
+ */
 int S_StatList(Token *act, Token **back, bool isScope){
 
     while(1){
@@ -629,6 +678,11 @@ int S_StatList(Token *act, Token **back, bool isScope){
     return SYN_OK;
 }
 
+/**
+ * Zpracovava deklaraci (pripadnou inicializaci) promenne
+ *
+ * @param act - vstupni token
+ */
 int S_Dim(Token *act){
     char *id = NULL;
     TokType type;
@@ -682,6 +736,11 @@ int S_Dim(Token *act){
     return SYN_OK;
 }
 
+/**
+ * Zpracovava prikaz Input
+ *
+ * @param act - vstupni token
+ */
 int S_Input(Token *act){
     GET_TOKEN(act);
     if(act->type == ID){
@@ -699,6 +758,11 @@ int S_Input(Token *act){
     return SYN_OK;
 }
 
+/**
+ * Zpracovava prikaz Print
+ *
+ * @param act - vstupni token
+ */
 int S_Print(Token *act){
     Token *back;
     TokType type;
@@ -722,6 +786,12 @@ int S_Print(Token *act){
     return SYN_OK;
 }
 
+/**
+ * Zpracovava ridici strukturu If
+ *
+ * @param act - vstupni token
+ * @param isScope - zda-li se zpracovava scope
+ */
 int S_If(Token *act, bool isScope){
     Token *back;
     TokType type;
@@ -766,6 +836,12 @@ int S_If(Token *act, bool isScope){
     return SYN_OK;
 }
 
+/**
+ * Zpracovava ridici strukturu While
+ *
+ * @param act - vstupni token
+ * @param isScope - zda-li se zpracovava scope
+ */
 int S_While(Token *act, bool isScope){
     Token *back;
     TokType type;
@@ -792,6 +868,11 @@ int S_While(Token *act, bool isScope){
     return SYN_OK;
 }
 
+/**
+ * Zpracovava prikaz Return
+ *
+ * @param act - vstupni token
+ */
 int S_Ret(Token *act){
     Token *back;
     TokType type, functype;
@@ -816,6 +897,13 @@ int S_Ret(Token *act){
     return SYN_OK;
 }
 
+/**
+ * Zpracovava prikaz prirazeni
+ *
+ * @param act - vstupni token
+ * @param function - vystup zda-li se jednalo o volani funkce
+ * @param inType - typ promenne do ktere ma byt hodnota prirazena
+ */
 int S_Assig(Token *act, bool *function, TokType inType){
     Token *back;
     TokType type, retType;
