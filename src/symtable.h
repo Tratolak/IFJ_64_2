@@ -9,8 +9,8 @@
 
 #define MAX_TSIZE 101
 
-//Martin Stodùlka(xstodu08)
-//Ondøej Olšák(xolsak00)
+//Martin StodÅ¯lka(xstodu08)
+//Ondï¿½ej OlÅ¡Ã¡k(xolsak00)
 //Michael Schneider(xschne07)
 //Marek Kuchynka(xkuchy00)
 

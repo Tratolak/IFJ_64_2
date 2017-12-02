@@ -7,6 +7,11 @@
 
 /******* základní operace nad tabulkou ********/
 
+/**
+ * Zahashuje řetězec (funkce převzata z IAL přednášek)
+ * @param  str řetězec pro zahashování
+ * @return     klíč (index) do tabulky
+ */
 int DJBHash(char *str) {
   unsigned long hash = 5381;
   int c;
@@ -15,14 +20,26 @@ int DJBHash(char *str) {
   return hash % MAX_TSIZE;
 }
 
-
+/**
+ * Inicializuje prázdnou tabulku do základního stavu
+ * @param t ukazatel na tabulku
+ */
 void TInit(Table* t) {
   for (int i = 0; i < MAX_TSIZE; i++) {
     (*t)[i] = NULL;
   }
 }
 
-
+/**
+ * Vyhledá v tabulce položku a zjistí její parametry
+ * @param  t         ukazatel na tabulku
+ * @param  name      jméno hledané funkce/proměnné/argumentu
+ * @param  isdef     je definována?
+ * @param  define    definujeme funkci
+ * @param  numofargs počet argumentů funkce
+ * @return           true  pokud byla nalezena funkce s tímto jménem
+ *                   false pokud nebyla nalezena funkce s tímto jménem
+ */
 bool TSearch (Table* t, char* name, bool *isdef, bool define, int *numofargs) {
   int hash = DJBHash(name);
   tItem* ptr = (*t)[hash];
@@ -42,7 +59,13 @@ bool TSearch (Table* t, char* name, bool *isdef, bool define, int *numofargs) {
   return false;
 }
 
-
+/**
+ * Přečte prvek z tabulky
+ * @param  t    ukazatel na tabulku
+ * @param  name jméno hledané funkce/proměnné/argumentu
+ * @return      ukazatel na nalezený prvek v tabulce
+ *              NULL pokud prvek nenajde
+ */
 tItem* TRead (Table* t, char* name) {
   int hash = DJBHash(name);
   tItem* ptr = (*t)[hash];
@@ -55,7 +78,11 @@ tItem* TRead (Table* t, char* name) {
   return NULL;
 }
 
-
+/**
+ * Vloží prvek do tabulky, příp. přepíše data prvku, u kterého se shoduje jméno
+ * @param t    ukazatel na tabulku
+ * @param item ukazatel na prvek, který se má vložit
+ */
 void TInsert (Table* t, tItem *item) {
   tItem* oldItem;
   if ((oldItem = TRead(t, item->name)) != NULL)
@@ -67,7 +94,11 @@ void TInsert (Table* t, tItem *item) {
   }
 }
 
-
+/**
+ * Vymaže prvek zadaného jména
+ * @param t    ukazatel na tabulku
+ * @param name jméno funkce/proměnné/argumentu
+ */
 void TDelete (Table* t, char* name) {
   int hash = DJBHash(name);
   tItem* ptr = (*t)[hash];
@@ -88,7 +119,10 @@ void TDelete (Table* t, char* name) {
   }
 }
 
-
+/**
+ * Vymaže všechny prvky tabulky tabulku
+ * @param t ukazatel na tabulku
+ */
 void TClearAll (Table* t) {
   tItem *ptr;
   tItem *nextptr;
@@ -107,6 +141,11 @@ void TClearAll (Table* t) {
 
 /******* pokročilé operace nad tabulkou *******/
 
+/**
+ * Inicializuje globální tabulku symbolů
+ * @return true  v případě úspěchu
+ *         false v případě neúspěchu
+ */
 bool Symtable_Init() {
   Func = (Table *) malloc(sizeof(Table));
   if (Func == NULL)
@@ -117,6 +156,9 @@ bool Symtable_Init() {
   return true;
 }
 
+/**
+ * Zruší celou tabulku symbolů
+ */
 void Symtable_Destroy() {
   tItem *ptr;
   tItem *nextptr;
@@ -259,21 +301,21 @@ bool Search_Var(char *funcname, char *varname, TokType *vartype) {
 }
 
 bool Every_Func_Defed(){
-    tItem *ptr;
-    tItem *nextptr;
+  tItem *ptr;
+  tItem *nextptr;
 
-    for(int i = 0; i < MAX_TSIZE; ++i){
-        ptr = (*Func)[i];
-        while (ptr != NULL) {
-            nextptr = ptr->next;
+  for(int i = 0; i < MAX_TSIZE; ++i){
+    ptr = (*Func)[i];
+    while (ptr != NULL) {
+      nextptr = ptr->next;
 
-            if(!ptr->isdef){
-                return false;
-            }
+      if(!ptr->isdef){
+        return false;
+      }
 
-            ptr = nextptr;
-        }
+      ptr = nextptr;
     }
+  }
 
-    return true;
+  return true;
 }
