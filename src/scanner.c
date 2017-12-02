@@ -530,10 +530,10 @@ int GetToken(Token **token) {
           *token = FormToken(STRING, str.buffer);
           t = true;
         }
-        else if (c == '\n') {
+        else if (c < 31) {
           if (!BufferInsert(&str, '\0'))
             return S_MEMORY_ERROR;
-          fprintf(stderr, "ERROR: unexpected EOL in string \"%s\".\n", str.buffer);
+          fprintf(stderr, "ERROR: unexpected symbol in string \"%s\".\n", str.buffer);
           free(str.buffer);
           return S_LEXEM_FAIL;
         }
@@ -541,7 +541,7 @@ int GetToken(Token **token) {
           state = ESCAPE;
           sum = 0;
         }
-        else if (c <= 32 || c == 35 || c == 92) {
+        else if (c == 32 || c == 35 || c == 92) {
           char esc[4];
           sprintf(esc, "%03d", c);
           if (!BufferInsert(&str, '\\') || !BufferInsert(&str, esc[0]) ||
