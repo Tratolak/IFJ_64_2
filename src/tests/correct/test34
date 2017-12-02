@@ -1,0 +1,17 @@
+Declare Function get_number (a As Integer) As Integer
+Function get_number(a As integer) As Integer
+	if a < 2 then
+		return 1
+	else
+	    return 0
+	end if
+end function
+
+scope
+	Dim b As Integer
+	b = get_number(25)
+	Print b;
+
+	b = get_number(1)
+    Print b;
+end scope
