@@ -1,0 +1,19 @@
+Declare Function concatenation (str As String) As String
+Function concatenation(str As String) As String
+    Dim a As Integer = 10
+    Do While a > 0
+        str = str + !"Hello 2!\n"
+        a = a - 1
+    Loop
+        return str
+end function
+
+scope
+
+	Dim str As String
+	str = !"Hello\n"
+	str = concatenation(str)
+	Print str;
+
+    Print !"H" + !"a!";
+end scope
