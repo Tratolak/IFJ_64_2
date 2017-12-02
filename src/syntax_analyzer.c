@@ -1211,7 +1211,7 @@ int PreExe(char c, Token* act, tDLList* local,tDLList* partrule,tDLList* rule, i
                 DLInsertLast(rule, ')',NULL);
                 if(DLCompare(partrule, rule)==0){
 
-                    DLInsertLast(local,'E',vys);
+                    DLInsertLast(local,'E',partrule->Last->lptr->act);
 
                     continue;
                 }
