@@ -10,17 +10,17 @@
 typedef struct tDLElem {                 // prvek dvousměrně vázaného seznamu
         char data;   // terminal popr. neterminal
         Token *act; //ukayatal na token k prislusnemu terminalu
-        struct tDLElem *lptr;          /* ukazatel na předchozí prvek seznamu */
-        struct tDLElem *rptr;        /* ukazatel na následující prvek seznamu */
+        struct tDLElem *lptr;          // ukazatel na předchozí prvek seznamu
+        struct tDLElem *rptr;        // ukazatel na následující prvek seznamu
 } *tDLElemPtr;
 
-typedef struct {                                  /* dvousměrně vázaný seznam */
-    tDLElemPtr First;                      /* ukazatel na první prvek seznamu */
-    tDLElemPtr Act;                     /* ukazatel na aktuální prvek seznamu */
-    tDLElemPtr Last;                    /* ukazatel na posledni prvek seznamu */
+typedef struct {                                  // dvousměrně vázaný seznam
+    tDLElemPtr First;                      //ukazatel na první prvek seznamu
+    tDLElemPtr Act;                    //  ukazatel na aktuální prvek seznamu
+    tDLElemPtr Last;                   // ukazatel na posledni prvek seznamu
 } tDLList;
 
-                                             /* prototypy jednotlivých funkcí */
+
 void DLInitList (tDLList *);
 void DLInitList$ (tDLList *);
 void DLDisposeList (tDLList *);
@@ -40,7 +40,7 @@ void DLCopy (tDLList *, char *);
 void DLActualize (tDLList *, char);
 void DLSucc (tDLList *);
 void DLPred (tDLList *);
-int DLActive (tDLList *); //
+int DLActive (tDLList *);
 void DLCutUntil(tDLList *L, tDLList *V); //vykopirovani prvku ay po < nebo $
 int DLCompare(tDLList *L, tDLList *V);//vraci 0 kdyz jsou stejne jinak 1
 void DLCopyLastTerm (tDLList *L, char *val);//do char vrati nejlevejsi terminal

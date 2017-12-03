@@ -1,5 +1,4 @@
 #include "dl_list.h"
-#include "string.h"
 #include "syntax_analyzer.h"
 
 //Martin Stodůlka(xstodu08)
@@ -7,29 +6,33 @@
 //Michael Schneider(xschne07)
 //Marek Kuchynka(xkuchy00)
 
+/**
+ * Init nastaveni ukayatelu na NULL
+ * @param L dllist
+ */
 void DLInitList (tDLList *L) {
-/*
-** Provede inicializaci seznamu L před jeho prvním použitím
-**/
     L->First = NULL;
     L->Act = NULL;
     L->Last = NULL;
 }
 
+/**
+ * init pro precedncni analyzu, prida $ na zacatek
+ * @param L dllist
+ */
 void DLInitList$ (tDLList *L) {
-/*
-** Provede inicializaci seznamu L i s $
-**/
+
 	L->First = NULL;
 	L->Act = NULL;
 	L->Last = NULL;
 	DLInsertFirst(L, '$', NULL);
 }
 
+/**
+ * rozlozi list i uvolni
+ * @param L dllist
+ */
 void DLDisposeList (tDLList *L) {
-/*
-** Zruší všechny prvky seznamu L + free
-**/
 if(L->First != NULL){
 while(L->First != L->Last)
 {
@@ -50,10 +53,13 @@ else
 
 }
 
+/**
+ * vlozi prvek na zacatek
+ * @param L dllist
+ * @param val char v prvku
+ * @param act ukayatel na reprezentujici token
+ */
 void DLInsertFirst (tDLList *L, char val, Token *act) {
-/*
-** Vloží nový prvek na začátek seznamu L.
-**/
 tDLElemPtr nov;
 nov= (tDLElemPtr)malloc(sizeof(struct tDLElem));
 if (nov==NULL)
@@ -76,10 +82,14 @@ if (nov==NULL)
 L->First=nov;
 }
 
+/**
+ * vlozi prvek na konec
+ * @param L dllist
+ * @param val char v prvku
+ * @param act ukazatel na reprezentujici token
+ */
 void DLInsertLast(tDLList *L, char val, Token *act) {
-/*
-** Vloží nový prvek na konec seznamu L
-**/
+
   tDLElemPtr nov;
   nov= (tDLElemPtr)malloc(sizeof(struct tDLElem)); //alokuji misto pro novy prvek
   if (nov==NULL){ //pokud nastane chyba alokace
@@ -99,27 +109,32 @@ void DLInsertLast(tDLList *L, char val, Token *act) {
 	L->Last=nov;
 }
 
-
+/**
+ * nastavi act na prvni prvek
+ * @param L dllist
+ */
 void DLFirst (tDLList *L) {
-/*
-** Nastaví aktivitu na první prvek seznamu L.
-**/
 L->Act=L->First;
 
 
 }
 
+/**
+ * nastavi act na posledni prvek
+ * @param L dllist
+ */
 void DLLast (tDLList *L) {
-/*
-** Nastaví aktivitu na poslední prvek seznamu L.
-**/
+
 L->Act=L->Last;
 }
 
+/**
+ * vrati char prvniho prvku (pouziti prevazne pro kontrolu)
+ * @param L dllist
+ * @param val ukazatel na jehoz adressu se vlozi char
+ */
 void DLCopyFirst (tDLList *L, char *val) {
-/*
-** Prostřednictvím parametru val vrátí hodnotu prvního prvku seznamu L.
-**/
+
 if(L->First==NULL){
 
 }
@@ -128,10 +143,13 @@ else{
 }
 }
 
+/**
+ * vrati char posledniho prvku (pouziti prevazne pro kontrolu)
+ * @param L dllist
+ * @param val ukazatel na jehoz adressu se vlozi char
+ */
 void DLCopyLast (tDLList *L, char *val) {
-/*
-** Prostřednictvím parametru val vrátí hodnotu posledního prvku seznamu L.
-**/
+
 if(L->Last==NULL){
 
 }
@@ -140,10 +158,12 @@ else{
 }
 }
 
+/**
+ * smaze prvni prvek seznamu i s free
+ * @param L dllist
+ */
 void DLDeleteFirst (tDLList *L) {
-/*
-** Zruší první prvek seznamu L.
-**/
+
 	if(L->First!=NULL){
 		if (L->First==L->Act){ //zruseni act kdyz ukazuje na prvni
 			L->Act=NULL;
@@ -162,10 +182,11 @@ void DLDeleteFirst (tDLList *L) {
 	}
 }
 
+/**
+ * smaze posledni prvek seznamu
+ * @param L dllist
+ */
 void DLDeleteLast (tDLList *L) {
-/*
-** Zruší poslední prvek seznamu L.
-**/
 	if(L->Last!=NULL){ //zda seznam neni prazdny
 		if (L->Last==L->Act){ //ruseni aktualniho prvku
 			L->Act=NULL;
@@ -185,10 +206,12 @@ void DLDeleteLast (tDLList *L) {
 
 }
 
+/**
+ * smaze nasledujici prvek za act
+ * @param L dllist
+ */
 void DLPostDelete (tDLList *L) {
-/*
-** Zruší prvek seznamu L za aktivním prvkem.
-**/
+
 tDLElemPtr pom;
 if(L->Act!=NULL && (L->Act!=L->Last)){
 	pom= L->Act->rptr->rptr;
@@ -208,11 +231,12 @@ if(L->Act!=NULL && (L->Act!=L->Last)){
 
 
 }
-
+/**
+ * smaze predchozi prvek pred act
+ * @param L dllist
+ */
 void DLPreDelete (tDLList *L) {
-/*
-** Zruší prvek před aktivním prvkem seznamu L.
-**/
+
   tDLElemPtr pom;
 	if(L->Act!=NULL && (L->Act!=L->First)){
 		pom= L->Act->lptr->lptr;
@@ -233,11 +257,13 @@ void DLPreDelete (tDLList *L) {
 
 }
 
+/**
+ * funkce pro vlozeni prvku do dllistu za act (vyuziti na debug)
+ * @param L dllist
+ * @param val char vlozeni
+ */
 void DLPostInsert (tDLList *L, char val) {
-/*
-** Vloží prvek za aktivní prvek seznamu L.
 
-**/
 	if(L->Act!=NULL){
 		tDLElemPtr nov;
 		nov= (tDLElemPtr)malloc(sizeof(struct tDLElem)); //alokuji misto pro novy prvek
@@ -260,10 +286,13 @@ void DLPostInsert (tDLList *L, char val) {
 
 }
 
+/**
+ * funkce pro vlozeni prvku do dllistu pred act (vyuziti na debug)
+ * @param L dllist
+ * @param val char vlozeni
+ */
 void DLPreInsert (tDLList *L, char val) {
-/*
-** Vloží prvek před aktivní prvek seznamu L.
-**/
+
 if(L->Act!=NULL){
 	tDLElemPtr nov;
 	nov= (tDLElemPtr)malloc(sizeof(struct tDLElem)); //alokuji misto pro novy prvek
@@ -284,11 +313,13 @@ if(L->Act!=NULL){
 	L->Act->lptr=nov;
 }
 }
+
+/**
+ * vraci hodnotu charu ve val na act prvku
+ * @param L dllist
+ * @param val ukazatel na char
+ */
 void DLCopy (tDLList *L, char *val) {
-/*
-** Prostřednictvím parametru val vrátí hodnotu aktivního prvku seznamu L.
-** Pokud seznam L není aktivní, volá funkci DLError ().
-**/
 
 if(L->Act!=NULL){
 	*val=L->Act->data;
@@ -298,43 +329,56 @@ else{
 }
 }
 
+/**
+ * prepise obsah char na act prvku
+ * @param L dllist
+ * @param val hodnota kterou se prepisuje
+ */
 void DLActualize (tDLList *L, char val) {
-/*
-** Přepíše obsah aktivního prvku seznamu L.
-** Pokud seznam L není aktivní, nedělá nic.
-**/
+
 if(L->Act!=NULL){
 	L->Act->data=val;
 }
 
 }
 
+/**
+ * act na nasledujici prvek
+ * @param L dllist
+ */
 void DLSucc (tDLList *L) {
-/*
-** Posune aktivitu na následující prvek seznamu L.
-**/
+
 if(L->Act!=NULL){
 	L->Act=L->Act->rptr;
 }
 }
 
-
+/**
+ * act na predchozi prvek
+ * @param L dllist
+ */
 void DLPred (tDLList *L) {
-/*
-** Posune aktivitu na předchozí prvek seznamu L.
-**/
+
 if(L->Act!=NULL){
 	L->Act=L->Act->lptr;
 }
 }
 
+/**
+ * vraci jestli je aktivni
+ * @param L dllist
+ * @return 1-je aktivni, 0-neni aktivni
+ */
 int DLActive (tDLList *L) {
-/*
-** Je-li seznam L aktivní, vrací nenulovou hodnotu, jinak vrací 0.
-**/
+
 return (L->Act!=NULL)?1:0;
 }
 
+/**
+ * funkce pro vyjmuti prvku po zarazku z local (prec analyza)
+ * @param L dllist local
+ * @param V ldlist vysledny dllist
+ */
 void DLCutUntil(tDLList *L, tDLList *V)
 {
     DLDisposeList(V);
@@ -346,6 +390,13 @@ void DLCutUntil(tDLList *L, tDLList *V)
     }
 	DLDeleteLast(L); // toto je to posledni ynacka <
 }
+
+/**
+ * porovnani dllistu
+ * @param L prvni dllist
+ * @param V druhy dllist
+ * @return 0-kdyz jsou stejne, 1- jsou rozdilne
+ */
 int DLCompare(tDLList *L, tDLList *V){
     DLFirst(L);
     DLFirst(V);
@@ -363,11 +414,13 @@ int DLCompare(tDLList *L, tDLList *V){
 
 }
 
+/**
+ * vrati posledni terminal
+ * @param L dllist
+ * @param val ukaztel v kterem se vrati posledni terminal
+ */
 void DLCopyLastTerm (tDLList *L, char *val) {
-/*
-** Prostřednictvím parametru val vrátí hodnotu posledního terminalu seznamu L.
-** Pokud je seznam L prázdný, volá funkci DLError().
-**/
+
    DLLast(L);
     while(PrePosition(L->Act->data)==-1){ //jde seznamem odzadu a pusuzuje zda nasla terminal
         DLPred(L);
@@ -375,6 +428,10 @@ void DLCopyLastTerm (tDLList *L, char *val) {
     *val=L->Act->data; //terminal vrati
 
 }
+/**
+ * nastavi act na terminal
+ * @param L dllist
+ */
 void DLLastTerm(tDLList* L){
 	DLLast(L);
 	while(PrePosition(L->Act->data)==-1){ //jde seznamem odzadu a pusuzuje zda nasla terminal

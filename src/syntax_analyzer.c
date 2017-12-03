@@ -1094,12 +1094,12 @@ int DLListInitForParser(tDLList **local,tDLList **rule,tDLList **partrule){
 }
 /**
  * @brief funkce vykonavajici precedencni analyzu
- * @param c
- * @param act
- * @param local
- * @param partrule
- * @param rule
- * @return
+ * @param c aktualni char
+ * @param act aktualni token
+ * @param local dllist hlavniho zasobniku
+ * @param partrule dllist vykopirovany dllist
+ * @param rule pravidlo
+ * @return v prpade chyby cislo chyby jinak 0 nebo 7 pri zpracovani
  */
 int PreExe(char c, Token* act, tDLList* local,tDLList* partrule,tDLList* rule, int fce){
     char *top;
