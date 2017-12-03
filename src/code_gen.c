@@ -1,8 +1,8 @@
 #include <stdio.h>
 #include "code_gen.h"
 
-//Martin Stod�lka(xstodu08)
-//Ond�ej Ol��k(xolsak00)
+//Martin Stodůlka(xstodu08)
+//Ondřej Olšák(xolsak00)
 //Michael Schneider(xschne07)
 //Marek Kuchynka(xkuchy00)
 
@@ -12,13 +12,10 @@ int whileLabelQuantity = 0;
 int ifLabelQuantity = 0;
 int variableQuantity;
 
-//================================================================================
-//
-//================================================================================
-
 /**
  * Utvoreni povinne hlavicky IFJcode17, inicializace zasobniku pro navesti.
- * Instrukce pro skok na navesti zacatku programu.
+ * Generovani instrukce pro skok na navesti zacatku programu. Volani fci na
+ * generovani vestavenych fci.
  */
 void header() {
     printf(".IFJcode17\n");
@@ -54,11 +51,12 @@ void TFCreation() {
  *
  * @brief exprOperand1 == first & exprOperand2 == second (rovnost hodnot na zasobnicich)
  *
+ * @param operand - znak urcujici provadenou matematickou operaci (char)
  * @param convert - urcuje zda-li je pretypovani potrebne (bool)
  * @param type    - urcuje typ vysledku (TokType)
  * @return status - informace o uspesnosti alokace (int)
  */
-int typeConvert(bool convert, TokType type) {
+int typeConvert(char operand, bool convert, TokType type) {
     printf("POPS TF@_exprOperand1\n"); //exprOperand1 == first
     printf("POPS TF@_exprOperand2\n"); //exprOperand2 == second
 
@@ -66,7 +64,12 @@ int typeConvert(bool convert, TokType type) {
     typeStackPop(&typeStack, &first);
     typeStackPop(&typeStack, &second);
 
-    if (convert) {
+    if (operand == '\\') {
+        if (first != INTEGER)
+            convertInstructionSelect(first, INTEGER, "TF@_exprOperand1");
+        if (second != INTEGER)
+            convertInstructionSelect(second, INTEGER, "TF@_exprOperand2");
+    } else if (convert) {
         if (first != type)
             convertInstructionSelect(first, type, "TF@_exprOperand1");
         if (second != type)
@@ -87,22 +90,23 @@ void convertInstructionSelect(TokType original, TokType new, char *string) {
     if (original == INTEGER && new == DOUBLE) {
         printf("INT2FLOAT %s %s\n", string, string);
     } else if (original == DOUBLE && new == INTEGER) {
-        printf("FLOAT2INT %s %s\n", string, string);
+        printf("FLOAT2R2EINT %s %s\n", string, string);
     } else if (original == INTEGER && new == STRING) {
         printf("INT2CHAR %s %s\n", string, string);
     }
 }
 
 /**
- * Ziskani poslednich dvou hodnot ulozenych na zasobniku, provedeni operace
- * dle operand a ulozeni vysledku na vrchol zasobniku.
+ * Generovani instrukci pro ziskani poslednich dvou hodnot ulozenych na zasobniku,
+ * provedeni matematicke operace a ulozeni vysledku na vrchol zasobniku.
  *
  * @param operation - provadena operace (char)
  * @param convert   - true = je treba pretypovat | false = neni treba pretypovat (bool)
  * @param type      - typ do ktereho se provede pripadne pretypovani (TokType)
+ * @return status   - informace o uspesnosti alokace ve fci TypeConvert (int)
  */
 int operationSelect(char operand, bool convert, TokType type) {
-    int status = typeConvert(convert, type);
+    int status = typeConvert(operand, convert, type);
     switch (operand) {
         case '+':
             if (type == STRING) {
@@ -129,7 +133,10 @@ int operationSelect(char operand, bool convert, TokType type) {
             printf("PUSHS TF@_exprResult\n");
             break;
         case '\\': //Operandy a vysledek jsou typu INTEGER
+            printf("INT2FLOAT TF@_exprOperand1 TF@_exprOperand1\n");
+            printf("INT2FLOAT TF@_exprOperand2 TF@_exprOperand2\n");
             printf("DIV TF@_exprResult TF@_exprOperand2 TF@_exprOperand1\n");
+            printf("FLOAT2INT TF@_exprResult TF@_exprResult\n");
             printf("PUSHS TF@_exprResult\n");
             break;
         default:
@@ -305,19 +312,20 @@ int getOperand(Token *t) {
 
 /**
  * Generovani instrukci pro pretypovani vysledku vyrazu.
+ *
  * @brief Je treba tuhle fci volat jeste pred funkcemi getRestult() a functionReturn().
  *
  * @param original - aktualni typ promenne (TokType)
  * @param new      - vysledny typ promenne (TokType)
  */
-void retype(TokType original, TokType new){
+void retype(TokType original, TokType new) {
     if (original == INTEGER && new == DOUBLE) {
         printf("POPS TF@_exprResult\n");
         printf("INT2FLOAT TF@_exprResult TF@_exprResult\n");
         printf("PUSHS TF@_exprResult\n");
     } else if (original == DOUBLE && new == INTEGER) {
         printf("POPS TF@_exprResult\n");
-        printf("FLOAT2INT TF@_exprResult TF@_exprResult\n");
+        printf("FLOAT2R2EINT TF@_exprResult TF@_exprResult\n");
         printf("PUSHS TF@_exprResult\n");
     } else if (original == INTEGER && new == STRING) {
         printf("POPS TF@_exprResult\n");
@@ -331,7 +339,7 @@ void retype(TokType original, TokType new){
  * Nastaveni zasobniku typu do vychoziho stavu.
  *
  * @param variableName - nazev promenne, do ktere bude vysledek prirazen (char*)
-
+ * @param isFunction   - indikuje zda-li se jedna o navratovou hodnotu z fce ci nikoliv (bool)
  */
 void getResult(char *variableName, bool isFunction) {
     if (!isFunction) {
@@ -433,12 +441,12 @@ void functionReturn(bool fReturn) {
 }
 
 /**
- * Generovani instrukci pro navrat z funkce ber prikazu RETURN.
+ * Generovani instrukci pro navrat z funkce bez prikazu RETURN.
  *
  * @param type - typ, ktery se bude navrace (TokType)
  */
-void functionReturn0(TokType type){
-    switch (type){
+void functionReturn0(TokType type) {
+    switch (type) {
         case INTEGER:
             printf("MOVE LF@_returnValue int@0\n");
             break;
@@ -448,9 +456,11 @@ void functionReturn0(TokType type){
         case STRING:
             printf("MOVE LF@_returnValue string@\n");
             break;
-        default:break;
+        default:
+            break;
     }
 }
+
 //================================================================================
 // Vestavene funkce
 //================================================================================
@@ -616,7 +626,7 @@ int whileIfBegin(labelType type) {
 /**
  * Generovani instrukci pro konstrukce IF ,ELSE, WHILE.
  *
- * @param type - typ konstrukce (labelType)
+ * @param type    - typ konstrukce (labelType)
  * @return status - informace o uspesnosti alokace (int)
  */
 int whileIfElseEnd(labelType type) {
@@ -650,7 +660,7 @@ int whileIfElseEnd(labelType type) {
  */
 void variableDeclaration(char *name, TokType type) {
     printf("DEFVAR TF@_%s\n", name);
-    switch (type){
+    switch (type) {
         case INTEGER:
             printf("MOVE TF@_%s int@0\n", name);
             break;
@@ -660,15 +670,13 @@ void variableDeclaration(char *name, TokType type) {
         case STRING:
             printf("MOVE TF@_%s string@\n", name);
             break;
-        default:break;
+        default:
+            break;
     }
 }
 
 /**
  * Generovani instrukce pro vypis.
- *
- * @param string      - vypisovany retezec/ jmeno promenne (char *)
- * @param isVariable  - TRUE pokud je retezec promenna (bool)
  */
 void write() {
     printf("POPS TF@_exprResult\n");
@@ -680,7 +688,7 @@ void write() {
  * Generovani instrukce pro nacteni do promenne.
  *
  * @param variableName - jmeno promenne (char*)
- * @param type     - typ promenne (TokType)
+ * @param type         - typ promenne (TokType)
  */
 void input(char *variableName, TokType type) {
     printf("WRITE string@\\010?\n");

@@ -1,8 +1,8 @@
 #ifndef IFJ_64_2_CODE_GEN_H
 #define IFJ_64_2_CODE_GEN_H
 
-//Martin Stod�lka(xstodu08)
-//Ond�ej Ol��k(xolsak00)
+//Martin Stodůlka(xstodu08)
+//Ondřej Olšák(xolsak00)
 //Michael Schneider(xschne07)
 //Marek Kuchynka(xkuchy00)
 
@@ -17,8 +17,7 @@ struct labelStackNode *labelStack;
 
 void header();
 
-
-int typeConvert(bool convert, TokType type);
+int typeConvert(char operand, bool convert, TokType type);
 
 void convertInstructionSelect(TokType original, TokType new, char *string);
 

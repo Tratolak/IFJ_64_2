@@ -1,7 +1,8 @@
 #include "stack_operations.h"
+#include "code_gen.h"
 
-//Martin Stodùlka(xstodu08)
-//Ondøej Olšák(xolsak00)
+//Martin StodÅ¯lka(xstodu08)
+//OndÅ™ej OlÅ¡Ã¡k(xolsak00)
 //Michael Schneider(xschne07)
 //Marek Kuchynka(xkuchy00)
 
@@ -141,4 +142,12 @@ void labelStackDispose(struct labelStackNode **head) {
         *head = (*head)->next;
         free(node);
     }
+}
+
+/**
+ * Volani fci pro uvolneni naalokovane pameti.
+ */
+void stacksDispose(){
+    labelStackDispose(&labelStack);
+    typeStackDispose(&typeStack);
 }

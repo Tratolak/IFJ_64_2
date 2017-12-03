@@ -3,8 +3,8 @@
 
 #include "scanner.h"
 
-//Martin Stodùlka(xstodu08)
-//Ondøej Olšák(xolsak00)
+//Martin StodÅ¯lka(xstodu08)
+//OndÅ™ej OlÅ¡Ã¡k(xolsak00)
 //Michael Schneider(xschne07)
 //Marek Kuchynka(xkuchy00)
 
