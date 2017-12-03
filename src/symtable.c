@@ -7,6 +7,11 @@
 
 /******* základní operace nad tabulkou ********/
 
+/**
+ * Zahashuje řetězec (funkce převzata z IAL přednášek)
+ * @param  str řetězec pro zahashování
+ * @return     klíč (index) do tabulky
+ */
 int DJBHash(char *str) {
   unsigned long hash = 5381;
   int c;
@@ -15,14 +20,26 @@ int DJBHash(char *str) {
   return hash % MAX_TSIZE;
 }
 
-
+/**
+ * Inicializuje prázdnou tabulku do základního stavu
+ * @param t ukazatel na tabulku
+ */
 void TInit(Table* t) {
   for (int i = 0; i < MAX_TSIZE; i++) {
     (*t)[i] = NULL;
   }
 }
 
-
+/**
+ * Vyhledá v tabulce položku a zjistí její parametry
+ * @param  t         ukazatel na tabulku
+ * @param  name      jméno hledané funkce/proměnné/argumentu
+ * @param  isdef     je definována?
+ * @param  define    definujeme funkci
+ * @param  numofargs počet argumentů funkce
+ * @return           true  pokud byla nalezena funkce s tímto jménem
+ *                   false pokud nebyla nalezena funkce s tímto jménem
+ */
 bool TSearch (Table* t, char* name, bool *isdef, bool define, int *numofargs) {
   int hash = DJBHash(name);
   tItem* ptr = (*t)[hash];
@@ -42,7 +59,13 @@ bool TSearch (Table* t, char* name, bool *isdef, bool define, int *numofargs) {
   return false;
 }
 
-
+/**
+ * Přečte prvek z tabulky
+ * @param  t    ukazatel na tabulku
+ * @param  name jméno hledané funkce/proměnné/argumentu
+ * @return      ukazatel na nalezený prvek v tabulce
+ *              NULL pokud prvek nenajde
+ */
 tItem* TRead (Table* t, char* name) {
   int hash = DJBHash(name);
   tItem* ptr = (*t)[hash];
@@ -55,7 +78,11 @@ tItem* TRead (Table* t, char* name) {
   return NULL;
 }
 
-
+/**
+ * Vloží prvek do tabulky, příp. přepíše data prvku, u kterého se shoduje jméno
+ * @param t    ukazatel na tabulku
+ * @param item ukazatel na prvek, který se má vložit
+ */
 void TInsert (Table* t, tItem *item) {
   tItem* oldItem;
   if ((oldItem = TRead(t, item->name)) != NULL)
@@ -67,7 +94,11 @@ void TInsert (Table* t, tItem *item) {
   }
 }
 
-
+/**
+ * Vymaže prvek zadaného jména
+ * @param t    ukazatel na tabulku
+ * @param name jméno funkce/proměnné/argumentu
+ */
 void TDelete (Table* t, char* name) {
   int hash = DJBHash(name);
   tItem* ptr = (*t)[hash];
@@ -88,7 +119,10 @@ void TDelete (Table* t, char* name) {
   }
 }
 
-
+/**
+ * Vymaže všechny prvky tabulky tabulku
+ * @param t ukazatel na tabulku
+ */
 void TClearAll (Table* t) {
   tItem *ptr;
   tItem *nextptr;
@@ -107,6 +141,11 @@ void TClearAll (Table* t) {
 
 /******* pokročilé operace nad tabulkou *******/
 
+/**
+ * Inicializuje globální tabulku symbolů
+ * @return true  v případě úspěchu
+ *         false v případě neúspěchu
+ */
 bool Symtable_Init() {
   Func = (Table *) malloc(sizeof(Table));
   if (Func == NULL)
@@ -117,6 +156,9 @@ bool Symtable_Init() {
   return true;
 }
 
+/**
+ * Zruší celou tabulku symbolů
+ */
 void Symtable_Destroy() {
   tItem *ptr;
   tItem *nextptr;
@@ -132,7 +174,11 @@ void Symtable_Destroy() {
   TClearAll(Func);
 }
 
-
+/**
+ * Ulozi prvek (funkci) do tabulky symbolu
+ * @param funcname - jmeno funkce
+ * @param define - zda-li se zaroven jedna o definici
+ */
 bool Dec_Func(char *funcname, bool define) {
   tItem *item = (tItem *) malloc(sizeof(tItem));
   if (item == NULL)
@@ -158,6 +204,11 @@ bool Dec_Func(char *funcname, bool define) {
   return true;
 }
 
+/**
+ * Nastavi navratovou hodnotu funkce
+ * @param funcname - jmeno funkce
+ * @param type - navratovy typ
+ */
 bool Dec_Func_Set_Type(char *funcname, TokType type) {
   tItem *item = TRead(Func, funcname);
   if (item == NULL)
@@ -168,6 +219,12 @@ bool Dec_Func_Set_Type(char *funcname, TokType type) {
   return true;
 }
 
+/**
+ * Nastavi nty argument funkce
+ * @param funcname - jmeno funkce
+ * @param n - cislo argumentu
+ * @param argtype - typ argumentu
+ */
 bool Dec_Func_AddArgument(char *funcname, int n, TokType argtype) {
   tItem *func = TRead(Func, funcname);
   if (func == NULL)
@@ -188,6 +245,12 @@ bool Dec_Func_AddArgument(char *funcname, int n, TokType argtype) {
   return true;
 }
 
+/**
+ * Deklaruje promennou uvnitr funkce
+ * @param funcname - jmeno funkce
+ * @param varname - nazev promenne
+ * @param vartype - typ promenne
+ */
 bool Add_Var(char *funcname, char *varname, TokType vartype) {
   tItem *func = TRead(Func, funcname);
   if (func == NULL)
@@ -209,14 +272,29 @@ bool Add_Var(char *funcname, char *varname, TokType vartype) {
   return true;
 }
 
+/**
+ * Definuje funkci
+ * @param funcname - jmeno funkce
+ */
 bool Define_Func(char *funcname) {
   return TSearch(Func, funcname, NULL, true, NULL);
 }
 
+/**
+ * Zkontroluje zda funkce je obsazena uvnitr tabulky, poprida vraci pocet argumentu a zda-li je definovana
+ * @param funcname - jmeno funkce
+ * @param isdef - je definovana
+ * @param numofargs - pocet argumentu
+ */
 bool Search_Func(char *funcname, bool *isdef, int *numofargs) {
   return TSearch(Func, funcname, isdef, false, numofargs);
 }
 
+/**
+ * Vraci navratovy typ funkce
+ * @param funcname - jmeno funkce
+ * @param rettype - navratovy typ
+ */
 bool Ret_Func_Type(char *funcname, TokType *rettype) {
   tItem *item = TRead(Func, funcname);
   if (item == NULL)
@@ -226,6 +304,12 @@ bool Ret_Func_Type(char *funcname, TokType *rettype) {
   return true;
 }
 
+/**
+ * Zkontroluje zda-li nty argument funkce je urciteho typu
+ * @param funcname - jmeno funkce
+ * @param n - poradi argumentu
+ * @param argtype - typ ktery je ocekavan
+ */
 bool Nth_Func_ArgType(char *funcname, int n, TokType argtype) {
   tItem *item = TRead(Func, funcname);
   if (item == NULL)
@@ -243,6 +327,12 @@ bool Nth_Func_ArgType(char *funcname, int n, TokType argtype) {
     return false;
 }
 
+/**
+ * Zkontroluje zda-li funkce obsahuje promennou/vrati jeji typ
+ * @param funcname - jmeno funkce
+ * @param varname - jmeno promenne
+ * @param vartype - typ vyhledane promenne
+ */
 bool Search_Var(char *funcname, char *varname, TokType *vartype) {
   tItem *item = TRead(Func, funcname);
   if (item == NULL)
@@ -258,22 +348,25 @@ bool Search_Var(char *funcname, char *varname, TokType *vartype) {
   return true;
 }
 
+/**
+ * Zkontroluje zda-li je kazda funkce definovana
+ */
 bool Every_Func_Defed(){
-    tItem *ptr;
-    tItem *nextptr;
+  tItem *ptr;
+  tItem *nextptr;
 
-    for(int i = 0; i < MAX_TSIZE; ++i){
-        ptr = (*Func)[i];
-        while (ptr != NULL) {
-            nextptr = ptr->next;
+  for(int i = 0; i < MAX_TSIZE; ++i){
+    ptr = (*Func)[i];
+    while (ptr != NULL) {
+      nextptr = ptr->next;
 
-            if(!ptr->isdef){
-                return false;
-            }
+      if(!ptr->isdef){
+        return false;
+      }
 
-            ptr = nextptr;
-        }
+      ptr = nextptr;
     }
+  }
 
-    return true;
+  return true;
 }
