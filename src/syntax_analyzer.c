@@ -39,7 +39,7 @@ char ArtPreTB [15][15] = {
 /* * */   {1,2,2,2,1,2,2,2,2,2,2,2,2,2,2},
 /* ( */   {1,1,1,1,1,3,0,1,1,1,1,1,1,1,1},
 /* ) */   {0,2,2,2,0,2,2,2,2,2,2,2,2,2,2},
-/* $ */   {1,1,1,1,1,0,3,1,1,1,1,1,1,1,1},
+/* $ */   {1,1,1,1,1,0,0,1,1,1,1,1,1,1,1},
 /* / */   {1,2,2,2,1,2,2,2,2,2,2,2,2,2,2},
 /* \ */   {1,2,2,1,1,2,2,1,2,2,2,2,2,2,2},
 /*eql*/   {1,1,1,1,1,2,2,1,1,2,2,2,2,2,2},
@@ -1115,9 +1115,9 @@ int PreExe(char c, Token* act, tDLList* local,tDLList* partrule,tDLList* rule, i
 
 
 
-
+    DLCopyLastTerm(local, top);
     do {
-        DLCopyLastTerm(local, top);
+
         switch (ArtPreTB[PrePosition(*top)][ PrePosition(c)]) {
             case 3:  //=
                 DLInsertLast(local, c, act);
@@ -1132,6 +1132,7 @@ int PreExe(char c, Token* act, tDLList* local,tDLList* partrule,tDLList* rule, i
             case 2: // >
                 DLCutUntil(local, partrule);
                 ret=7;
+                DLCopyLastTerm(local, top);
 
                 DLDisposeList(rule);
                 DLInsertLast(rule, 'E', NULL);
@@ -1329,7 +1330,8 @@ int PreExe(char c, Token* act, tDLList* local,tDLList* partrule,tDLList* rule, i
 
         }
 
-    }while((local->Last->data!='$')&&(c=='$'));
+
+    }while((*top!='$')&&(c=='$'));
 
     free(top);
     return ret;
