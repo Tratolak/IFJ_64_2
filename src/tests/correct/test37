@@ -2,7 +2,8 @@
 scope
 dim a as integer=10
 if a<100 then
-    print!"ok";
+    print!"ok\n";
+else
 end if
 
 end scope
